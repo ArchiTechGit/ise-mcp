@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexus Dashboard MCP Server",
-  description: "Web management interface for Nexus Dashboard MCP Server",
+  title: "Cisco ISE MCP Server",
+  description: "Web management interface for the Cisco ISE MCP Server",
 };
 
 export default function RootLayout({

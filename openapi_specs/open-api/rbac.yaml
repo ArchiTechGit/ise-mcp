@@ -1,0 +1,2211 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - Rbac Catalog
+  version: 1.0.0
+servers:
+  - url: https://10.86.189.217:443
+    description: Inferred Url
+tags:
+  - name: rbac-api-controller
+    description: the rbac API
+paths:
+  /api/v1/rbac/admin-group:
+    get:
+      tags:
+        - Admin Groups
+      summary: Retrieve all admin groups available in Cisco ISE
+      description: Get admin groups API will be used to view Cisco ISE  network admin groups
+      operationId: listAllAdminGroups
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: size
+          in: query
+          description: Number of objects returned per page
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: sort
+          in: query
+          description: sort type - asc or desc
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - asc
+              - desc
+        - name: sortBy
+          in: query
+          description: sort column by which objects needs to be sorted
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filter
+          in: query
+          description: '<div> <style type="text/css" scoped> .apiServiceTable td, .apiServiceTable th { padding: 5px 10px !important; text-align: left; } </style> <span> <b>Simple filtering</b> should be available through the filter query string parameter. The structure of a filter is a triplet of field operator and value separated with dots. More than one filter can be sent. The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the <i>"filterType=or"</i> query string parameter. Each resource Data model description should specify if an attribute is a filtered field. </span> <br /> <table class="apiServiceTable"> <thead> <tr> <th>OPERATOR</th> <th>DESCRIPTION</th> </tr> </thead> <tbody> <tr> <td>EQ</td> <td>Equals</td> </tr> <tr> <td>NEQ</td> <td>Not Equals</td> </tr> <tr> <td>GT</td> <td>Greater Than</td> </tr> <tr> <td>LT</td> <td>Less Then</td> </tr> <tr> <td>STARTSW</td> <td>Starts With</td> </tr> <tr> <td>NSTARTSW</td> <td>Not Starts With</td> </tr> <tr> <td>ENDSW</td> <td>Ends With</td> </tr> <tr> <td>NENDSW</td> <td>Not Ends With</td> </tr> <tr> <td>CONTAINS</td> <td>Contains</td> </tr> <tr> <td>NCONTAINS</td> <td>Not Contains</td> </tr> </tbody> </table> </div>'
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filterType
+          in: query
+          description: The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the parameter
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - AND
+              - OR
+      responses:
+        '200':
+          description: Response object with all the admin groups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminGroupResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Admin Groups
+      summary: Create admin group in Cisco ISE
+      description: Post admin group API will be used to create Cisco ISE network admin group <ul> <li><strong>name</strong> - Admin group name.</li> <li><strong>description</strong> - Admin group description.</li> <li><strong>isExternal</strong> -</li> <ul> <li>If <strong>isExternal</strong> is set to true <ul> <li>It is mandatory to pass values in externalGroups array for AD group association.</li> </ul> </li> <li>If <strong>isExternal</strong> is set to false <ul> <li>External group association is not allowed.</li> </ul> </li> </ul> <li><strong>externalGroups</strong> - An array of external AD groups associated with the admin group.</li> <li><strong>rbacUsers</strong> - An array of admin users associated with the admin group.</li> </ul>
+      operationId: createAdminGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiAdminGroup'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successfully created admin group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Group already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/admin-group/reset/bulk:
+    post:
+      tags:
+        - Admin Groups
+      summary: Reset admin groups external available in Cisco ISE
+      description: Post reset admin groups API will be used to reset external Cisco ISE network admin group
+      operationId: resetAdminGroups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetExternalGroupNames'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Admin groups reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '207':
+          description: External groups reset completed for partial admin groups passed in the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Admin groups not found
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/admin-group/{name}:
+    get:
+      tags:
+        - Admin Groups
+      summary: Get details of requested admin group created in Cisco ISE
+      description: Get admin group by name API will be used to get details of requested Cisco ISE network admin group
+      operationId: getAdminGroupByName
+      parameters:
+        - name: name
+          in: path
+          description: The name of the admin group
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleAdminGroup'
+                exampleSetFlag: false
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Admin Groups
+      summary: Update details of an admin group created in Cisco ISE
+      description: Put admin group API will be used to update requested Cisco ISE network admin group <h3>Request Header</h3> <ul> <li><strong>name</strong> - The name of the admin group to be edited.</li> </ul> <h3>Request Body</h3> <ul> <li><strong>name</strong> - The updated admin group name.</li> <li><strong>description</strong> - The updated admin group description.</li> <li><strong>isExternal</strong> -</li> <ul> <li>If <strong>isExternal</strong> is set to true <ul> <li>All fields (name, description, externalGroups, rbacUsers) can be updated.</li> </ul> </li> <li>If <strong>isExternal</strong> is set to false <ul> <li>All fields except externalGroups (name, description, rbacUsers) can be updated.</li> </ul> </li> <li>If the admin group being edited is part of the system admin group <ul> <li>name and description cannot be edited.</li> </ul> </li> </ul> <li><strong>externalGroups</strong> - An array of external AD groups associated with the admin group.</li> <li><strong>rbacUsers</strong> - An array of admin users associated with the admin group.</li> </ul>
+      operationId: updateAdminGroup
+      parameters:
+        - name: name
+          in: path
+          description: The name of the admin group
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiAdminGroup'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Updated admin group successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Admin group not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Admin Groups
+      summary: Delete requested admin group available in Cisco ISE
+      description: Delete admin group API will be used to delete requested Cisco ISE network admin group
+      operationId: deleteAdminGroup
+      parameters:
+        - name: name
+          in: path
+          description: The name of the admin group
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Admin group deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Admin group passed is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Admin group not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/admin-user:
+    get:
+      tags:
+        - Admin Users
+      summary: Retrieve all admin users created in Cisco ISE
+      description: Get admin users API will be used to view Cisco ISE administrators
+      operationId: listAllAdminUsers
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: size
+          in: query
+          description: Number of objects returned per page
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: sort
+          in: query
+          description: sort type - asc or desc
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - asc
+              - desc
+        - name: sortBy
+          in: query
+          description: sort column by which objects needs to be sorted
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filter
+          in: query
+          description: '<div> <style type="text/css" scoped> .apiServiceTable td, .apiServiceTable th { padding: 5px 10px !important; text-align: left; } </style> <span> <b>Simple filtering</b> should be available through the filter query string parameter. The structure of a filter is a triplet of field operator and value separated with dots. More than one filter can be sent. The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the <i>"filterType=or"</i> query string parameter. Each resource Data model description should specify if an attribute is a filtered field. </span> <br /> <table class="apiServiceTable"> <thead> <tr> <th>OPERATOR</th> <th>DESCRIPTION</th> </tr> </thead> <tbody> <tr> <td>EQ</td> <td>Equals</td> </tr> <tr> <td>NEQ</td> <td>Not Equals</td> </tr> <tr> <td>GT</td> <td>Greater Than</td> </tr> <tr> <td>LT</td> <td>Less Then</td> </tr> <tr> <td>STARTSW</td> <td>Starts With</td> </tr> <tr> <td>NSTARTSW</td> <td>Not Starts With</td> </tr> <tr> <td>ENDSW</td> <td>Ends With</td> </tr> <tr> <td>NENDSW</td> <td>Not Ends With</td> </tr> <tr> <td>CONTAINS</td> <td>Contains</td> </tr> <tr> <td>NCONTAINS</td> <td>Not Contains</td> </tr> </tbody> </table> </div>'
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filterType
+          in: query
+          description: The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the parameter
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - AND
+              - OR
+      responses:
+        '200':
+          description: A paged array of admin users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Admin Users
+      summary: Create admin user in Cisco ISE
+      description: Post admin users API will be used to create Cisco ISE administrators <ul> <li><strong>rbacGroups</strong> - ISE UI doesn't allow Read Only Admin group to be passed as Admin group in Admin user creation. Associating this Admin group will make Admin user read only. To make user as read only , enable readonly field as true.</li> <ul>
+      operationId: createAdminUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiAdminUser'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Added admin user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/admin-user/bulk:
+    post:
+      tags:
+        - Admin Users
+      summary: Create multiple admin users in Cisco ISE
+      description: Create bulk admin users API will be used to create multiple Cisco ISE administrators
+      operationId: createBulkAdminUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/OpenApiAdminUser'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Admin users created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '207':
+          description: Admin users partially created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Admin users not found
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/admin-user/{name}:
+    get:
+      tags:
+        - Admin Users
+      summary: Get details of a requested admin user in Cisco ISE
+      description: Get admin user API will be used to view requested Cisco ISE administrator details
+      operationId: getAdminUserByName
+      parameters:
+        - name: name
+          in: path
+          description: The name of the admin user
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailsResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Admin Users
+      summary: Update details of an admin user in Cisco ISE
+      description: Put admin user API will be used to update details of  Cisco ISE administrators <ul> <li><strong>rbacGroups</strong> - ISE UI doesn't allow Read Only Admin group to be passed as Admin group in Admin user updation. Associating this Admin group will make Admin user read only. To make user as read only , enable readonly field as true.</li> <ul>
+      operationId: updateAdminUser
+      parameters:
+        - name: name
+          in: path
+          description: The name of the admin user
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiAdminUser'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Updated admin user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Admin user not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Admin Users
+      summary: Delete requested admin user available in Cisco ISE
+      description: Delete admin user API will be used to delete available Cisco ISE administrator
+      operationId: deleteAdminUser
+      parameters:
+        - name: name
+          in: path
+          description: The name of the admin user
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Admin user deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Admin user passed is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Admin user not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/data-access:
+    get:
+      tags:
+        - Data Access
+      summary: Get all data access available in Cisco ISE
+      description: Get data access API allows to retrieve all the data access created in Cisco ISE
+      operationId: listAllDataAccess
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: size
+          in: query
+          description: Number of objects returned per page
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: sort
+          in: query
+          description: sort type - asc or desc
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - asc
+              - desc
+        - name: sortBy
+          in: query
+          description: sort column by which objects needs to be sorted
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filter
+          in: query
+          description: '<div> <style type="text/css" scoped> .apiServiceTable td, .apiServiceTable th { padding: 5px 10px !important; text-align: left; } </style> <span> <b>Simple filtering</b> should be available through the filter query string parameter. The structure of a filter is a triplet of field operator and value separated with dots. More than one filter can be sent. The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the <i>"filterType=or"</i> query string parameter. Each resource Data model description should specify if an attribute is a filtered field. </span> <br /> <table class="apiServiceTable"> <thead> <tr> <th>OPERATOR</th> <th>DESCRIPTION</th> </tr> </thead> <tbody> <tr> <td>EQ</td> <td>Equals</td> </tr> <tr> <td>NEQ</td> <td>Not Equals</td> </tr> <tr> <td>GT</td> <td>Greater Than</td> </tr> <tr> <td>LT</td> <td>Less Then</td> </tr> <tr> <td>STARTSW</td> <td>Starts With</td> </tr> <tr> <td>NSTARTSW</td> <td>Not Starts With</td> </tr> <tr> <td>ENDSW</td> <td>Ends With</td> </tr> <tr> <td>NENDSW</td> <td>Not Ends With</td> </tr> <tr> <td>CONTAINS</td> <td>Contains</td> </tr> <tr> <td>NCONTAINS</td> <td>Not Contains</td> </tr> </tbody> </table> </div>'
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filterType
+          in: query
+          description: The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the parameter
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - AND
+              - OR
+      responses:
+        '200':
+          description: A paged array of data access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataAccessResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Data Access
+      summary: Update data access by name in Cisco ISE
+      operationId: updateDataAccess
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataAccessRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Updated data access successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Request passed is not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Data access not found.
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Data Access
+      summary: Create data access in Cisco ISE
+      description: Create data access API allows to create new data access in Cisco ISE
+      operationId: createDataAccess
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataAccessRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Added data access successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '400':
+          description: Request passed is not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/data-access/{name}:
+    get:
+      tags:
+        - Data Access
+      summary: Get details of requested data access available in Cisco ISE
+      description: Get details of requested data access available in Cisco ISE, which has the details of all the accessible tabs
+      operationId: getDataAccessByName
+      parameters:
+        - name: name
+          in: path
+          description: The name of the data access
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataAccessByNameResponse'
+                exampleSetFlag: false
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Group already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Data Access
+      summary: Delete data access by name in Cisco ISE
+      description: Delete data access API allows to delete data access name available in Cisco ISE
+      operationId: deleteDataAccess
+      parameters:
+        - name: name
+          in: path
+          description: The name of the data access
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Data access deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Data access name not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/external-groups:
+    get:
+      tags:
+        - Admin Groups
+      summary: Retrieve all external groups available in Cisco ISE
+      description: Get external groups API will be used to view Cisco ISE network external groups.
+      operationId: listAllExternalGroups
+      responses:
+        '200':
+          description: Response object with all the external groups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalGroupResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalGroupResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalGroupResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/menu-access:
+    get:
+      tags:
+        - Menu Access
+      summary: Get all the menu access created in Cisco ISE
+      description: Get all the menu access created in Cisco ISE, example super admin menu access,Policy admin menu Access
+      operationId: listAllMenuAccess
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: size
+          in: query
+          description: Number of objects returned per page
+          required: false
+          style: form
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: sort
+          in: query
+          description: sort type - asc or desc
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - asc
+              - desc
+        - name: sortBy
+          in: query
+          description: sort column by which objects needs to be sorted
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filter
+          in: query
+          description: '<div> <style type="text/css" scoped> .apiServiceTable td, .apiServiceTable th { padding: 5px 10px !important; text-align: left; } </style> <span> <b>Simple filtering</b> should be available through the filter query string parameter. The structure of a filter is a triplet of field operator and value separated with dots. More than one filter can be sent. The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the <i>"filterType=or"</i> query string parameter. Each resource Data model description should specify if an attribute is a filtered field. </span> <br /> <table class="apiServiceTable"> <thead> <tr> <th>OPERATOR</th> <th>DESCRIPTION</th> </tr> </thead> <tbody> <tr> <td>EQ</td> <td>Equals</td> </tr> <tr> <td>NEQ</td> <td>Not Equals</td> </tr> <tr> <td>GT</td> <td>Greater Than</td> </tr> <tr> <td>LT</td> <td>Less Then</td> </tr> <tr> <td>STARTSW</td> <td>Starts With</td> </tr> <tr> <td>NSTARTSW</td> <td>Not Starts With</td> </tr> <tr> <td>ENDSW</td> <td>Ends With</td> </tr> <tr> <td>NENDSW</td> <td>Not Ends With</td> </tr> <tr> <td>CONTAINS</td> <td>Contains</td> </tr> <tr> <td>NCONTAINS</td> <td>Not Contains</td> </tr> </tbody> </table> </div>'
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filterType
+          in: query
+          description: The logical operator common to ALL filter criteria will be by default AND, and can be changed by using the parameter
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - AND
+              - OR
+      responses:
+        '200':
+          description: A paged array of menu access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuAccessResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Menu Access
+      summary: Update details of menu access present in Cisco ISE
+      description: Update details of menu access present in Cisco ISE based on the permissions required for specific tabs
+      operationId: updateMenuAccess
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuAccessRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Updated menu access successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Request passed is not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Menu access not found.
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Menu Access
+      summary: Create menu access in Cisco ISE
+      description: Create  menu access in Cisco ISE based on the access permissions required to the tabs.
+      operationId: createMenuAccess
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuAccessRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Added menu access successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Request passed is not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/menu-access/{name}:
+    get:
+      tags:
+        - Menu Access
+      summary: Get details of requested menu access available in Cisco ISE
+      description: Get details of requested menu access available in Cisco ISE, which has the details of all the accessible tabs
+      operationId: getMenuAccessByName
+      parameters:
+        - name: name
+          in: path
+          description: The name of the menu access
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuAccessByNameResponse'
+                exampleSetFlag: false
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Group already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Menu Access
+      summary: Delete menu access in Cisco ISE
+      description: Delete menu access API in Cisco ISE is used to delete menu access based on the role fulfilled
+      operationId: deleteMenuAccess
+      parameters:
+        - name: name
+          in: path
+          description: The name of the menu access
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Menu access deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Group already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/network-users:
+    get:
+      tags:
+        - Admin Users
+      summary: Retrieve all external network users available in Cisco ISE
+      description: Get external users API will be used to view Cisco ISE network external groups.
+      operationId: listAllNetworkUsers
+      responses:
+        '200':
+          description: Response object with all the external network users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalUserResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalUserResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalUserResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/policy:
+    get:
+      tags:
+        - RBAC Policy
+      summary: Get all rbac policy available in Cisco ISE
+      description: Get rbac policy API allows to retrieve all rbac policy and policy related data access, menu access
+      operationId: listAllRbacPolicy
+      responses:
+        '200':
+          description: A paged array of rbac policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RbacPolicyResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - RBAC Policy
+      summary: Create rbac policy in Cisco ISE
+      description: Create rbac policy API allows to create rbac policy with related menu access and data access
+      operationId: createRbacPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiRbacPolicy'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Added rbac policy successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      security:
+        - BasicAuth: []
+  /api/v1/rbac/policy/{name}:
+    put:
+      tags:
+        - RBAC Policy
+      summary: Update rbac policy in Cisco ISE
+      description: Update rbac policy API allows to update rbac policy with related menu access and data access permissions
+      operationId: updateRbacPolicy
+      parameters:
+        - name: name
+          in: path
+          description: The name of the rbac policy
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiRbacPolicy'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Updated rbac policy successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Admin group passed is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - RBAC Policy
+      summary: Delete rbac policy by name in Cisco ISE
+      description: Delete rbac policy API allows to delete rbac policy available in Cisco ISE
+      operationId: deleteRbacPolicy
+      parameters:
+        - name: name
+          in: path
+          description: The name of the rbac policy
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Rbac policy deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Rbac policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+components:
+  schemas:
+    AdminGroupData:
+      title: AdminGroupData
+      required:
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: A brief description of the admin group.
+          exampleSetFlag: true
+        externalGroupCount:
+          type: integer
+          description: The number of external groups associated with the admin group.
+          format: int32
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the admin group.
+          exampleSetFlag: true
+      description: Schema representing data about an admin group, including its name, description, and the count of external groups associated with it.
+      exampleSetFlag: false
+    AdminGroupResponse:
+      title: AdminGroupResponse
+      required:
+        - statusCode
+      type: object
+      properties:
+        adminGroupList:
+          type: array
+          description: A list of admin groups.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AdminGroupData'
+            exampleSetFlag: false
+        message:
+          type: string
+          description: A descriptive message related to the response.
+          exampleSetFlag: true
+        statusCode:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+      description: Response schema for admin group data, including the status code, message, and a list of admin group data.
+      exampleSetFlag: false
+    AdminUserData:
+      title: AdminUserData
+      required:
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description or role of the admin user.
+          exampleSetFlag: true
+        emailAddr:
+          type: string
+          description: Email address of the admin user.
+          exampleSetFlag: true
+        firstName:
+          type: string
+          description: First name of the admin user.
+          exampleSetFlag: true
+        id:
+          type: string
+          description: Unique identifier for the admin user.
+          exampleSetFlag: true
+        lastName:
+          type: string
+          description: Last name of the admin user.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Name of the admin user.
+          exampleSetFlag: true
+        rbacGroupNames:
+          type: array
+          description: List of RBAC group names the admin user belongs to.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        statusEnabled:
+          type: boolean
+          description: Indicates whether the admin user's account is enabled.
+          example: false
+          exampleSetFlag: true
+      description: Schema for admin user data, representing key information such as user details, email, and RBAC group memberships.
+      exampleSetFlag: false
+    AdminUserDetailsResponse:
+      title: AdminUserDetailsResponse
+      required:
+        - statusCode
+      type: object
+      properties:
+        adminUserDetails:
+          $ref: '#/components/schemas/OpenApiAdminUser'
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A message providing more information about the response.
+          exampleSetFlag: true
+        statusCode:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+      description: Response schema for retrieving detailed information about a specific admin user.
+      exampleSetFlag: false
+    AdminUserResponse:
+      title: AdminUserResponse
+      required:
+        - statusCode
+      type: object
+      properties:
+        adminUserList:
+          type: array
+          description: A list of admin users.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AdminUserData'
+            exampleSetFlag: false
+        message:
+          type: string
+          description: A descriptive message related to the response.
+          exampleSetFlag: true
+        statusCode:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+      description: Response schema for admin user data, including the status code, message, and a list of admin user data.
+      exampleSetFlag: false
+    BaseResponse:
+      title: BaseResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The response status code. A code of 0 typically indicates success, while non-zero codes represent errors or issues.
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A message detailing the response, indicating success or failure.
+          exampleSetFlag: true
+      description: 'The `BaseResponse` object represents the standard structure for a response.  It contains a `code` indicating the success or failure of the request, and a  `message` providing additional details about the outcome. A `code` of `0` typically indicates a successful operation, whereas non-zero  values represent various types of errors or issues. '
+      exampleSetFlag: false
+    DataAccess:
+      title: DataAccess
+      required:
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: A description of the data access.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the data access.
+          exampleSetFlag: true
+      description: Represents a simple data access object with name and description fields.
+      exampleSetFlag: false
+    DataAccessByNameResponse:
+      title: DataAccessByNameResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The status code of the response, indicating the success or failure of the operation.
+          format: int32
+          exampleSetFlag: true
+        dataAccessPrivileges:
+          type: array
+          description: A list of data access permissions (privileges) associated with the data access.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/DataAccessPermission'
+            exampleSetFlag: false
+        description:
+          type: string
+          description: A description of the data access object.
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A message providing more details about the response.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the data access object.
+          exampleSetFlag: true
+      description: Response schema for retrieving data access by its name, with associated privileges and description.
+      exampleSetFlag: false
+    DataAccessPermission:
+      title: DataAccessPermission
+      type: object
+      properties:
+        childPermissions:
+          type: array
+          description: A list of child permissions under this data access permission, allowing nested or hierarchical permissions.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/DataAccessPermission'
+            exampleSetFlag: false
+        id:
+          type: string
+          description: A unique identifier for the data access permission.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the data access permission.
+          exampleSetFlag: true
+        permission:
+          type: string
+          description: The actual permission type (e.g., 'read', 'write', 'execute').
+          exampleSetFlag: true
+      description: Represents a single data access permission, with potential child permissions for hierarchical structure.
+      exampleSetFlag: false
+    DataAccessRequest:
+      title: DataAccessRequest
+      required:
+        - dataAccessPrivileges
+      type: object
+      properties:
+        dataAccessPrivileges:
+          type: array
+          description: A list of data access privileges associated with this request.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/DataAccessPermission'
+            exampleSetFlag: false
+        description:
+          type: string
+          description: A description of the data access request.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the data access request.
+          exampleSetFlag: true
+      description: Represents a request for data access, including the name, description, and associated privileges.
+      exampleSetFlag: false
+    DataAccessResponse:
+      title: DataAccessResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The status code of the response, indicating success or failure.
+          format: int32
+          exampleSetFlag: true
+        dataAccessList:
+          type: array
+          description: A list of `DataAccess` objects representing the available data access permissions.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/DataAccess'
+            exampleSetFlag: false
+        message:
+          type: string
+          description: A message providing more details about the response.
+          exampleSetFlag: true
+      description: Response schema for retrieving a list of data access objects, including status code and message.
+      exampleSetFlag: false
+    Error:
+      title: Error
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The error code associated with the response. A non-zero code typically indicates an error.
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A description of the error encountered.
+          exampleSetFlag: true
+      description: 'The `Error` object represents an error response. It provides information about  the error code and a message that explains the cause of the error. This object is typically returned when a request fails due to invalid input,  server issues, or other unforeseen circumstances. '
+      exampleSetFlag: false
+    ExternalGroupResponse:
+      title: ExternalGroupResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+        externalGroups:
+          type: array
+          description: List of external groups associated with the identity source.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        externalIdentitySoruce:
+          type: string
+          description: The source of external identity information, if applicable.
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A descriptive message related to the response.
+          exampleSetFlag: true
+      description: Response schema for external group information, including status code and external group details.
+      exampleSetFlag: false
+    ExternalUserResponse:
+      title: ExternalUserResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Status code of the response.
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          description: Message describing the response status.
+          exampleSetFlag: true
+        networkUsers:
+          type: array
+          description: List of network users in the response.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/NetworkUser'
+            exampleSetFlag: false
+        totalCount:
+          type: integer
+          description: Total number of network users.
+          format: int32
+          exampleSetFlag: true
+      description: Schema for the response containing external user data, including status code, message, and a list of network users.
+      exampleSetFlag: false
+    MenuAccessByNameResponse:
+      title: MenuAccessByNameResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A brief description of the menu access.
+          exampleSetFlag: true
+        menuAccessPrivileges:
+          type: array
+          description: A list of menu access permissions associated with this menu.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/MenuAccessPermission'
+            exampleSetFlag: false
+        message:
+          type: string
+          description: A message providing more information about the response.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the menu for which the access details are being requested.
+          exampleSetFlag: true
+      description: Response schema for retrieving menu access details by name, including its privileges and a status code/message.
+      exampleSetFlag: false
+    MenuAccessData:
+      title: MenuAccessData
+      required:
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: A brief description of the menu access.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the menu access entry.
+          exampleSetFlag: true
+      description: Schema representing data about a menu access entry, including its name and description.
+      exampleSetFlag: false
+    MenuAccessPermission:
+      title: MenuAccessPermission
+      type: object
+      properties:
+        childPermissions:
+          type: array
+          description: A list of child permissions that are part of this permission.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/MenuAccessPermission'
+            exampleSetFlag: false
+        id:
+          type: string
+          description: A unique identifier for the permission.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the permission.
+          exampleSetFlag: true
+        permission:
+          type: string
+          description: A string representing the type of permission, such as 'read', 'write', etc.
+          exampleSetFlag: true
+      description: Represents a menu access permission, including its own properties and any child permissions it might have.
+      exampleSetFlag: false
+    MenuAccessRequest:
+      title: MenuAccessRequest
+      required:
+        - menuAccessPrivileges
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: A brief description of the menu access request.
+          exampleSetFlag: true
+        menuAccessPrivileges:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/MenuAccessPermission'
+            exampleSetFlag: false
+        name:
+          type: string
+          description: The name of the menu access request.
+          exampleSetFlag: true
+      description: Request schema for creating or updating menu access, including its name, description, and privileges.
+      exampleSetFlag: false
+    MenuAccessResponse:
+      title: MenuAccessResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+        menuAccessList:
+          type: array
+          description: A list of menu access entries.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/MenuAccessData'
+            exampleSetFlag: false
+        message:
+          type: string
+          description: A descriptive message related to the response.
+          exampleSetFlag: true
+      description: Response schema for menu access data, including the status code, message, and a list of menu access entries.
+      exampleSetFlag: false
+    NetworkUser:
+      title: NetworkUser
+      required:
+        - name
+      type: object
+      properties:
+        changePasswordOnNextLogin:
+          type: boolean
+          description: Indicates if the user should change their password on the next login.
+          example: false
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A description of the network user.
+          exampleSetFlag: true
+        email:
+          type: string
+          description: Email address of the network user.
+          exampleSetFlag: true
+        firstName:
+          type: string
+          description: The first name of the network user.
+          exampleSetFlag: true
+        inactiveAccountNeverDisabled:
+          type: boolean
+          description: Indicates if inactive accounts are never disabled.
+          example: false
+          exampleSetFlag: true
+        lastName:
+          type: string
+          description: The last name of the network user.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the network user.
+          exampleSetFlag: true
+        status:
+          type: boolean
+          description: Indicates whether the user account is active or not.
+          example: false
+          exampleSetFlag: true
+      description: Schema representing a Network User. It includes details like name, email, password, and status. These users are typically restricted to specific network access.
+      exampleSetFlag: false
+    OpenApiAdminGroup:
+      title: OpenApiAdminGroup
+      required:
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: A brief description of the admin group.
+          exampleSetFlag: true
+        externalGroups:
+          type: array
+          description: List of external groups associated with this admin group, if applicable.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        isExternal:
+          type: boolean
+          description: Indicates whether the admin group is external to the organization.
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the admin group.
+          exampleSetFlag: true
+        rbacUsers:
+          type: array
+          description: List of users who are part of this admin group, based on their RBAC (Role-Based Access Control) memberships.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Schema representing an Admin Group, detailing the group's name, description, external affiliation, and associated users.
+      exampleSetFlag: false
+    OpenApiAdminUser:
+      title: OpenApiAdminUser
+      required:
+        - name
+      type: object
+      properties:
+        changePasswordOnNextLogin:
+          type: boolean
+          description: Indicates if the user should change their password on the next login.
+          example: false
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A description of the admin user.
+          exampleSetFlag: true
+        email:
+          type: string
+          description: Email address of the admin user.
+          exampleSetFlag: true
+        external:
+          type: boolean
+          description: Indicates if the user is an external user.
+          example: false
+          exampleSetFlag: true
+        firstName:
+          type: string
+          description: The first name of the admin user.
+          exampleSetFlag: true
+        inactiveAccountNeverDisabled:
+          type: boolean
+          description: Indicates if inactive accounts are never disabled.
+          example: false
+          exampleSetFlag: true
+        includeSystemAlarmsInEmails:
+          type: boolean
+          description: Indicates if system alarms are included in the user's email notifications.
+          example: false
+          exampleSetFlag: true
+        lastName:
+          type: string
+          description: The last name of the admin user.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the admin user.
+          exampleSetFlag: true
+        password:
+          type: string
+          description: Password for the admin user.
+          exampleSetFlag: true
+        rbacGroups:
+          type: array
+          description: A list of RBAC groups the admin user belongs to.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        readOnly:
+          type: boolean
+          description: Indicates if the user has read-only permissions.
+          example: false
+          exampleSetFlag: true
+        status:
+          type: boolean
+          description: Indicates whether the user account is active or not.
+          example: false
+          exampleSetFlag: true
+      description: Schema representing an Admin User in the system. This includes attributes like user details, access control, and system-related settings.
+      exampleSetFlag: false
+    OpenApiRbacPolicy:
+      title: OpenApiRbacPolicy
+      required:
+        - adminGroups
+        - policyName
+      type: object
+      properties:
+        Permission:
+          $ref: '#/components/schemas/OpenApiRbacPolicyPermission'
+          exampleSetFlag: true
+        adminGroups:
+          type: array
+          description: A list of admin groups that are associated with this RBAC policy.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        enabled:
+          type: boolean
+          description: Indicates whether the RBAC policy is enabled or disabled.
+          example: false
+          exampleSetFlag: true
+        policyName:
+          type: string
+          description: The name of the RBAC policy.
+          exampleSetFlag: true
+      description: Represents an RBAC (Role-Based Access Control) policy, including the policy's name, enabled status, and associated admin groups.
+      exampleSetFlag: false
+    OpenApiRbacPolicyPermission:
+      title: OpenApiRbacPolicyPermission
+      required:
+        - menuAccessName
+      type: object
+      properties:
+        dataAccessName:
+          type: string
+          description: The name of the data access related to this permission.
+          exampleSetFlag: true
+        menuAccessName:
+          type: string
+          description: The name of the menu access related to this permission.
+          exampleSetFlag: true
+      description: Defines a permission within the RBAC policy.
+      exampleSetFlag: false
+    RbacPolicyResponse:
+      title: RbacPolicyResponse
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        RbacPolicyList:
+          type: array
+          description: A list of RBAC policies, each defining permissions for a particular role or group.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/OpenApiRbacPolicy'
+            exampleSetFlag: false
+        code:
+          type: integer
+          description: The status code of the response.
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A message providing additional details about the status of the request.
+          exampleSetFlag: true
+      description: Response schema for retrieving RBAC (Role-Based Access Control) policies, including a list of policies.
+      exampleSetFlag: false
+    ResetExternalGroupNames:
+      title: ResetExternalGroupNames
+      required:
+        - names
+      type: object
+      properties:
+        names:
+          type: array
+          description: List of external group names to be reset.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Schema for resetting the names of external groups.
+      exampleSetFlag: false
+    SingleAdminGroup:
+      title: SingleAdminGroup
+      required:
+        - name
+      type: object
+      properties:
+        description:
+          type: string
+          description: A brief description of the admin group.
+          exampleSetFlag: true
+        externalGroups:
+          type: array
+          description: List of external groups associated with this admin group.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        externalIdenSourceName:
+          type: string
+          description: The name of the external identity source used for this admin group.
+          exampleSetFlag: true
+        isExternal:
+          type: boolean
+          description: Indicates whether the admin group is external to the organization.
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the admin group.
+          exampleSetFlag: true
+        rbacUsers:
+          type: array
+          description: List of users who are part of this admin group, based on RBAC (Role-Based Access Control) information.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/SingleAdminGroupRbacUsers'
+            exampleSetFlag: false
+      description: Schema representing a single admin group, including its name, description, external affiliation, and associated users.
+      exampleSetFlag: false
+    SingleAdminGroupRbacUsers:
+      title: SingleAdminGroupRbacUsers
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email address of the user.
+          exampleSetFlag: true
+        firstName:
+          type: string
+          description: The first name of the user.
+          exampleSetFlag: true
+        isEnabled:
+          type: boolean
+          description: Indicates whether the user is enabled or not.
+          example: false
+          exampleSetFlag: true
+        lastName:
+          type: string
+          description: The last name of the user.
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the user.
+          exampleSetFlag: true
+      exampleSetFlag: false
+    TaskResponse:
+      title: TaskResponse
+      type: object
+      properties:
+        id:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false

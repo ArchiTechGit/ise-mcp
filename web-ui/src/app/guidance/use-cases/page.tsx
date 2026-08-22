@@ -325,7 +325,7 @@ export default function UseCasesPage() {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       disabled={!!editingUseCase}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
-                      placeholder="e.g., vlan-provisioning"
+                      placeholder="e.g., device-onboarding"
                     />
                   </div>
                   <div>
@@ -337,7 +337,7 @@ export default function UseCasesPage() {
                       value={formData.display_name}
                       onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., VLAN Provisioning"
+                      placeholder="e.g., Device Onboarding"
                     />
                   </div>
                 </div>

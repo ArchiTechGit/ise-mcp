@@ -2,7 +2,7 @@
 
 ## Overview
 
-The API Guidance System is a database-driven framework that enhances Claude's ability to work with Nexus Dashboard APIs by providing customizable guidance, workflows, tool descriptions, and system prompts. All guidance is stored in the database and can be updated without code changes.
+The API Guidance System is a database-driven framework that enhances Claude's ability to work with Cisco ISE APIs by providing customizable guidance, workflows, tool descriptions, and system prompts. All guidance is stored in the database and can be updated without code changes.
 
 ## Architecture
 
@@ -54,7 +54,7 @@ Stores API-level guidance and best practices for each API (e.g., 'manage', 'anal
 
 ### 2. CategoryGuidance
 
-Stores category-level guidance within an API (e.g., 'fabric', 'sites', 'policies').
+Stores category-level guidance within an API (e.g., 'network', 'identity', 'trustsec').
 
 **Fields:**
 - `api_guidance_id` (int): Foreign key to APIGuidance
@@ -71,7 +71,7 @@ Stores category-level guidance within an API (e.g., 'fabric', 'sites', 'policies
 
 ### 3. Workflow
 
-Stores multi-step workflows for common tasks (e.g., "Deploy New Fabric").
+Stores multi-step workflows for common tasks (e.g., "Network Access Device Onboarding").
 
 **Fields:**
 - `name` (str, unique): Unique identifier
@@ -144,10 +144,10 @@ Create or update API guidance. If it exists, updates fields; otherwise creates n
 **Example:**
 ```python
 guidance = await service.upsert_api_guidance(
-    api_name="manage",
-    display_name="Nexus Dashboard Manage API",
-    description="Manages NDFC fabrics, policies, and networks",
-    general_guidance="Always check fabric state before modifications",
+    api_name="ise",
+    display_name="Cisco ISE External RESTful Services (ERS) API",
+    description="Manages network access devices, identities, policy elements, and TrustSec",
+    general_guidance="Resolve a name to its UUID before calling an operation that takes an {id}",
     is_active=True,
     section_order=1
 )
@@ -170,12 +170,12 @@ Create or update category guidance. Raises ValueError if API guidance doesn't ex
 **Example:**
 ```python
 category = await service.upsert_category_guidance(
-    api_name="manage",
-    category_name="fabric",
-    display_name="Fabric Management",
-    description="Operations for creating and managing NDFC fabrics",
-    usage_tips="Always deploy fabric changes after configuration",
-    prerequisites="Ensure seed IP is reachable",
+    api_name="ise",
+    category_name="network",
+    display_name="Network Access Devices",
+    description="Operations for onboarding and managing network devices and device groups",
+    usage_tips="Create the device groups a device references before creating the device",
+    prerequisites="ERS enabled on the Primary PAN; account in the ERS Admin group",
     is_active=True
 )
 ```
@@ -191,13 +191,13 @@ Create a new workflow. Raises ValueError if workflow name already exists.
 **Example:**
 ```python
 workflow = await service.create_workflow(
-    name="deploy_fabric",
-    display_name="Deploy New Fabric",
-    description="Create and deploy a new NDFC fabric from scratch",
-    use_case="When setting up a new data center fabric",
-    prerequisites="Switches reachable, credentials configured",
-    estimated_duration="10-15 minutes",
-    use_case_tags=["fabric", "deployment", "setup"],
+    name="network_device_onboarding",
+    display_name="Network Access Device Onboarding",
+    description="Onboard a switch, WLC, or firewall as a RADIUS/TACACS+ client of ISE",
+    use_case="When adding a new network access device to the deployment",
+    prerequisites="Device groups defined, shared secret agreed",
+    estimated_duration="2-5 minutes",
+    use_case_tags=["onboarding", "network-device", "radius"],
     is_active=True
 )
 ```
@@ -224,23 +224,23 @@ workflow = await service.set_workflow_steps(
     steps=[
         {
             "step_order": 1,
-            "step_name": "Create Fabric",
-            "operation_name": "manage_create_fabric",
-            "description": "Create the fabric with basic configuration",
-            "parameters": {"fabric_name": "DC1", "template": "Easy_Fabric"},
-            "expected_result": "Fabric created with status 'ok'",
-            "validation": "Check fabric appears in fabric list",
-            "notes": "Use Easy_Fabric template for VXLAN EVPN"
+            "step_name": "Review Device Groups",
+            "operation_name": "ise_networkdevicegroup_getAll",
+            "description": "List the device group hierarchy so the new device lands in the right groups",
+            "parameters": {"size": 100},
+            "expected_result": "Device groups with their names and ids",
+            "validation": "Confirm the intended Location and Device Type groups exist",
+            "notes": "Groups must exist before a device can reference them"
         },
         {
             "step_order": 2,
-            "step_name": "Add Switches",
-            "operation_name": "manage_add_switches",
-            "description": "Discover and add switches to fabric",
-            "parameters": {"seed_ip": "10.1.1.1", "auth_protocol": "MD5"},
-            "expected_result": "Switches added with role assigned",
-            "validation": "Verify switch count matches expected",
-            "notes": None
+            "step_name": "Create Network Device",
+            "operation_name": "ise_networkdevice_create",
+            "description": "Create the device with its IP list, groups, and shared secret",
+            "parameters": {"body": {"NetworkDevice": {"name": "branch-sw-01", "profileName": "Cisco"}}},
+            "expected_result": "201 Created with the new UUID in the Location header",
+            "validation": "Read the device back with ise_networkdevice_getByName",
+            "notes": "ERS returns an empty body on create - the ID is in the Location header"
         }
     ]
 )
@@ -263,18 +263,18 @@ Create or update tool description override.
 **Example:**
 ```python
 override = await service.upsert_tool_override(
-    operation_name="manage_deploy_fabric",
-    custom_description="Deploys pending fabric configuration to switches. This is a critical operation that pushes all pending changes.",
-    usage_guidance="Only use after verifying configuration in config preview. Always check fabric state first.",
+    operation_name="ise_ancendpoint_apply",
+    custom_description="Applies an ANC policy to an endpoint MAC address, containing it immediately. Actions include QUARANTINE, PORTBOUNCE, SHUTDOWN, and REAUTHENTICATE.",
+    usage_guidance="Confirm the MAC address and the policy name with the user first. Pair every apply with a plan to clear it once remediation is complete.",
     parameter_guidance={
-        "fabric_name": "Must match existing fabric exactly (case-sensitive)",
-        "force": "Use with caution - bypasses some safety checks"
+        "macAddress": "The endpoint MAC, in ISE format (e.g. 00:11:22:33:44:55)",
+        "policyName": "Must match an existing ANC policy exactly (case-sensitive)"
     },
     examples=[
-        {"description": "Deploy fabric 'DC1' after config changes"},
-        {"description": "Force deploy when switches are unreachable (dangerous)"}
+        {"description": "Quarantine a compromised laptop by MAC address"},
+        {"description": "Port bounce an endpoint to force reauthentication"}
     ],
-    warnings="This operation modifies production network. Always verify changes first.",
+    warnings="This drops the endpoint off the network immediately. Always confirm the target MAC before applying.",
     is_active=True
 )
 ```
@@ -296,8 +296,9 @@ section = await service.upsert_system_prompt_section(
     section_name="introduction",
     display_name="Introduction",
     content="""You are an expert network automation assistant specialized in
-Cisco Nexus Dashboard operations. Your role is to help users manage and
-automate their data center network infrastructure efficiently and safely.""",
+Cisco ISE operations. Your role is to help users manage network access
+control, identities, policy elements, and TrustSec segmentation efficiently
+and safely.""",
     section_order=1,
     is_active=True
 )
@@ -323,18 +324,15 @@ Returns the complete prompt text ready to use.
 
 # API Reference and Best Practices
 
-## Nexus Dashboard Manage API
-[Description, guidance, patterns, gotchas]
-
-## Nexus Dashboard Analyze API
+## Cisco ISE External RESTful Services (ERS) API
 [Description, guidance, patterns, gotchas]
 
 # Available Workflows
 
-## Deploy New Fabric
+## Network Access Device Onboarding
 [Description, use case, prerequisites, steps]
 
-## Add Site to Fabric
+## ANC Threat Containment
 [Description, use case, prerequisites, steps]
 ```
 
@@ -345,8 +343,9 @@ Build enhanced description for a tool operation. Checks for custom override and 
 ```python
 # operation dict from OpenAPI spec
 operation = {
-    "operationId": "manage_deploy_fabric",
-    "description": "Deploy fabric configuration",
+    "operation_id": "ancendpoint_apply",
+    "tool_name": "ise_ancendpoint_apply",
+    "summary": "apply",
     ...
 }
 
@@ -354,11 +353,11 @@ operation = {
 enhanced = await service.build_enhanced_tool_description(operation)
 
 # If override exists, returns:
-# "Deploys pending fabric configuration to switches. This is a critical operation...
+# "Applies an ANC policy to an endpoint MAC address, containing it immediately...
 #
-# **Usage Guidance:** Only use after verifying configuration in config preview...
+# **Usage Guidance:** Confirm the MAC address and the policy name with the user first...
 #
-# **Warning:** This operation modifies production network..."
+# **Warning:** This drops the endpoint off the network immediately..."
 ```
 
 ## Usage Examples
@@ -376,41 +375,41 @@ service = GuidanceService()
 ```python
 # 1. Create API guidance
 api_guidance = await service.upsert_api_guidance(
-    api_name="manage",
-    display_name="Nexus Dashboard Manage API",
-    description="NDFC API for managing fabrics, policies, and networks",
-    general_guidance="Always verify fabric state before modifications",
-    common_patterns="Get fabric -> Modify config -> Deploy -> Verify",
-    gotchas="Deploy operations are async - always check completion status",
+    api_name="ise",
+    display_name="Cisco ISE External RESTful Services (ERS) API",
+    description="ISE API for network access devices, identities, policy elements, and TrustSec",
+    general_guidance="Resolve a name to its UUID before calling an operation that takes an {id}",
+    common_patterns="getByName (or getAll + filter) -> getById -> create/update -> read back",
+    gotchas="PUT replaces the whole object; create returns 201 with an empty body and the ID in Location",
     examples=[
-        {"use_case": "Create fabric", "steps": ["create", "configure", "deploy"]},
-        {"use_case": "Add network", "steps": ["verify fabric", "create network", "deploy"]}
+        {"use_case": "Onboard a device", "steps": ["list groups", "create", "read back"]},
+        {"use_case": "Contain an endpoint", "steps": ["list ANC policies", "apply", "verify"]}
     ],
     is_active=True,
     section_order=1
 )
 
 # 2. Add category guidance
-fabric_category = await service.upsert_category_guidance(
-    api_name="manage",
-    category_name="fabric",
-    display_name="Fabric Management",
-    description="Create, configure, and manage NDFC fabrics",
-    usage_tips="Use Easy_Fabric template for VXLAN EVPN deployments",
-    prerequisites="Switches must be reachable and have basic config",
-    related_categories=["switches", "networks"],
+network_category = await service.upsert_category_guidance(
+    api_name="ise",
+    category_name="network",
+    display_name="Network Access Devices",
+    description="Onboard and manage network devices, device groups, and RADIUS/TACACS+ servers",
+    usage_tips="Create the device groups a device references before creating the device",
+    prerequisites="ERS enabled on the Primary PAN; account in the ERS Admin group",
+    related_categories=["policy", "trustsec"],
     is_active=True
 )
 
 # 3. Create workflow
 workflow = await service.create_workflow(
-    name="deploy_fabric",
-    display_name="Deploy New Fabric",
-    description="End-to-end fabric deployment workflow",
-    use_case="Setting up new data center fabric",
-    prerequisites="Switches powered on, management IPs configured",
-    estimated_duration="10-15 minutes",
-    use_case_tags=["fabric", "deployment"],
+    name="network_device_onboarding",
+    display_name="Network Access Device Onboarding",
+    description="End-to-end device onboarding workflow",
+    use_case="Adding a new switch, WLC, or firewall as a RADIUS/TACACS+ client",
+    prerequisites="Device groups defined, shared secret agreed",
+    estimated_duration="2-5 minutes",
+    use_case_tags=["onboarding", "network-device"],
     is_active=True
 )
 
@@ -420,40 +419,40 @@ await service.set_workflow_steps(
     steps=[
         {
             "step_order": 1,
-            "step_name": "Create Fabric",
-            "operation_name": "manage_create_fabric",
-            "description": "Create fabric with VXLAN EVPN template",
-            "parameters": {"fabric_name": "DC1", "template": "Easy_Fabric"},
-            "expected_result": "Fabric created successfully",
-            "validation": "Fabric appears in fabric list"
+            "step_name": "Review Device Groups",
+            "operation_name": "ise_networkdevicegroup_getAll",
+            "description": "List the device group hierarchy",
+            "parameters": {"size": 100},
+            "expected_result": "Device groups with their names and ids",
+            "validation": "Intended Location and Device Type groups exist"
         },
         {
             "step_order": 2,
-            "step_name": "Discover Switches",
-            "operation_name": "manage_discover_switches",
-            "description": "Discover and import switches",
-            "parameters": {"seed_ip": "10.1.1.1"},
-            "expected_result": "All switches discovered",
-            "validation": "Switch count matches expected"
+            "step_name": "Create Network Device",
+            "operation_name": "ise_networkdevice_create",
+            "description": "Create the device with its IP list, groups, and shared secret",
+            "parameters": {"body": {"NetworkDevice": {"name": "branch-sw-01"}}},
+            "expected_result": "201 Created with the new UUID in the Location header",
+            "validation": "Location header present"
         },
         {
             "step_order": 3,
-            "step_name": "Deploy Fabric",
-            "operation_name": "manage_deploy_fabric",
-            "description": "Deploy configuration to all switches",
-            "parameters": {"fabric_name": "DC1"},
-            "expected_result": "All configs deployed successfully",
-            "validation": "Check deployment status is 'complete'"
+            "step_name": "Confirm",
+            "operation_name": "ise_networkdevice_getByName",
+            "description": "Read the device back to confirm what ISE stored",
+            "parameters": {"name": "branch-sw-01"},
+            "expected_result": "Full NetworkDevice object",
+            "validation": "Group membership and CoA port match intent"
         }
     ]
 )
 
 # 5. Add tool overrides for critical operations
 await service.upsert_tool_override(
-    operation_name="manage_deploy_fabric",
-    custom_description="CRITICAL: Deploys configuration to production switches",
-    usage_guidance="Always preview changes first. Verify switches are in maintenance window.",
-    warnings="This modifies production network. Cannot be rolled back automatically.",
+    operation_name="ise_ancendpoint_apply",
+    custom_description="CRITICAL: Contains an endpoint by applying an ANC policy to its MAC address",
+    usage_guidance="Confirm the MAC address and policy name with the user first.",
+    warnings="This drops the endpoint off the network immediately.",
     is_active=True
 )
 
@@ -465,8 +464,8 @@ await service.upsert_system_prompt_section(
 1. Verify current state before making changes
 2. Use read-only operations to understand the environment first
 3. For destructive operations, confirm with user before executing
-4. Check for maintenance windows on production systems
-5. Validate configuration before deployment""",
+4. Treat shared secrets and passwords as sensitive - never echo them back
+5. Validate required path, query, and body parameters before calling""",
     section_order=2,
     is_active=True
 )

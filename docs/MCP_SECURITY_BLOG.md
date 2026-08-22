@@ -6,9 +6,9 @@ Model Context Protocol (MCP) is changing how AI assistants interact with enterpr
 
 **Who's guarding the AI's access to your network?**
 
-When an MCP server connects to Cisco Nexus Dashboard, it gains access to fabric management, device configurations, VLAN provisioning, and network topology. One poorly secured MCP endpoint could become an attack vector for your entire data center infrastructure.
+When an MCP server connects to Cisco ISE, it gains access to network access policy, RADIUS and TACACS+ shared secrets, identity stores, and TrustSec segmentation. One poorly secured MCP endpoint could become an attack vector for your entire network access control layer.
 
-This guide documents the security architecture we built for the Nexus Dashboard MCP Server, a reference implementation for securing AI-to-infrastructure communication.
+This guide documents the security architecture we built for the Cisco ISE MCP Server, a reference implementation for securing AI-to-infrastructure communication.
 
 ---
 
@@ -20,11 +20,11 @@ Traditional API security focuses on human users with predictable behavior. MCP s
 
 ```
 +------------------+     +------------------+     +-------------------+
-|   Claude/GPT     |---->|   MCP Server     |---->|  Nexus Dashboard  |
+|   Claude/GPT     |---->|   MCP Server     |---->|  Cisco ISE  |
 |   (AI Agent)     |     |   (Bridge)       |     |  (Infrastructure) |
 +------------------+     +------------------+     +-------------------+
         |                        |                         |
-   Prompt Injection?      Credential Theft?         Fabric Changes?
+   Prompt Injection?      Credential Theft?         Policy Changes? 
    Unauthorized Ops?      Session Hijacking?        Config Drift?
 ```
 
@@ -59,7 +59,7 @@ Our implementation addresses these gaps with a defense-in-depth approach:
                [HTTPS/TLS]          [HTTPS/TLS]
             (Self-signed or CA)   (Self-signed or CA)
                     |                    |
-            Port 7443            Port 8444
+            Port 7447            Port 8448
                     |                    |
 +-------------------+    +---------------------------+
 |     Web UI        |    |         Web API           |
@@ -74,12 +74,12 @@ Our implementation addresses these gaps with a defense-in-depth approach:
               +----------------------+----------------------+
               |                      |                      |
      +--------+--------+    +--------+--------+    +--------+--------+
-     |   PostgreSQL    |    |   MCP Server    |    | Nexus Dashboard |
+     |   PostgreSQL    |    |   MCP Server    |    | Cisco ISE |
      |                 |    |                 |    |    Clusters     |
      | - Encrypted     |    | - Read-Only     |    |                 |
      |   Credentials   |    |   by Default    |    | - Per-Cluster   |
      | - Audit Logs    |    | - Tool Registry |    |   Credentials   |
-     | - User/Roles    |    | - 1,371 Tools   |    | - SSL Optional  |
+     | - User/Roles    |    | - 1007 Tools  |    | - SSL Optional  |
      +-----------------+    +-----------------+    +-----------------+
 ```
 
@@ -162,10 +162,10 @@ class SecurityManager:
 |  allowed through the MCP interface.      |
 |                                          |
 |  Whitelisted Operations:                 |
-|  [ ] fabric-create                       |
-|  [ ] fabric-update                       |
-|  [x] fabric-deploy (approved)            |
-|  [ ] fabric-delete                       |
+|  [ ] ise_networkdevice_create            |
+|  [ ] ise_networkdevice_update            |
+|  [x] ise_networkdevice_getAll (approved) |
+|  [ ] ise_networkdevice_delete            |
 |                                          |
 +------------------------------------------+
 ```
@@ -225,7 +225,7 @@ CREATE TABLE user_roles (
 
 ### 4. Encrypted Credential Storage
 
-**The Problem:** Nexus Dashboard credentials stored in plaintext can be extracted from database dumps.
+**The Problem:** Cisco ISE credentials stored in plaintext can be extracted from database dumps.
 
 **Our Solution:** Fernet symmetric encryption for all stored credentials.
 
@@ -263,7 +263,7 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 ENCRYPTION_KEY=gAAAAABh...your-key-here...
 ```
 
-**Result:** Database breach does not expose Nexus Dashboard credentials. Key rotation possible without data loss.
+**Result:** Database breach does not expose Cisco ISE credentials. Key rotation possible without data loss.
 
 ---
 
@@ -309,7 +309,7 @@ CREATE TABLE audit_log (
 +------------------------------------------------------------------+
 | Timestamp           | User    | Operation        | Status | Time |
 +------------------------------------------------------------------+
-| 2025-12-04 20:15:32 | admin   | fabric-list      | 200    | 45ms |
+| 2025-12-04 20:15:32 | admin   | networkdevice_getAll | 200 | 45ms |
 | 2025-12-04 20:14:18 | admin   | cluster-test     | 200    | 890ms|
 | 2025-12-04 20:13:05 | system  | health-check     | 200    | 12ms |
 +------------------------------------------------------------------+
@@ -329,7 +329,7 @@ CREATE TABLE audit_log (
 # Session configuration
 SESSION_CONFIG = {
     "secret_key": os.environ.get("SESSION_SECRET_KEY"),
-    "cookie_name": "nexus_mcp_session",
+    "cookie_name": "ise_mcp_session",
     "max_age": 3600,  # 1 hour
     "httponly": True,  # No JavaScript access
     "secure": True,    # HTTPS only
@@ -395,11 +395,11 @@ async def verify_mcp_token(request: Request):
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://192.168.1.213:8444/mcp/sse",
+        "https://192.168.1.213:8448/mcp/sse",
         "--transport", "sse-only",
         "--header", "Authorization: Bearer your-secure-token-here"
       ]
@@ -436,9 +436,9 @@ Before deploying an MCP server to production:
 - [ ] **Keep edit mode disabled** unless actively making changes
 
 - [ ] **Configure firewall rules**
-  - Allow 7443 (Web UI) from trusted networks only
-  - Allow 8444 (API/MCP) from Claude Desktop clients only
-  - Block 15432 (PostgreSQL) from external access
+  - Allow 7447 (Web UI) from trusted networks only
+  - Allow 8448 (API/MCP) from Claude Desktop clients only
+  - Block 15436 (PostgreSQL) from external access
 
 - [ ] **Set up log rotation** for audit logs
 
@@ -467,7 +467,7 @@ The organizations building secure MCP implementations now will be better positio
 
 ## Resources
 
-- [Nexus Dashboard MCP Server](https://github.com/beye91/nexus-dashboard-mcp) - Full implementation
+- [Cisco ISE MCP Server](https://github.com/ArchiTechGit/ise-mcp) - Full implementation
 - [Model Context Protocol Specification](https://modelcontextprotocol.io/) - Official MCP docs
 - [OWASP API Security Top 10](https://owasp.org/www-project-api-security/) - API security reference
 - [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework) - Security controls reference
@@ -488,4 +488,4 @@ The organizations building secure MCP implementations now will be better positio
 
 ---
 
-*This document summarizes the security implementation of the Nexus Dashboard MCP Server. For deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md). For quick start, see [QUICKSTART.md](../QUICKSTART.md).*
+*This document summarizes the security implementation of the Cisco ISE MCP Server. For deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md). For quick start, see [QUICKSTART.md](../QUICKSTART.md).*

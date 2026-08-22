@@ -1,0 +1,2087 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - Alarms
+  version: 1.0.0
+servers:
+  - url: https://10.104.241.219:443
+    description: Inferred Url
+tags:
+  - name: alarms-api-controller
+    description: the alarms API
+paths:
+  /api/v1/alarms:
+    get:
+      tags:
+        - AlarmConfigurations Services
+      summary: Retrieve all the Alarm Rules
+      description: This API retrieves all the Alarm Rules present in the system.
+      operationId: getAllAlarms
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleListResponseWrapper'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    put:
+      tags:
+        - AlarmConfigurations Services
+      summary: Update the Alarms Rules in Bulk
+      description: >-
+        This API updates the Alarms Rule status, notification and suppression
+        for multiple Alarms.
+      operationId: updateAlarmRules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/AlarmRuleUpdateRequest'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleUpdateResponseWrapper'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - AlarmConfigurations Services
+      summary: Create a new Alarm Rule
+      description: This API creates a new Alarm Rule.
+      operationId: createAlarms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlarmRuleRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Unexpected Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleResponseWrapper1'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Alarm with the same name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    delete:
+      tags:
+        - AlarmConfigurations Services
+      summary: Bulk Remove Alarm Rules
+      description: This API removes multiple Alarm Rules for the given list of IDs.
+      operationId: removeAlarms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlarmIdsRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveAlarmRuleResponseWrapper'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/details-report/definitions:
+    get:
+      tags:
+        - Alarm details
+      summary: Retrieve Report Definitions with Sections
+      description: >-
+        Returns static report definition data containing report names and their
+        associated sections with IDs and titles.
+      operationId: getReportDefinitions
+      responses:
+        '200':
+          description: Successful response containing the report definitions with sections.
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/ReportDefinitionWithSections'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/instances/acknowledge/acknowledgeByAlarmIDs:
+    put:
+      tags:
+        - Alarm Instances Services
+      summary: Acknowledge alarm instances by alarm IDs
+      description: This API acknowledges all alarm instances of given alarm IDs.
+      operationId: acknowledgeAlarmInstancesByAlarmIds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcknowledgeAlarmsByIdsRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgeAlarmsByIdsResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/instances/acknowledge/acknowledgeByInstanceIds:
+    put:
+      tags:
+        - Alarm Instances Services
+      summary: Acknowledge alarm instances
+      description: >-
+        This API acknowledges a list of alarm instances by setting their visited
+        status.
+      operationId: acknowledgeAlarmInstances
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcknowledgeInstancesRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgeInstancesResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/instances/{instanceId}:
+    get:
+      tags:
+        - Alarm Instances Services
+      summary: Retrieve specific alarm instance
+      description: This API retrieves specific alarm instances present in the system.
+      operationId: getAlarmInstancesById
+      parameters:
+        - name: instanceId
+          in: path
+          description: Get Alarm Instance by Id.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmInstanceResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/instances/{page}/{size}:
+    get:
+      tags:
+        - Alarm Instances Services
+      summary: Retrieve all alarm instances
+      description: This API retrieves all alarm instances present in the system.
+      operationId: getAllAlarmInstances
+      parameters:
+        - name: page
+          in: path
+          description: Page number for pagination (default is 1)
+          required: true
+          style: simple
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: size
+          in: path
+          description: Number of items per page for pagination (default is 50)
+          required: true
+          style: simple
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: from
+          in: header
+          description: >-
+            Start date for filtering alarm instances (ISO 8601 UTC format, e.g.,
+            "2025-09-15T10:00:00.000Z")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: to
+          in: header
+          description: >-
+            End date for filtering alarm instances (ISO 8601 UTC format, e.g.,
+            "2025-09-15T23:59:59.999Z")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: severity
+          in: header
+          description: >-
+            Severity level for filtering alarm instances (e.g., "Critical",
+            "Warning", "Info")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - Critical
+              - Info
+              - Warning
+        - name: iseNode
+          in: header
+          description: ISE Node name for filtering alarm instances
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: keyword
+          in: header
+          description: keyword for global search
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmInstancePaginatedResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/primingData:
+    get:
+      tags:
+        - AlarmConfigurations Services
+      summary: Retrieve all the Alarm Rules present
+      description: This API retrieves all the Alarm Rules present in the system.
+      operationId: fetchAlarmRuleTemplate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleTemplateWrapper'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/summary/groupByAlarms:
+    get:
+      tags:
+        - Alarm Instances Services
+      summary: Alarms summary grouped by Alarm Id
+      description: >-
+        This API retrieves a summary of alarm instances including counts grouped
+        by Alarms.
+      operationId: getAlarmInstancesSummary
+      parameters:
+        - name: from
+          in: header
+          description: >-
+            Start date for filtering alarm instances (ISO 8601 UTC format, e.g.,
+            "2025-09-15T10:00:00.000Z")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: to
+          in: header
+          description: >-
+            End date for filtering alarm instances (ISO 8601 UTC format, e.g.,
+            "2025-09-15T23:59:59.999Z")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/AlarmSummary'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/{alarmId}/instances/{page}/{size}:
+    get:
+      tags:
+        - Alarm Instances Services
+      summary: Retrieve alarm instances by Alarm ID
+      description: This API retrieves all alarm instances for a specific alarm ID.
+      operationId: getAlarmInstancesByType
+      parameters:
+        - name: alarmId
+          in: path
+          description: The alarm ID to filter instances
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: page
+          in: path
+          description: Page number for pagination (default is 1)
+          required: true
+          style: simple
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: size
+          in: path
+          description: Number of items per page for pagination (default is 50)
+          required: true
+          style: simple
+          schema:
+            type: integer
+            format: int32
+            exampleSetFlag: true
+        - name: from
+          in: header
+          description: >-
+            Start date for filtering alarm instances (ISO 8601 UTC format, e.g.,
+            "2025-09-15T10:00:00.000Z")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: to
+          in: header
+          description: >-
+            End date for filtering alarm instances (ISO 8601 UTC format, e.g.,
+            "2025-09-15T23:59:59.999Z")
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: iseNode
+          in: header
+          description: ISE Node name for filtering alarm instances
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmInstancePagedResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/{id}:
+    get:
+      tags:
+        - AlarmConfigurations Services
+      summary: Retrieve the specific Alarm Rule
+      description: This API retrieves the Alarm Rule by its ID
+      operationId: getAlarmById
+      parameters:
+        - name: id
+          in: path
+          description: The id is used to fetch the Alarm Rule.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleResponseWrapper1'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    put:
+      tags:
+        - AlarmConfigurations Services
+      summary: Update the Alarm Rule
+      description: This API updates the Alarm Rule for the given ID.
+      operationId: updateAlarm
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier of the Alarm Rule to update
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlarmModificationRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleResponseWrapper1'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    delete:
+      tags:
+        - AlarmConfigurations Services
+      summary: Remove the Alarm Rule
+      description: This API removes the Alarm Rule for the given ID.
+      operationId: removeAlarm
+      parameters:
+        - name: id
+          in: path
+          description: The id is used to fetch the Alarm Rule to be removed
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveAlarmRuleResponseWrapper'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/alarms/{reportName}/details-report:
+    get:
+      tags:
+        - Alarm details
+      summary: Retrieve Report Data
+      description: >-
+        Fetches data for a specific report section. The response format varies
+        based on the section's template (grid, chart, etc.).
+      operationId: getReportStoreData
+      parameters:
+        - name: reportName
+          in: path
+          description: The reportName is used to retrieve data from the designated report.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: section
+          in: header
+          description: >-
+            The ID of the report section for which to retrieve data. Must
+            correspond to a valid section ID from the report definition.
+          required: true
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: server
+          in: header
+          description: Server identifier to filter results for a specific server.
+          required: true
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: timeRange
+          in: header
+          description: >-
+            Specifies the time range for the report data. Accepts predefined
+            values such as 'today', 'last7days' and  'last30days'. Use 'custom'
+            to specify a custom range with the 'from' and 'to' parameters. If
+            omitted, the default time range is determined by the report's
+            definition, often defaulting to 'today'.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - custom
+              - last30days
+              - last7days
+              - today
+        - name: from
+          in: header
+          description: >-
+            Start timestamp for custom time range filter. Supports epoch time in
+            milliseconds or time format (ISO 8601 UTC format, e.g.,
+            "2025-09-15T10:00:00.000Z").
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: to
+          in: header
+          description: >-
+            End timestamp for custom time range filter. Supports epoch time in
+            milliseconds or time format (ISO 8601 UTC format, e.g.,
+            "2025-09-15T10:00:00.000Z").
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: >-
+            Successful response containing the report data. The structure of the
+            items in the array depends on the report section's template.
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  type: object
+                  exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+components:
+  schemas:
+    AcknowledgeAlarmsByIdsRequest:
+      title: AcknowledgeAlarmsByIdsRequest
+      required:
+        - alarmIds
+      type: object
+      properties:
+        alarmIds:
+          type: array
+          description: List of alarm IDs to acknowledge all instances for.
+          example: >-
+            ["550e8400-e29b-41d4-a716-446655440000","660f9400-f29c-51d5-b817-556755550111"]
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: >-
+        Represents the request payload for acknowledging alarm instances by
+        alarm IDs.
+      exampleSetFlag: false
+    AcknowledgeAlarmsByIdsResponse:
+      title: AcknowledgeAlarmsByIdsResponse
+      required:
+        - acknowledgedCount
+        - version
+      type: object
+      properties:
+        acknowledgedCount:
+          type: integer
+          description: >-
+            Total number of alarm instances that were successfully acknowledged
+            across all alarm IDs.
+          format: int32
+          example: 5
+          exampleSetFlag: true
+        version:
+          type: string
+          description: Version of the API.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response for acknowledging alarm instances by alarm IDs.
+      exampleSetFlag: false
+    AcknowledgeInstancesRequest:
+      title: AcknowledgeInstancesRequest
+      required:
+        - instanceIds
+      type: object
+      properties:
+        instanceIds:
+          type: array
+          description: List of alarm instance IDs to be acknowledged.
+          example: >-
+            ["550e8400-e29b-41d4-a716-446655440000","660f9400-f29c-51d5-b817-556755550111"]
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Represents the request payload for acknowledging alarm instances.
+      exampleSetFlag: false
+    AcknowledgeInstancesResponse:
+      title: AcknowledgeInstancesResponse
+      required:
+        - acknowledgedCount
+        - version
+      type: object
+      properties:
+        acknowledgedCount:
+          type: integer
+          description: Number of instances that were successfully acknowledged.
+          format: int32
+          example: 2
+          exampleSetFlag: true
+        version:
+          type: string
+          description: Version of the API.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response for acknowledging alarm instances.
+      exampleSetFlag: false
+    AlarmIdsRequest:
+      title: AlarmIdsRequest
+      required:
+        - ids
+      type: object
+      properties:
+        ids:
+          type: array
+          description: List of alarm IDs to be removed.
+          example: '["alarmId1","alarmId2","alarmId3"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: >-
+        Represents the request payload for operations that involve specifying a
+        list of alarm IDs. This is typically used for removing multiple alarms
+        in a single operation.
+      exampleSetFlag: false
+    AlarmInstance:
+      title: AlarmInstance
+      type: object
+      properties:
+        alarmDetails:
+          type: string
+          description: Detailed information about the alarm instance.
+          example: Critical posture violation detected on endpoint
+          exampleSetFlag: true
+        alarmId:
+          type: string
+          description: The ID of the alarm rule that triggered this instance.
+          example: alarm-rule-123
+          exampleSetFlag: true
+        alarmName:
+          type: string
+          description: The name of the alarm.
+          example: Critical Posture Alarm
+          exampleSetFlag: true
+        description:
+          type: string
+          description: Description of the alarm condition that was triggered.
+          example: Detailed description of the alarm condition
+          exampleSetFlag: true
+        details:
+          type: string
+          description: Additional details about the alarm instance.
+          example: Additional alarm configuration details
+          exampleSetFlag: true
+        detailsLink:
+          type: string
+          description: Suggested actions to resolve or address the alarm.
+          example: Review and update security policies
+          exampleSetFlag: true
+        instanceId:
+          type: string
+          description: Unique identifier for the alarm instance.
+          example: 550e8400-e29b-41d4-a716-446655440000
+          exampleSetFlag: true
+        iseNode:
+          type: string
+          description: The ISE node where the alarm was generated.
+          example: ISE-Node-01
+          exampleSetFlag: true
+        loggedAt:
+          type: string
+          description: The timestamp when the alarm instance was logged.
+          exampleSetFlag: true
+        severity:
+          type: string
+          description: The severity level of the alarm instance.
+          example: High
+          exampleSetFlag: true
+        suggestedActions:
+          type: string
+          description: Suggested actions to resolve or address the alarm.
+          example: Review and update security policies
+          exampleSetFlag: true
+        timeInterval:
+          type: string
+          description: Suggested actions to resolve or address the alarm.
+          example: The time innterval of the instance
+          exampleSetFlag: true
+      description: Represents an alarm instance that has been triggered in the system.
+      exampleSetFlag: false
+    AlarmInstancePagedResponseWrapper:
+      title: AlarmInstancePagedResponseWrapper
+      type: object
+      properties:
+        instances:
+          type: array
+          description: List of alarm instances
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AlarmInstance'
+            exampleSetFlag: false
+        pageNumber:
+          type: integer
+          description: The current page number of the paginated response.
+          format: int32
+          example: 1
+          exampleSetFlag: true
+        pageSize:
+          type: integer
+          description: The number of items per page in the paginated response.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        totalPages:
+          type: integer
+          description: The total number of pages available based on the page size.
+          format: int32
+          example: 5
+          exampleSetFlag: true
+        totalRecords:
+          type: integer
+          description: The total number of alarm instances available.
+          format: int64
+          example: 50
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or response format.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for retrieving a single alarm instance.
+      exampleSetFlag: false
+    AlarmInstancePaginatedResponseWrapper:
+      title: AlarmInstancePaginatedResponseWrapper
+      type: object
+      properties:
+        criticalSeverity:
+          type: integer
+          description: The total number of critical severity.
+          format: int64
+          example: 30
+          exampleSetFlag: true
+        infoSeverity:
+          type: integer
+          description: The total number of info severity.
+          format: int64
+          example: 59
+          exampleSetFlag: true
+        instances:
+          type: array
+          description: List of alarm instances
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AlarmInstance'
+            exampleSetFlag: false
+        pageNumber:
+          type: integer
+          description: The current page number of the paginated response.
+          format: int32
+          example: 1
+          exampleSetFlag: true
+        pageSize:
+          type: integer
+          description: The number of items per page in the paginated response.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        totalPages:
+          type: integer
+          description: The total number of pages available based on the page size.
+          format: int32
+          example: 5
+          exampleSetFlag: true
+        totalRecords:
+          type: integer
+          description: The total number of alarm instances available.
+          format: int64
+          example: 50
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or response format.
+          example: 1.0.0
+          exampleSetFlag: true
+        warningSeverity:
+          type: integer
+          description: The total number of warning severity.
+          format: int64
+          example: 40
+          exampleSetFlag: true
+      description: >-
+        Represents the response wrapper for retrieving a list of alarm
+        instances.
+      exampleSetFlag: false
+    AlarmInstanceResponseWrapper:
+      title: AlarmInstanceResponseWrapper
+      type: object
+      properties:
+        instance:
+          $ref: '#/components/schemas/AlarmInstance'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or response format.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for retrieving a single alarm instance.
+      exampleSetFlag: false
+    AlarmModificationRequest:
+      title: AlarmModificationRequest
+      required:
+        - description
+        - name
+        - severity
+        - suggestedAction
+      type: object
+      properties:
+        dashboardNotification:
+          type: boolean
+          description: >-
+            Indicates whether dashboard notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A brief description of the alarm rule.
+          example: This alarm rule monitors critical posture violations in the system.
+          exampleSetFlag: true
+        emailFrequency:
+          type: integer
+          description: The frequency at which email notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        emailFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the email frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        emailFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+        emailNotification:
+          type: boolean
+          description: >-
+            Indicates whether email notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        emailText:
+          type: string
+          description: >-
+            Custom text to be included in email notifications when the alarm
+            rule is triggered.
+          example: Notification email text for alarm.
+          exampleSetFlag: true
+        enabledSyslog:
+          type: boolean
+          description: >-
+            Indicates whether syslog notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        filters:
+          type: object
+          additionalProperties:
+            type: array
+            exampleSetFlag: false
+            items:
+              type: string
+              exampleSetFlag: false
+          description: List of Filter conditions
+          exampleSetFlag: true
+        id:
+          type: string
+          description: The id of the alarm rule.
+          example: d530fe3b-53e5-49c0-8d2d-bb229a8d1e3c
+          exampleSetFlag: true
+        isUserDefined:
+          type: boolean
+          description: Indicates whether the alarm rule is user-defined or system-defined.
+          example: true
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the alarm rule.
+          example: Critical Posture Alarm
+          exampleSetFlag: true
+        receiverEmailAddress:
+          type: string
+          description: >-
+            A list of email addresses to which notifications will be sent when
+            the alarm rule is triggered.
+          example: abc@cisco.com, xyz@cisco.com
+          exampleSetFlag: true
+        senderMailAddress:
+          type: string
+          description: >-
+            The email address from which notifications will be sent when the
+            alarm rule is triggered.
+          exampleSetFlag: true
+        severity:
+          type: integer
+          description: The severity level of the alarm rule.
+          format: int32
+          example: 1
+          exampleSetFlag: true
+        status:
+          type: string
+          description: Indicates whether the alarm rule is Enabled, Disabled or Muted.
+          example: Enabled
+          exampleSetFlag: true
+        suggestedAction:
+          type: string
+          description: Suggested actions to be taken when the alarm rule is triggered.
+          example: Review the posture violations and take necessary actions.
+          exampleSetFlag: true
+        suppression:
+          $ref: '#/components/schemas/Suppression'
+          exampleSetFlag: true
+        thresholdInterval:
+          type: string
+          description: The interval at which the threshold condition is evaluated.
+          example: '5'
+          exampleSetFlag: true
+        thresholdLowerBound:
+          type: number
+          description: The threshold lower bound value.
+          format: bigdecimal
+          example: 1
+          exampleSetFlag: true
+        thresholdOn:
+          type: string
+          description: >-
+            The specific field or metric on which the threshold condition is
+            applied.
+          example: cpu_usage
+          exampleSetFlag: true
+        thresholdOperator:
+          type: string
+          description: >-
+            The operator used for threshold evaluation, such as "greater than"
+            or "less than."
+          example: Greater Than
+          exampleSetFlag: true
+        thresholdType:
+          type: string
+          description: The type of threshold condition, such as "static" or "dynamic."
+          example: Number
+          exampleSetFlag: true
+        thresholdUpperBound:
+          type: number
+          description: The threshold upper bound value.
+          format: bigdecimal
+          example: 99999
+          exampleSetFlag: true
+        thresholdValue:
+          type: number
+          description: The threshold value that, when exceeded, will trigger the alarm.
+          format: bigdecimal
+          example: 100
+          exampleSetFlag: true
+        webhookFrequency:
+          type: integer
+          description: The frequency at which webhook notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        webhookFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the webhook frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        webhookFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+        webhookNotification:
+          type: boolean
+          description: >-
+            Indicates whether webhook notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        webhookReceiver:
+          type: array
+          description: Webhook ids to be associated with the alarm
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: >-
+        Represents the request payload for creating or updating an alarm rule.
+        This object contains various properties that define the alarm rule,
+        including its unique identifier, name, description, category, severity,
+        and other relevant settings.
+      exampleSetFlag: false
+    AlarmRuleListResponseWrapper:
+      title: AlarmRuleListResponseWrapper
+      type: object
+      properties:
+        rulesRes:
+          type: array
+          description: Runtime-populated list of alarms
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: >-
+        Represents the response wrapper for retrieving a list of alarm rules.
+        This object contains an array of alarm rule details and the version of
+        the API or response format being used.
+      exampleSetFlag: false
+    AlarmRuleRequest:
+      title: AlarmRuleRequest
+      required:
+        - alarmTypeId
+        - description
+        - name
+        - severity
+        - suggestedAction
+      type: object
+      properties:
+        alarmTypeId:
+          type: string
+          description: >-
+            The type ID of the alarm rule, which may correspond to a specific
+            category or classification of alarms.
+          example: '2000'
+          exampleSetFlag: true
+        dashboardNotification:
+          type: boolean
+          description: >-
+            Indicates whether dashboard notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A brief description of the alarm rule.
+          example: This alarm rule monitors critical posture violations in the system.
+          exampleSetFlag: true
+        emailFrequency:
+          type: integer
+          description: The frequency at which email notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        emailFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the email frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        emailFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+        emailNotification:
+          type: boolean
+          description: >-
+            Indicates whether email notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        emailText:
+          type: string
+          description: >-
+            Custom text to be included in email notifications when the alarm
+            rule is triggered.
+          example: Notification email text for alarm.
+          exampleSetFlag: true
+        enabledSyslog:
+          type: boolean
+          description: >-
+            Indicates whether syslog notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        filters:
+          type: object
+          additionalProperties:
+            type: array
+            exampleSetFlag: false
+            items:
+              type: string
+              exampleSetFlag: false
+          description: List of Filter conditions
+          exampleSetFlag: true
+        isUserDefined:
+          type: boolean
+          description: Indicates whether the alarm rule is user-defined or system-defined.
+          example: true
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the alarm rule.
+          example: Critical Posture Alarm
+          exampleSetFlag: true
+        receiverEmailAddress:
+          type: string
+          description: >-
+            A list of email addresses to which notifications will be sent when
+            the alarm rule is triggered.
+          example: abc@cisco.com, xyz@cisco.com
+          exampleSetFlag: true
+        senderMailAddress:
+          type: string
+          description: >-
+            The email address from which notifications will be sent when the
+            alarm rule is triggered.
+          exampleSetFlag: true
+        severity:
+          type: integer
+          description: The severity level of the alarm rule.
+          format: int32
+          example: 1
+          exampleSetFlag: true
+        status:
+          type: string
+          description: Indicates whether the alarm rule is Enabled, Disabled or Suppressed.
+          example: Enabled
+          exampleSetFlag: true
+        suggestedAction:
+          type: string
+          description: Suggested actions to be taken when the alarm rule is triggered.
+          example: Review the posture violations and take necessary actions.
+          exampleSetFlag: true
+        suppression:
+          $ref: '#/components/schemas/Suppression'
+          exampleSetFlag: true
+        thresholdInterval:
+          type: string
+          description: The interval at which the threshold condition is evaluated.
+          example: '5'
+          exampleSetFlag: true
+        thresholdLowerBound:
+          type: number
+          description: The threshold lower bound value.
+          format: bigdecimal
+          example: 1
+          exampleSetFlag: true
+        thresholdOn:
+          type: string
+          description: >-
+            The specific field or metric on which the threshold condition is
+            applied.
+          example: cpu_usage
+          exampleSetFlag: true
+        thresholdOperator:
+          type: string
+          description: >-
+            The operator used for threshold evaluation, such as "greater than"
+            or "less than."
+          example: Greater Than
+          exampleSetFlag: true
+        thresholdType:
+          type: string
+          description: The type of threshold condition, such as "static" or "dynamic."
+          example: Number
+          exampleSetFlag: true
+        thresholdUpperBound:
+          type: number
+          description: The threshold upper bound value.
+          format: bigdecimal
+          example: 99999
+          exampleSetFlag: true
+        thresholdValue:
+          type: number
+          description: The threshold value that, when exceeded, will trigger the alarm.
+          format: bigdecimal
+          example: 100
+          exampleSetFlag: true
+        webhookFrequency:
+          type: integer
+          description: The frequency at which webhook notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        webhookFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the webhook frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        webhookFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+        webhookNotification:
+          type: boolean
+          description: >-
+            Indicates whether webhook notifications are enabled for this alarm
+            rule.
+          example: true
+          exampleSetFlag: true
+        webhookReceiver:
+          type: array
+          description: Webhook ids to be associated with the alarm
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: >-
+        Represents the request payload for creating or updating an alarm rule.
+        This object contains various properties that define the alarm rule,
+        including its unique identifier, name, description, category, severity,
+        and other relevant settings.
+      exampleSetFlag: false
+    AlarmRuleResponseWrapper1:
+      title: AlarmRuleResponseWrapper1
+      type: object
+      properties:
+        alarmRule:
+          type: object
+          description: Runtime-populated alarm rule details
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or response format.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: >-
+        Represents the response wrapper for retrieving the details of a single
+        alarm rule. This object contains the alarm rule details along with the
+        version of the API or response format being used.
+      exampleSetFlag: false
+    AlarmRuleTemplateWrapper:
+      title: AlarmRuleTemplateWrapper
+      type: object
+      properties:
+        template:
+          type: array
+          description: Runtime-populated list of alarm definitions
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: >-
+        Represents the response wrapper for retrieving template for an alarm
+        type ID.
+      exampleSetFlag: false
+    AlarmRuleUpdateRequest:
+      title: AlarmRuleUpdateRequest
+      required:
+        - id
+      type: object
+      properties:
+        dashboardNotification:
+          $ref: '#/components/schemas/DashboardNotification'
+          exampleSetFlag: true
+        emailNotification:
+          $ref: '#/components/schemas/EmailNotification'
+          exampleSetFlag: true
+        id:
+          type: string
+          description: The ID of the alarm rule.
+          exampleSetFlag: true
+        status:
+          type: string
+          description: The status to update for the alarm rule.
+          example: Enabled
+          exampleSetFlag: true
+        suppression:
+          $ref: '#/components/schemas/Suppression'
+          exampleSetFlag: true
+        webhookNotification:
+          $ref: '#/components/schemas/WebhookNotification'
+          exampleSetFlag: true
+      description: >-
+        Represents the request payload for updating the status of an alarm rule,
+        including notification settings.
+      exampleSetFlag: false
+    AlarmRuleUpdateResponse:
+      title: AlarmRuleUpdateResponse
+      type: object
+      properties:
+        dashboardNotification:
+          $ref: '#/components/schemas/DashboardNotificationResponse'
+          exampleSetFlag: true
+        emailNotification:
+          $ref: '#/components/schemas/EmailNotificationResponse'
+          exampleSetFlag: true
+        id:
+          type: string
+          description: The unique identifier of the alarm rule.
+          example: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+          exampleSetFlag: true
+        status:
+          type: string
+          description: >-
+            The updated status of the alarm rule, indicating whether it is
+            enabled or disabled.
+          example: Enabled
+          exampleSetFlag: true
+        suppression:
+          $ref: '#/components/schemas/SuppressionResponse'
+          exampleSetFlag: true
+        webhookNotification:
+          $ref: '#/components/schemas/WebhookNotificationResponse'
+          exampleSetFlag: true
+      description: >-
+        Represents the response object for a alarm rule status update operation.
+        This object includes the unique identifier of the alarm and its updated
+        status.
+      exampleSetFlag: false
+    AlarmRuleUpdateResponseWrapper:
+      title: AlarmRuleUpdateResponseWrapper
+      type: object
+      properties:
+        alarmList:
+          type: array
+          description: A list of alarm rule, including details such as ID and status.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AlarmRuleUpdateResponse'
+            exampleSetFlag: false
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: >-
+        Represents the response wrapper for operations that update the status of
+        alarm rule. This wrapper includes a list of webhook configurations with
+        their updated statuses and the API version information.
+      exampleSetFlag: false
+    AlarmSummary:
+      title: AlarmSummary
+      type: object
+      properties:
+        alarmId:
+          type: string
+          description: The unique identifier of the alarm.
+          example: 550e8400-e29b-41d4-a716-446655440000
+          exampleSetFlag: true
+        alarmName:
+          type: string
+          description: The name of the alarm.
+          example: Critical Posture Alarm
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A brief description of the alarm rule.
+          example: This alarm rule monitors critical posture violations in the system.
+          exampleSetFlag: true
+        iseNodes:
+          type: array
+          description: List of ISE nodes where this alarm has occurred.
+          example: '["ISE-Node-01","ISE-Node-02"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        lastOccurredTime:
+          type: string
+          description: The last time this alarm occurred, in ISO 8601 format.
+          example: '2023-10-01T12:00:00Z'
+          exampleSetFlag: true
+        occurrences:
+          type: integer
+          description: The number of times this alarm has occurred.
+          format: int32
+          example: 5
+          exampleSetFlag: true
+        severity:
+          type: string
+          description: The severity level of the alarm.
+          example: Critical
+          exampleSetFlag: true
+        suggestedAction:
+          type: string
+          description: Suggested actions to be taken when the alarm rule is triggered.
+          example: Review the posture violations and take necessary actions.
+          exampleSetFlag: true
+      description: Represents a summary of alarm occurrences grouped by alarm ID.
+      exampleSetFlag: false
+    DashboardNotification:
+      title: DashboardNotification
+      type: object
+      properties:
+        status:
+          type: boolean
+          description: Status of the dashboard notification.
+          example: true
+          exampleSetFlag: true
+      description: Configuration for dashboard notifications.
+      exampleSetFlag: false
+    DashboardNotificationResponse:
+      title: DashboardNotificationResponse
+      type: object
+      properties:
+        status:
+          type: boolean
+          description: Status of the dashboard notification.
+          example: true
+          exampleSetFlag: true
+      description: Configuration for dashboard notifications.
+      exampleSetFlag: false
+    EmailNotification:
+      title: EmailNotification
+      type: object
+      properties:
+        emailFrequency:
+          type: integer
+          description: The frequency at which email notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        emailFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the email frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        emailFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+        recipientEmail:
+          type: string
+          description: >-
+            A list of email addresses to which notifications will be sent when
+            the alarm rule is triggered.
+          example: abc@cisco.com, xyz@cisco.com
+          exampleSetFlag: true
+        senderEmail:
+          type: string
+          description: Email of the sender.
+          exampleSetFlag: true
+        syslog:
+          type: boolean
+          description: Syslog information for email notifications.
+          example: true
+          exampleSetFlag: true
+      description: Configuration for email notifications.
+      exampleSetFlag: false
+    EmailNotificationResponse:
+      title: EmailNotificationResponse
+      type: object
+      properties:
+        emailFrequency:
+          type: integer
+          description: The frequency at which email notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        emailFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the email frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        emailFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+        recipientEmail:
+          type: array
+          description: List of recipient emails.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        senderEmail:
+          type: string
+          description: Email of the sender.
+          example: no-reply@cisco.com
+          exampleSetFlag: true
+        syslog:
+          type: boolean
+          description: Syslog information for email notifications.
+          example: true
+          exampleSetFlag: true
+      description: Configuration for email notifications.
+      exampleSetFlag: false
+    ErrorResponse:
+      title: ErrorResponse
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Message'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: >-
+        Represents the error response object for API operations. This object
+        provides details about an error that occurred during the API call,
+        including an error message and the version of the API or response
+        format.
+      exampleSetFlag: false
+    Message:
+      title: Message
+      type: object
+      properties:
+        data:
+          type: array
+          description: Optional data payload, like a list of items.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        message:
+          type: string
+          description: >-
+            A string containing a brief message about the result of the
+            operation, such as "Success" for successful operations or an error
+            message for failures.
+          example: Success
+          exampleSetFlag: true
+      description: >-
+        Represents a simple message object used in API responses. This object
+        typically contains a single message string that provides information
+        about the success, error, or status of an operation.
+      exampleSetFlag: false
+    RemoveAlarmRuleResponse:
+      title: RemoveAlarmRuleResponse
+      type: object
+      properties:
+        code:
+          type: integer
+          description: >-
+            A status code indicating the result of the operation (e.g., 200 for
+            success, 400 for a bad request).
+          format: int32
+          example: 200
+          exampleSetFlag: true
+        message:
+          type: string
+          description: >-
+            A brief message describing the result of the operation, such as
+            confirmation of successful removal or an error message.
+          example: Alarm Removed Successfully
+          exampleSetFlag: true
+      description: >-
+        Represents the response object for removing an alarm or alarms. This
+        object provides details about the result of the operation, including a
+        status code and a message.
+      exampleSetFlag: false
+    RemoveAlarmRuleResponseWrapper:
+      title: RemoveAlarmRuleResponseWrapper
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/RemoveAlarmRuleResponse'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or response format.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: >-
+        Represents the response wrapper for removing an alarm rule. This object
+        contains the result of the removal operation and the version of the API
+        or response format being used.
+      exampleSetFlag: false
+    ReportDefinitionWithSections:
+      title: ReportDefinitionWithSections
+      type: object
+      properties:
+        reportName:
+          type: string
+          description: The name of the report file.
+          example: Health-Summary.xml
+          exampleSetFlag: true
+        sections:
+          type: array
+          description: List of sections within the report.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/ReportSectionDefinition'
+            exampleSetFlag: false
+      description: Represents a report definition with its associated sections.
+      exampleSetFlag: false
+    ReportSectionDefinition:
+      title: ReportSectionDefinition
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the section.
+          example: '0'
+          exampleSetFlag: true
+        title:
+          type: string
+          description: The title/name of the section.
+          example: chartTimeVsCPUUtilization
+          exampleSetFlag: true
+      description: Represents a section within a report definition.
+      exampleSetFlag: false
+    Suppression:
+      title: Suppression
+      type: object
+      properties:
+        suppressFor:
+          type: integer
+          description: Suppression time in minutes.
+          format: int32
+          exampleSetFlag: true
+      description: Configuration for suppression settings.
+      exampleSetFlag: false
+    SuppressionResponse:
+      title: SuppressionResponse
+      type: object
+      properties:
+        suppressFor:
+          type: object
+          description: Suppression time left.
+          exampleSetFlag: true
+      description: Configuration for suppression settings.
+      exampleSetFlag: false
+    WebhookNotification:
+      title: WebhookNotification
+      type: object
+      properties:
+        receiver:
+          type: array
+          description: List of receivers for the webhook notification.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        webhookFrequency:
+          type: integer
+          description: The frequency at which webhook notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        webhookFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the webhook frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        webhookFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+      description: Configuration for webhook notifications.
+      exampleSetFlag: false
+    WebhookNotificationResponse:
+      title: WebhookNotificationResponse
+      type: object
+      properties:
+        receiver:
+          type: array
+          description: List of receivers for the webhook notification.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        webhookFrequency:
+          type: integer
+          description: The frequency at which webhook notifications are sent.
+          format: int32
+          example: 10
+          exampleSetFlag: true
+        webhookFrequencyEnabled:
+          type: boolean
+          description: Indicates whether the webhook frequency is enabled or disabled.
+          example: true
+          exampleSetFlag: true
+        webhookFrequencyUnit:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - Days
+            - Hours
+            - Minutes
+            - Seconds
+      description: Configuration for webhook notifications.
+      exampleSetFlag: false

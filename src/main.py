@@ -1,4 +1,4 @@
-"""Main entry point for Nexus Dashboard MCP Server."""
+"""Main entry point for the Cisco ISE MCP Server."""
 
 import argparse
 import asyncio
@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import get_settings, init_db
-from src.core.mcp_server import NexusDashboardMCP
+from src.core.mcp_server import ISEMCP
 from src.services.database_init import initialize_database_defaults
 
 
@@ -21,13 +21,15 @@ def parse_arguments():
         Parsed arguments
     """
     parser = argparse.ArgumentParser(
-        description="Nexus Dashboard MCP Server - Database-driven cluster management"
+        description="Cisco ISE MCP Server - Database-driven ISE deployment management"
     )
     parser.add_argument(
+        "--deployment",
         "--cluster",
         type=str,
+        dest="deployment",
         default="default",
-        help="Name of the cluster to connect to (must exist in database). Default: 'default'"
+        help="Name of the ISE deployment to connect to (must exist in database). Default: 'default'"
     )
     parser.add_argument(
         "--log-level",
@@ -74,7 +76,7 @@ async def main():
     logger = logging.getLogger(__name__)
 
     try:
-        logger.info("Starting Nexus Dashboard MCP Server...")
+        logger.info("Starting Cisco ISE MCP Server...")
 
         # Initialize database
         logger.info("Initializing database...")
@@ -84,14 +86,14 @@ async def main():
         logger.info("Initializing database defaults...")
         await initialize_database_defaults()
 
-        # Use cluster name from command-line argument
-        cluster_name = args.cluster
-        logger.info(f"Using cluster: {cluster_name}")
+        # Use ISE deployment name from command-line argument
+        deployment_name = args.deployment
+        logger.info(f"Using ISE deployment: {deployment_name}")
 
         # Create and run MCP server
-        server = NexusDashboardMCP(cluster_name=cluster_name)
+        server = ISEMCP(deployment_name=deployment_name)
 
-        logger.info(f"Connecting to cluster: {cluster_name}")
+        logger.info(f"Connecting to ISE deployment: {deployment_name}")
         logger.info("Note: Edit mode is now controlled via database (security_config table)")
 
         await server.run()

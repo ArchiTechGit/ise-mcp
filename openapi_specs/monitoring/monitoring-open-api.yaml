@@ -1,0 +1,1234 @@
+openapi: 3.0.1
+info:
+  title: MnT APIs
+  version: 1.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://{server}/admin/API/mnt
+    variables:
+      server:
+        default: localhost
+        description: The host where the API is rooted
+security:
+  - basicAuth: []
+
+paths:
+  /Session/ActiveCount:
+    get:
+      summary: Get Active Session Count
+      description: Returns the count of active sessions.
+      operationId: getActiveSessionCount
+      responses:
+        '200':
+          description: Successful response with the active session count
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/sessionCount'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/PostureCount:
+    get:
+      summary: Get Active Session Count
+      operationId: getPostureCount
+      description: Returns Posture count.
+      responses:
+        '200':
+          description: Successful response with the posture count
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/sessionCount'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/ProfilerCount:
+    get:
+      summary: Get Profiler Count
+      operationId: getProfilerCount
+      description: Returns Profiler count.
+      responses:
+        '200':
+          description: Successful response with the profiler count
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/sessionCount'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/ActiveList:
+    get:
+      summary: Get Active Session List
+      operationId: getActiveSessionList
+      description: Returns a list of active sessions.
+      responses:
+        '200':
+          description: Successful response with a list of active sessions
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SimpleActiveSessionList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/AuthList/{startTime}/{endTime}:
+    get:
+      summary: Get Authentication Session List
+      operationId: getAuthSessionList
+      description: Returns a list of authentication sessions between the specified start and end times.
+      parameters:
+        - name: startTime
+          in: path
+          required: true
+          description: Start time for filtering authentication sessions
+          schema:
+            type: string
+            example: "YYYY-MM-DD hh:mm:ss.s"
+        - name: endTime
+          in: path
+          required: true
+          description: End time for filtering authentication sessions
+          schema:
+            type: string
+            example: "YYYY-MM-DD hh:mm:ss.s"
+      responses:
+        '200':
+          description: Successful response with a list of authentication sessions
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SimpleActiveSessionList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/MACAddress/{mac}:
+    get:
+      summary: Get Full Session Information for MAC Address
+      operationId: getFullSDMacInfo
+      description: Returns detailed information for a given MAC address.
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          description: The MAC address to retrieve information for
+          schema:
+            type: string
+            example: "00:14:22:01:23:45"
+      responses:
+        '200':
+          description: Successful response containing the MAC address information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SessionParameters'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/UserName/{username}:
+    get:
+      summary: Get Full SD username Information
+      operationId: getFullSDUsernameInfo
+      description: Returns detailed information for a given username.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          description: The username to retrieve information for
+          schema:
+            type: string
+            example: "usernamE"
+      responses:
+        '200':
+          description: Successful response containing the user information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SessionParameters'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/IPAddress/{ipaddress}:
+    get:
+      summary: Get Full SD IPAddress Information
+      operationId: getFullSDIPAddressInfo
+      description: Returns detailed information for a given ipaddress.
+      parameters:
+        - name: ipaddress
+          in: path
+          required: true
+          description: The ipaddress to retrieve information for
+          schema:
+            type: string
+            example: "ipaddresS"
+      responses:
+        '200':
+          description: Successful response containing the ipaddress information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SessionParameters'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/Active/SessionID/{sid}/{outputType}:
+    get:
+      summary: Get Active Session by Session ID
+      operationId: getActiveSessionBySessionIDAndOutputType
+      description: Returns active session details for a given session ID and output type.
+      parameters:
+        - name: sid
+          in: path
+          required: true
+          description: The session ID to retrieve information for
+          schema:
+            type: string
+            example: "18:af:81:01:01:01"
+        - name: outputType
+          in: path
+          required: true
+          description: The output type format
+          schema:
+            type: string
+            example: "0"
+      responses:
+        '200':
+          description: Successful response containing the session information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/RadActiveSessionList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+  /Version:
+    get:
+      summary: Get Product Version
+      operationId: getProductVersion
+      description: Returns the version information for the product.
+      responses:
+        '200':
+          description: Successful response with the product version information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+  /FailureReasons:
+    get:
+      summary: Get Failure Reasons
+      operationId: getFailureReasons
+      description: Returns a list of failure reasons with their details.
+      responses:
+        '200':
+          description: Successful response with the list of failure reasons
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/FailureReasonList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /AuthStatus/MACAddress/{mac}/{duration}/{number}/{parameter}:
+    get:
+      summary: Get Authentication Status
+      operationId: getAuthStatus
+      description: Returns authentication status details for a given MAC address, duration, number, and parameter.
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          description: The MAC address to retrieve authentication status for
+          schema:
+            type: string
+            example: "00:14:22:01:23:45"
+        - name: duration
+          in: path
+          required: true
+          description: number of seconds in which an attempt is made to search and retrieve the authentication status records associated with the designated MAC address
+          schema:
+            type: string
+            example: "120"
+        - name: number
+          in: path
+          required: true
+          description: The number parameter for the authentication status
+          schema:
+            type: string
+            example: "0"
+        - name: parameter
+          in: path
+          required: true
+          description: Additional parameter for the authentication status
+          schema:
+            type: string
+            example: "params"
+      responses:
+        '200':
+          description: Successful response containing the authentication status information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AuthStatusOutputList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /AcctStatusTT/MACAddress/{mac}/{duration}:
+    get:
+      summary: Get account status for a specific MAC address and duration
+      operationId: getAcctStatusTT
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          description: The MAC address to retrieve account status for
+          schema:
+            type: string
+        - name: duration
+          in: path
+          required: true
+          description: The duration parameter for the account status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AcctStatusOutputList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /CoA/Reauth/{node}/{mac}/{type}:
+    get:
+      operationId: getCoAReauthStatus
+      summary: Get CoA reauthentication status
+      parameters:
+        - name: node
+          in: path
+          required: true
+          description: The node to retrieve CoA reauthentication status for
+          schema:
+            type: string
+        - name: mac
+          in: path
+          description: The MAC address to retrieve CoA reauthentication status for
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: path
+          description: The type parameter for the CoA reauthentication status
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/CoAResult'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /CoA/Disconnect/{node}/{mac}/{option}:
+    get:
+      operationId: getCoADisconnectStatus
+      summary: Get CoA disconnect status
+      parameters:
+        - name: node
+          in: path
+          required: true
+          description: The node to retrieve CoA disconnect status for
+          schema:
+            type: string
+        - name: mac
+          in: path
+          required: true
+          description: The MAC address to retrieve CoA disconnect status for
+          schema:
+            type: string
+        - name: option
+          in: path
+          description: The option parameter for the CoA disconnect status
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/CoAResult'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/EndPointIPAddress/{ip}:
+    get:
+      summary: Get full session details for an endpoint IP address
+      operationId: getFullSessionDetailsForEndPointIPAddress
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          description: The IP address to retrieve session details for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SessionParameters'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/Delete/MACAddress/{mac}:
+    delete:
+      summary: Delete session record by MAC address
+      operationId: deleteSessionRecordByMACAddress
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          description: The MAC address to delete session records for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session deleted successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/Delete/SessionID/{sid}:
+    delete:
+      summary: Delete session record by Session ID
+      operationId: deleteSessionRecordBySessionID
+      parameters:
+        - name: sid
+          in: path
+          required: true
+          description: The session ID to delete session records for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session deleted successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /Session/Delete/All:
+    delete:
+      summary: Delete all session records
+      operationId: deleteAllSessionRecords
+      responses:
+        '200':
+          description: All sessions deleted successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+  /AcctStatus/MACAddress/{mac}/{duration}:
+    get:
+      summary: Retrieve account status by MAC address and duration
+      operationId: getAcctStatus
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          description: The MAC address to retrieve account status for
+          schema:
+            type: string
+        - name: duration
+          in: path
+          required: true
+          description: The duration parameter for the account status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AcctStatusOutputList'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/mnt-rest-result'
+
+components:
+  schemas:
+    framed_ipv6_address:
+      description: IPv6 address
+      type: object
+      properties:
+        ipv6_address:
+          type: array
+          items:
+            type: string
+          example:
+            - "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            - "2001:0db8:85a3:0000:0000:8a2e:0370:7335"
+    sessionCount:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 32348
+    mnt-rest-result:
+      type: object
+      additionalProperties: true
+      properties:
+        http-code:
+          type: integer
+          example: 500
+        cpm-code:
+          type: integer
+          example: 34110
+        description:
+          type: string
+          example: "Server has encountered error while processing the REST request"
+        module-name:
+          type: string
+          example: "MnT"
+        internal-error-info:
+          type: string
+          example: "This host is not a MnT node. MnT REST APIs can not be executed on this node."
+        requested-operation:
+          type: string
+          example: "Get By Type"
+        resource-id:
+          type: string
+          example: "dummy"
+        resource-name:
+          type: string
+          example: "dummy"
+        resource-type:
+          type: string
+          example: "ActiveCount"
+        status:
+          type: string
+          example: "SERVER_ERROR"
+    SimpleActiveSessionList:
+      type: object
+      description: List of active sessions
+      xml:
+        name: activeList
+      properties:
+        activeSession:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleActiveSession'
+        noOfActiveSession:
+          type: integer
+          example: 10
+          xml:
+            attribute: true
+    SimpleActiveSession:
+      description: Active session
+      type: object
+      additionalProperties: true
+      properties:
+        user_name:
+          type: string
+          example: "jdoe"
+        calling_station_id:
+          type: string
+          example: "00-14-22-01-23-45"
+        orig_calling_station_id:
+          type: string
+          example: "00-14-22-01-23-45"
+        nas_ip_address:
+          type: string
+          example: "192.168.1.1"
+        nas_ipv6_address:
+          type: string
+          example: "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+        acct_session_id:
+          type: string
+          example: "session123"
+        audit_session_id:
+          type: string
+          example: "audit123"
+        cpmsession_id:
+          type: string
+          example: "cpm123"
+        server:
+          type: string
+          example: "server1"
+        framed_ip_address:
+          type: string
+          example: "192.168.1.100"
+        device_ip_address:
+          type: string
+          example: "192.168.1.101"
+        framed_ipv6_address:
+          $ref: '#/components/schemas/framed_ipv6_address'
+
+    SessionParameters:
+      description: Session parameters
+      type: object
+      additionalProperties: true
+      properties:
+        passed:
+          type: object
+        failed:
+          type: object
+        user_name:
+          type: string
+        nas_ip_address:
+          type: string
+        failure_reason:
+          type: string
+        calling_station_id:
+          type: string
+        orig_calling_station_id:
+          type: string
+        cpmsession_id:
+          type: string
+        destination_ip_address:
+          type: string
+        device_ip_address:
+          type: string
+        identity_group:
+          type: string
+        network_device_name:
+          type: string
+        acs_server:
+          type: string
+        authentication_method:
+          type: string
+        authentication_protocol:
+          type: string
+        framed_ip_address:
+          type: string
+        auth_acs_timestamp:
+          type: string
+        execution_steps:
+          type: string
+        response:
+          type: string
+        audit_session_id:
+          type: string
+        nas_port_id:
+          type: string
+        posture_status:
+          type: string
+        selected_azn_profiles:
+          type: string
+        service_type:
+          type: string
+        message_code:
+          type: string
+        auth_acsview_timestamp:
+          type: string
+        auth_id:
+          type: integer
+        identity_store:
+          type: string
+        cts_security_group:
+          type: string
+        location:
+          type: string
+        device_type:
+          type: string
+        response_time:
+          type: integer
+        nas_ipv6_address:
+          type: string
+        framed_ipv6_address:
+          $ref: '#/components/schemas/framed_ipv6_address'
+        other_attr_string:
+          type: string
+        acct_id:
+          type: integer
+        acct_acs_timestamp:
+          type: string
+        acct_acsview_timestamp:
+          type: string
+        acct_session_id:
+          type: string
+        acct_status_type:
+          type: string
+        acct_session_time:
+          type: integer
+        acct_input_octets:
+          type: string
+        acct_output_octets:
+          type: string
+        acct_input_packets:
+          type: integer
+          format: int64
+        acct_output_packets:
+          type: integer
+        acct_class:
+          type: string
+        acct_terminate_cause:
+          type: string
+        acct_multi_session_id:
+          type: string
+        acct_authentic:
+          type: string
+        termination_action:
+          type: string
+        session_timeout:
+          type: string
+        idle_timeout:
+          type: string
+        acct_interim_interval:
+          type: string
+        acct_delay_time:
+          type: string
+        event_timestamp:
+          type: string
+        acct_tunnel_connection:
+          type: string
+        acct_tunnel_packet_lost:
+          type: string
+        security_group:
+          type: string
+        cisco_h323_setup_time:
+          type: string
+        cisco_h323_connect_time:
+          type: string
+        cisco_h323_disconnect_time:
+          type: string
+        framed_protocol:
+          type: string
+        started:
+          type: object
+        stopped:
+          type: object
+        ckpt_id:
+          type: integer
+        type:
+          type: integer
+        nad_acsview_timestamp:
+          type: string
+        vlan:
+          type: string
+        dacl:
+          type: string
+        authentication_type:
+          type: string
+        interface_name:
+          type: string
+        reason:
+          type: string
+        endpoint_policy:
+          type: string
+        vn:
+          type: string
+      xml:
+        name: sessionParameters
+    RadActiveSessionList:
+      type: object
+      xml:
+        name: activeSessionList
+      properties:
+        activeSession:
+          type: array
+          items:
+            $ref: '#/components/schemas/RESTMntRadSess'
+          example:
+            - calling_station_id: "00-14-22-01-23-45"
+              orig_calling_station_id: "00-14-22-01-23-45"
+              session_state_bit: 1
+              session_state: "Active"
+              session_source: 1
+              authentication_rule: "rule1"
+              authorization_rule: "rule2"
+              selected_authz_profiles: "profile1"
+              user_domain_name: "example.com"
+              host_domain_name: "host.example.com"
+              user_netbios_name: "user1"
+              host_netbios_name: "host1"
+              auth_timestamp: "2023-12-06T15:04:05Z"
+              nad_timestamp: "2023-12-06T15:04:10Z"
+              acct_timestamp: "2023-12-06T15:05:00Z"
+              posture_timestamp: "2023-12-06T15:06:00Z"
+              dead_timestamp: "2023-12-06T15:06:00Z"
+              acct_session_time: 300
+              audit_session_id: "12345"
+              acct_session_id: "54321"
+              username: "user1"
+              radius_username: "user1@example.com"
+            - calling_station_id: "00-14-22-01-23-46"
+              orig_calling_station_id: "00-14-22-01-23-46"
+              session_state_bit: 0
+              session_state: "Inactive"
+              session_source: 2
+              authentication_rule: "rule3"
+              authorization_rule: "rule4"
+              selected_authz_profiles: "profile2"
+              user_domain_name: "example.net"
+              host_domain_name: "host.example.net"
+              user_netbios_name: "user2"
+              host_netbios_name: "host2"
+              auth_timestamp: "2023-12-06T12:00:00Z"
+              nad_timestamp: "2023-12-06T12:01:00Z"
+              acct_timestamp: "2023-12-06T12:02:00Z"
+              posture_timestamp: "2023-12-06T15:06:00Z"
+              dead_timestamp: "2023-12-06T12:30:00Z"
+        noOfActiveSession:
+          type: integer
+          example: 0
+          xml:
+            attribute: true
+    RESTMntRadSess:
+      type: object
+      additionalProperties: true
+      properties:
+        calling_station_id:
+          type: string
+        orig_calling_station_id:
+          type: string
+        session_state_bit:
+          type: integer
+        session_state:
+          type: string
+        session_source:
+          type: integer
+          example: 1
+        authentication_rule:
+          type: string
+        authorization_rule:
+          type: string
+        selected_authz_profiles:
+          type: string
+        user_domain_name:
+          type: string
+        host_domain_name:
+          type: string
+        user_netbios_name:
+          type: string
+        host_netbios_name:
+          type: string
+        auth_timestamp:
+          type: string
+        nad_timestamp:
+          type: string
+        acct_timestamp:
+          type: string
+        posture_timestamp:
+          type: string
+        dead_timestamp:
+          type: string
+        acct_session_time:
+          type: integer
+        audit_session_id:
+          type: string
+        acct_session_id:
+          type: string
+        username:
+          type: string
+        radius_username:
+          type: string
+        nas_ip_address:
+          type: string
+        nas_ipv6_address:
+          type: string
+        framed_ip_address:
+          type: string
+        framed_ipv6_address:
+          type: object
+          properties:
+            ipv6_address:
+              type: array
+              items:
+                type: string
+        nas_port_id:
+          type: string
+        auth_method:
+          type: string
+        auth_protocol:
+          type: string
+        posture_status:
+          type: string
+        pra_action:
+          type: string
+        endpoint_policy:
+          type: string
+        destination_ip_address:
+          type: string
+        server:
+          type: string
+        user_type:
+          type: string
+        is_wlc_roam:
+          type: string
+        cts_security_group:
+          type: string
+        paks_in:
+          type: integer
+        paks_out:
+          type: integer
+        bytes_in:
+          type: integer
+        bytes_out:
+          type: integer
+        eps_status:
+          type: string
+        selected_azn_profile:
+          type: string
+        network_device_name:
+          type: string
+        device_ip_address:
+          type: string
+        location:
+          type: string
+        is_live:
+          type: string
+        session_start_time:
+          type: string
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          xml:
+            attribute: true
+        version:
+          type: string
+          example: "3.5.0.223"
+        type_of_node:
+          type: integer
+          example: 1
+      xml:
+        name: product
+
+    FailureReasonList:
+      description: List of failure reasons
+      type: object
+      xml:
+        name: failureReasonList
+      properties:
+        failureReason:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailureReason'
+    FailureReason:
+      type: object
+      properties:
+        id:
+          type: string
+          xml:
+            attribute: true
+        code:
+          type: string
+          example: "100001 AUTHMGR-5-FAIL Authorization failed for client"
+        cause:
+          type: string
+          example: "This may or may not be indicating a violation"
+        resolution:
+          type: string
+          example: "Please review and resolve according to your organization's policy"
+
+    AuthStatusOutputList:
+      description: List of authentication status
+      type: object
+      xml:
+        name: authStatusOutputList
+      properties:
+        authStatusList:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                xml:
+                  attribute: true
+              authStatusElements:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    passed:
+                      type: boolean
+                    failed:
+                      type: boolean
+                    user_name:
+                      type: string
+                    nas_ip_address:
+                      type: string
+                    nas_ipv6_address:
+                      type: string
+                    calling_station_id:
+                      type: string
+                    identity_group:
+                      type: string
+                    acs_server:
+                      type: string
+                    acs_timestamp:
+                      type: string
+                    execution_steps:
+                      type: string
+                    message_code:
+                      type: integer
+                    id:
+                      type: string
+                    acsview_timestamp:
+                      type: string
+                    identity_store:
+                      type: string
+                    response_time:
+                      type: integer
+                    other_attributes:
+                      type: string
+                    framed_ipv6_address:
+                      type: object
+                      properties:
+                        ipv6_address:
+                          type: array
+                          items:
+                            type: string
+                    network_device_name:
+                      type: string
+                    authentication_method:
+                      type: string
+                    authentication_protocol:
+                      type: string
+                    response:
+                      type: string
+                    audit_session_id:
+                      type: string
+                    nas_port_id:
+                      type: string
+                    posture_status:
+                      type: string
+                    selected_azn_profiles:
+                      type: string
+                    service_type:
+                      type: string
+                    nac_policy_compliance:
+                      type: string
+    AcctStatusOutputList:
+      description: List of account status
+      type: object
+      xml:
+        name: acctStatusOutputList
+      properties:
+        acctStatusList:
+          type: array
+          items:
+            type: object
+            properties:
+              macAddress:
+                type: string
+                xml:
+                  attribute: true
+              acctStatusElements:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    calling_station_id:
+                      type: string
+                    paks_in:
+                      type: integer
+                    paks_out:
+                      type: integer
+                    bytes_in:
+                      type: integer
+                    bytes_out:
+                      type: integer
+                    session_time:
+                      type: integer
+                    server:
+                      type: string
+    CoAResult:
+      description: CoA result
+      type: object
+      xml:
+        name: remoteCoA
+      properties:
+        requestType:
+          type: string
+          xml:
+            attribute: true
+        results:
+          type: string
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic

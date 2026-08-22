@@ -2,29 +2,29 @@
 
 ## Overview
 
-This roadmap outlines the development plan for the Nexus Dashboard MCP Server from initial implementation to production-ready enterprise deployment.
+This roadmap outlines the development plan for the Cisco ISE MCP Server from initial implementation to production-ready enterprise deployment.
 
 ## Phase 1: Foundation ✅ CURRENT
 
 **Timeline**: Weeks 1-2
 **Status**: In Progress
-**Goal**: Working prototype with Manage API
+**Goal**: Working prototype with the ERS API
 
 ### Deliverables
 
 - [x] Project structure and configuration
 - [x] Core MCP server implementation
-- [x] Manage API integration (497 operations)
+- [x] ERS API integration (395 operations)
 - [x] Basic authentication (Basic Auth + cookies)
 - [x] Security middleware (environment variable control)
 - [x] PostgreSQL database with encrypted credentials
 - [x] Docker containerization
 - [x] Initial documentation (README, ARCHITECTURE, DEPLOYMENT)
-- [ ] Testing with development Nexus Dashboard cluster
+- [ ] Testing with development ISE deployment
 
 ### Success Criteria
 
-- Successfully authenticate with Nexus Dashboard
+- Successfully authenticate with Cisco ISE
 - Execute GET operations (read-only mode)
 - Toggle edit mode via environment variable
 - All operations logged to audit table
@@ -34,31 +34,41 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 
 **Timeline**: Week 3
 **Status**: Complete
-**Goal**: Complete API coverage for all Nexus Dashboard services
+**Goal**: Complete API coverage for all Cisco ISE services
 
 ### Deliverables
 
-- [x] Analyze API integration (316 operations)
-- [x] Infrastructure API integration (280 operations)
-- [x] OneManage API integration (132 operations)
-- [x] Orchestrator API integration (146 operations — spec parses cleanly, served under `/mso`)
+- [x] ERS API integration (395 operations across 78 resources)
+- [x] API Service integration (2 operations — Open API enablement)
+- [x] Open API integration (30 specs, 590 operations — policy sets, TrustSec,
+      certificates, deployment, upgrade, backup, licensing, alarms, webhooks, …)
+- [x] Monitoring (MnT) integration (20 operations — live session state)
+- [x] One tool profile per API category, derived from the registry at startup
+- [x] Operation ID and tool name synthesis for a spec that declares no `operationId`
+- [x] TrustSec (CTS) routing to port 9063
+- [x] Request body schemas exposed instead of opaque objects
 - [x] Modular API loading via `APIRegistry` with enable/disable per API
-- [ ] Lazy loading for API sections
+- [ ] Verify the base path for `deployment.yaml`, `upgrade.yaml` and `5G.yaml`
+      against a live PAN — the specs disagree between `/v1` and `/api/v1`
+- [ ] Confirm MnT returns JSON rather than the XML its older interface used
+- [ ] pxGrid (pub/sub, certificate auth) — does not fit request/response tools
 - [ ] Health monitoring for each API
 - [ ] API status dashboard (CLI)
 - [x] Updated documentation for all APIs
 
 ### Tasks
 
-1. **Orchestrator Spec** ✅
-   - Prior parsing failure resolved; `orchestration.json` validates against OpenAPI 3.0
-   - Enabled in the registry with base path `/mso`
-   - Auth middleware routes on the API's own base path (Orchestrator paths already
-     start with `/api/v1/...`, so a fixed `/api/` guard would have skipped `/mso`)
+1. **ERS Spec** ✅
+   - `ERS_APIs.yaml` validates against OpenAPI 3.0
+   - Enabled in the registry with base path `/ers/config`
+   - `$ref` pointers resolved at load time so pagination parameters and request
+     body schemas reach the tool builder as real objects
+   - Names synthesized by `src/core/tool_naming.py` — the spec declares no
+     `operationId` anywhere, and its summaries repeat (59 are `Get-All`)
 
 2. **Modular API Loading** ✅
-   - `APIRegistry` defines all five APIs (spec file, base path, enabled flag)
-   - `NexusDashboardMCP` loads enabled APIs and tags each operation with its `api_name`
+   - `APIRegistry` defines each API (spec file, base path, enabled flag)
+   - `ISEMCP` loads enabled APIs and tags each operation with its `api_name`
 
 3. **Health Monitoring**
    - Ping endpoints for each API
@@ -67,8 +77,8 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 
 ### Success Criteria
 
-- All 5 APIs loaded and functional ✅
-- 1,371 total operations available as MCP tools ✅
+- ERS API loaded and functional ✅
+- 1,007 total operations available as MCP tools ✅
 - Health checks show API status
 - Performance benchmarks established
 
@@ -247,7 +257,7 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 - [ ] Workflow engine integration
 - [ ] Template library for common tasks
 - [ ] AI-powered recommendations
-- [ ] Anomaly detection integration
+- [ ] ISE Monitoring (MnT) API integration for live session data
 - [ ] Predictive analytics
 - [ ] ChatOps integration (Slack, Teams)
 
@@ -271,7 +281,7 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | FastMCP breaking changes | High | Pin versions, maintain fork if needed |
-| Nexus Dashboard API changes | Medium | Version-specific specs, adapter pattern |
+| Cisco ISE API changes | Medium | Version-specific specs, adapter pattern |
 | Performance bottlenecks | Medium | Early load testing, caching strategy |
 | Security vulnerabilities | Critical | Regular audits, dependency scanning |
 
@@ -281,13 +291,13 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 |------|--------|------------|
 | Low community adoption | Low | Focus on docs, demos, engagement |
 | Maintenance burden | Medium | Automation, modular design, CI/CD |
-| Limited Nexus Dashboard access | Low | Use DevNet sandbox, mock data |
+| Limited Cisco ISE access | Low | Use DevNet sandbox, mock data |
 
 ## Dependencies
 
 ### External
 
-- Nexus Dashboard API stability
+- Cisco ISE API stability
 - MCP protocol evolution
 - Docker/container ecosystem
 - PostgreSQL compatibility
@@ -311,8 +321,8 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 
 ### Infrastructure
 
-- **Development**: Docker host, Nexus Dashboard dev cluster
-- **Testing**: CI/CD pipeline, test Nexus Dashboard
+- **Development**: Docker host, Cisco ISE dev cluster
+- **Testing**: CI/CD pipeline, test Cisco ISE
 - **Production**: Docker registry, monitoring tools
 
 ## Metrics and KPIs
@@ -341,7 +351,7 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 
 ## Version Strategy
 
-- **v1.0.0**: Phase 1 complete (Manage API)
+- **v1.0.0**: Phase 1 complete (ERS API)
 - **v1.1.0**: Phase 2 complete (All APIs)
 - **v1.2.0**: Phase 3 complete (Web UI)
 - **v1.3.0**: Phase 4 complete (Production hardening)
@@ -370,7 +380,7 @@ This roadmap outlines the development plan for the Nexus Dashboard MCP Server fr
 | 2025-01-23 | Basic Auth over OAuth2 | Simpler, faster Phase 1 implementation |
 | 2025-01-23 | Environment variable security | Simplest approach for Phase 1 |
 | 2025-01-23 | PostgreSQL over file config | ACID compliance, better audit logging |
-| 2025-01-23 | Manage API only in Phase 1 | Fastest path to working prototype |
+| 2025-01-23 | ERS API only in Phase 1 | Fastest path to working prototype |
 
 ## Changelog
 

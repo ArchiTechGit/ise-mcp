@@ -1,142 +1,173 @@
-"""Generate tool description overrides from OpenAPI specs.
+"""Generate tool description overrides from the Cisco ISE ERS OpenAPI spec.
 
-Reads all enabled API spec files and produces a SQL migration that seeds
-the tool_description_overrides table with rich, LLM-friendly descriptions.
+Reads the enabled API specs and produces a SQL migration that seeds the
+tool_description_overrides table with concise, LLM-friendly descriptions.
+
+The ERS spec carries no per-operation prose — every operation documents itself
+with a two-word summary such as "Get-All" — so the description is assembled
+from the resource, the action, the endpoint, and the shape of the request:
+exactly the facts a model needs to pick between 395 near-identical tools.
+
+Tool names come from src/core/tool_naming.py so the seeded rows match the names
+the MCP server actually advertises.
+
+Usage:
+    python scripts/generate_tool_descriptions.py
 """
 
-import json
-import os
 import sys
 from pathlib import Path
 
-SPECS = [
-    ("manage", "manage.json", "Manage API"),
-    ("analyze", "analyze.json", "Analyze API"),
-    ("infra", "infra.json", "Infrastructure API"),
-    ("onemanage", "oneManage.json", "OneManage API"),
-    ("orchestration", "orchestration.json", "Orchestrator API"),
-]
+REPO_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(REPO_ROOT))
 
-SPECS_DIR = Path(__file__).parent.parent / "openapi_specs"
-OUTPUT = Path(__file__).parent.parent / "src" / "config" / "migrations" / "008_seed_tool_descriptions.sql"
+from src.core.api_loader import APILoader  # noqa: E402
+from src.core.api_registry import APIRegistry  # noqa: E402
+from src.core.tool_naming import build_tool_name_map, describe_operation  # noqa: E402
+
+SPECS_DIR = REPO_ROOT / "openapi_specs"
+OUTPUT = REPO_ROOT / "src" / "config" / "migrations" / "008_seed_tool_descriptions.sql"
+
+MAX_DESCRIPTION_LEN = 300
+MAX_LISTED_PARAMS = 8
+MAX_LISTED_BODY_FIELDS = 8
 
 
 def escape_sql(s: str) -> str:
-    """Escape single quotes and newlines for PostgreSQL E'' strings."""
+    """Escape a string for a PostgreSQL E'' literal."""
     if not s:
         return ""
-    return s.replace("\\", "\\\\").replace("'", "''").replace("\n", "\\n")
+    return (
+        s.replace("\\", "\\\\")
+        .replace("'", "''")
+        .replace("\r", "")
+        .replace("\n", "\\n")
+    )
 
 
-def build_description(operation: dict, method: str, path: str) -> str | None:
-    """Build a concise LLM-friendly description from an OpenAPI operation."""
-    desc = operation.get("description", "")
-    summary = operation.get("summary", "")
+def body_fields(operation: dict) -> list:
+    """Return the field names an ERS request body expects.
 
-    # Use description if available, else summary
-    main = desc or summary
+    ERS wraps every payload in a single resource key — ``{"NetworkDevice":
+    {...}}`` — so the useful field list lives one level down from the schema
+    root. Both levels are reported: the wrapper, then its contents.
+    """
+    request_body = operation.get("requestBody") or {}
+    schema = (
+        request_body.get("content", {})
+        .get("application/json", {})
+        .get("schema", {})
+    )
+    properties = schema.get("properties") or {}
+    if not properties:
+        return []
+
+    names = list(properties)
+    if len(names) == 1:
+        wrapper = names[0]
+        inner = (properties[wrapper] or {}).get("properties") or {}
+        if inner:
+            return [f"{wrapper}.{field}" for field in list(inner)[:MAX_LISTED_BODY_FIELDS]]
+
+    return names[:MAX_LISTED_BODY_FIELDS]
+
+
+def build_description(operation: dict) -> str:
+    """Build a concise LLM-friendly description for one operation."""
+    main = describe_operation(operation)
     if not main:
-        return None
+        return ""
 
-    # Truncate overly long descriptions
-    if len(main) > 300:
-        main = main[:297] + "..."
+    if len(main) > MAX_DESCRIPTION_LEN:
+        main = main[: MAX_DESCRIPTION_LEN - 3].rstrip() + "..."
 
-    parts = [main.strip()]
+    parts = [main]
+    parts.append(f"Endpoint: {operation['method']} {operation['path']}")
 
-    # Add key parameter names (skip empty/unnamed params)
-    params = operation.get("parameters", [])
-    if params:
-        param_names = []
-        for p in params:
-            name = p.get("name", "").strip()
-            if not name:
-                continue
-            required = p.get("required", False)
-            p_in = p.get("in", "")
-            if p_in == "path" or required:
-                param_names.append(f"{name} (required)")
-            else:
-                param_names.append(name)
-        if param_names:
-            parts.append("Params: " + ", ".join(param_names[:8]))
+    # Only parameters the tool actually accepts. Header parameters are set by
+    # the API client (ERS needs Content-Type on every body), so advertising them
+    # would describe an input the caller has no way to pass.
+    param_names = []
+    for p in operation.get("parameters", []):
+        if not isinstance(p, dict) or p.get("in") not in ("path", "query"):
+            continue
+        name = (p.get("name") or "").strip()
+        if not name:
+            continue
+        if p.get("in") == "path" or p.get("required"):
+            param_names.append(f"{name} (required)")
+        else:
+            param_names.append(name)
+    if param_names:
+        parts.append("Params: " + ", ".join(param_names[:MAX_LISTED_PARAMS]))
 
-    # Note request body
-    request_body = operation.get("requestBody", {})
-    if request_body:
-        content = request_body.get("content", {})
-        json_content = content.get("application/json", {})
-        schema = json_content.get("schema", {})
-        props = schema.get("properties", {})
-        if props:
-            prop_names = list(props.keys())[:6]
-            parts.append("Body fields: " + ", ".join(prop_names))
+    fields = body_fields(operation)
+    if fields:
+        parts.append("Body fields: " + ", ".join(fields))
 
     return "\n".join(parts)
 
 
-def main():
-    sql_lines = []
-    sql_lines.append("-- Migration 008: Seed tool description overrides from OpenAPI specs")
-    sql_lines.append("-- Auto-generated by scripts/generate_tool_descriptions.py")
-    sql_lines.append("-- Provides LLM-friendly descriptions for all operations\n")
+def main() -> None:
+    loader = APILoader(specs_dir=str(SPECS_DIR))
+
+    sql_lines = [
+        "-- Migration 008: Seed tool description overrides from the ISE ERS OpenAPI spec",
+        "-- Auto-generated by scripts/generate_tool_descriptions.py",
+        "-- Provides concise, LLM-friendly descriptions for every operation.",
+        "-- Tool names are derived by src/core/tool_naming.py; regenerate this file",
+        "-- whenever the spec or the naming rules change.",
+        "",
+    ]
 
     counts = {}
 
-    for api_name, spec_file, display_name in SPECS:
-        spec_path = SPECS_DIR / spec_file
-        if not spec_path.exists():
-            print(f"WARNING: {spec_path} not found, skipping")
+    for api_def in APIRegistry.get_enabled_apis():
+        spec = loader.load_openapi_spec(api_def.spec_file)
+        if not spec:
+            print(f"WARNING: {api_def.spec_file} could not be loaded, skipping")
             continue
 
-        with open(spec_path) as f:
-            spec = json.load(f)
-
-        paths = spec.get("paths", {})
+        operations = loader.list_operations(spec)
+        tool_names = build_tool_name_map(
+            [op["operation_id"] for op in operations], api_def.tool_prefix
+        )
         api_count = 0
 
-        for path, methods in paths.items():
-            for method, operation in methods.items():
-                if method in ("parameters", "summary", "description", "servers"):
-                    continue
-                if not isinstance(operation, dict):
-                    continue
+        sql_lines.append(f"-- {api_def.display_name} ({len(operations)} operations)")
 
-                operation_id = operation.get("operationId")
-                if not operation_id:
-                    continue
+        for operation in operations:
+            description = build_description(operation)
+            if not description:
+                continue
 
-                tool_name = f"{api_name}_{operation_id}"
-                # MCP tool names are max 64 chars
-                if len(tool_name) > 64:
-                    tool_name = operation_id[:64]
+            escaped_name = escape_sql(tool_names[operation["operation_id"]])
+            escaped_desc = escape_sql(description)
 
-                desc = build_description(operation, method.upper(), path)
-                if not desc:
-                    continue
+            # created_at/updated_at are written explicitly: the SQLAlchemy model
+            # declares them NOT NULL with a client-side default, so the table
+            # created by create_all() has no server DEFAULT to fall back on.
+            sql_lines.append(
+                f"INSERT INTO tool_description_overrides "
+                f"(operation_name, enhanced_description, is_active, created_at, updated_at) "
+                f"VALUES ('{escaped_name}', E'{escaped_desc}', true, NOW(), NOW()) "
+                f"ON CONFLICT (operation_name) DO UPDATE SET "
+                f"enhanced_description = EXCLUDED.enhanced_description, "
+                f"updated_at = NOW();"
+            )
+            api_count += 1
 
-                escaped_name = escape_sql(tool_name)
-                escaped_desc = escape_sql(desc)
-
-                sql_lines.append(
-                    f"INSERT INTO tool_description_overrides (operation_name, enhanced_description, is_active) "
-                    f"VALUES ('{escaped_name}', E'{escaped_desc}', true) "
-                    f"ON CONFLICT (operation_name) DO UPDATE SET "
-                    f"enhanced_description = EXCLUDED.enhanced_description, "
-                    f"updated_at = NOW();"
-                )
-                api_count += 1
-
-        counts[api_name] = api_count
-        print(f"{display_name}: {api_count} descriptions generated")
-
-    # Write output
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT, "w") as f:
-        f.write("\n".join(sql_lines) + "\n")
+        sql_lines.append("")
+        counts[api_def.name] = api_count
 
     total = sum(counts.values())
-    print(f"\nTotal: {total} tool descriptions written to {OUTPUT}")
+    sql_lines.append(f"-- Total operations seeded: {total}")
+
+    OUTPUT.write_text("\n".join(sql_lines) + "\n")
+
+    for api_name, count in counts.items():
+        print(f"  {api_name}: {count} operations")
+    print(f"Wrote {total} tool descriptions to {OUTPUT}")
 
 
 if __name__ == "__main__":

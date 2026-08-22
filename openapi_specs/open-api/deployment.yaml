@@ -1,0 +1,1574 @@
+openapi: 3.0.3
+info:
+  title: Deployment
+  description: >-
+    APIs for the configuration, administration and monitoring of the nodes in a
+    Cisco ISE cluster deployment.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    email: cs-ise-api@cisco.com
+  version: v3-oas3
+paths:
+  /deployment/primary:
+    post:
+      summary: Promote a standalone node to a primary PAN.
+      operationId: makePrimary
+      description: >
+        This API promotes the standalone node on which the API is invoked to the
+        primary Policy Administration node (PAN).
+      tags:
+        - Node Deployment
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Node is not standalone.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/standalone:
+    post:
+      summary: Change a primary PAN to a standalone node.
+      operationId: makeStandalone
+      description: >
+        This API changes the primary PAN in a single node cluster on which the
+        API is invoked, to a standalone node.
+      tags:
+        - Node Deployment
+      responses:
+        '200':
+          description: |
+            The node changes from primary PAN to standalone.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Node is not a primary node in the single node cluster.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node/:
+    get:
+      summary: Retrieve the list of all the nodes that are deployed in the cluster.
+      operationId: getDeploymentNodes
+      description: >
+        The API lists all the nodes that are deployed in the cluster.<br>
+
+        Returns basic information about each of the deployed nodes in the
+        cluster like hostname, status, roles, and services. <br>
+
+        Supports filtering on FQDN, hostname, IP address, roles, services and
+        node status.
+      tags:
+        - Node Deployment
+      parameters:
+        - $ref: '#/components/parameters/filtering'
+        - $ref: '#/components/parameters/filtertype'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentNodesResponse'
+        '400':
+          description: |
+            Invalid inputs have been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Register a standalone node to the cluster
+      operationId: registerNode
+      description: |
+        This API registers a Cisco ISE node to form a multi-node deployment.
+      tags:
+        - Node Deployment
+      requestBody:
+        description: Details of the registering node.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeRegistrationRequest'
+      responses:
+        '200':
+          description: Registration initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: |
+            Invalid inputs are supplied.
+            1. Node being registered is not a standalone node.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node/{hostname}:
+    get:
+      summary: Retrieve details of a deployed node.
+      operationId: getNodeDetails
+      description: |
+        This API retrieves detailed information of the deployed node.
+      tags:
+        - Node Deployment
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the deployed node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentNodeResponse'
+        '400':
+          description: Invalid inputs or parameters supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No deployment node found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: >-
+        Replace the existing configuration of the Cisco ISE node with the
+        configuration provided.
+      operationId: updateDeploymentNode
+      description: >
+        This API updates the configuration of the Cisco ISE node with the
+        configuration provided. 
+      tags:
+        - Node Deployment
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the deployed node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      requestBody:
+        description: >-
+          Configuration of the existing node which needs to be replaced with new
+          configuration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeUpdateRequest'
+            example:
+              roles:
+                - PrimaryAdmin
+              services:
+                - DeviceAdmin
+      responses:
+        '200':
+          description: Configuration updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid inputs supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No node is found in the deployment with the provided hostname.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Remove a deployed node from a cluster.
+      operationId: deleteDeploymentNode
+      description: >
+        The deregistered node becomes a standalone Cisco ISE node.<br>
+
+        It retains the last configuration that it received from the primary PAN
+        and assumes the default roles and services of a standalone node.
+      tags:
+        - Node Deployment
+      parameters:
+        - name: hostname
+          in: path
+          description: The hostname of the node in the deployment to be deregistered.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: |
+            Invalid inputs are supplied.
+            1. Node being deregistered is a standalone node.
+            2. Node being deregistered is a primary node.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No node is found in the deployment with the provided hostname.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/sync-node/{hostname}:
+    post:
+      summary: Trigger manual synchronization of the node.
+      operationId: syncNode
+      description: >-
+        Performing a manual synchronization involves a reload of the target
+        node, but not the primary PAN.
+      tags:
+        - Node Deployment
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      responses:
+        '202':
+          description: >
+            Manual synchronization task initiated. Use the Task Service Status
+            API to retrieve the status of the task.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentTaskResponse'
+        '400':
+          description: >-
+            Manual synchronization cannot be initiated on a primary PAN or
+            standalone node.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node is not part of the cluster.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node-group:
+    get:
+      summary: Retrieve the list of all the node groups.
+      operationId: getNodeGroups
+      description: >-
+        This API retrieves the details of all the node groups in the
+        cluster.<br> Each node group retrieved consists of name, description and
+        MAR cache details like query-attempts, query-timeout,
+        replication-attempts, replication-timeout. </br>
+      tags:
+        - Node Group
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeGroupsResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node groups not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create a node group.
+      operationId: createNodeGroup
+      description: >-
+        <div> <style type="text/css" scoped> .nodeGroupTable td ,
+        .nodeGroupTable th { padding: 5px 10px !important; text-align: left;}
+        </style> <span>This API creates a node group in the cluster.  A node
+        group is a group of PSNs, where the PSNs maintain a heartbeat with each
+        other. It is used primarily to terminate or transfer posture-pending
+        sessions when a PSN in a local node group fails.  Node group members can
+        communicate over TCP/7800.</span><br> </br><span>The following
+        parameters are used in the request body of the API:</span></br> <table
+        class="nodeGroupTable"> <thead> <tr> <th>PARAMETER</th>
+        <th>DESCRIPTION</th> <th>EXAMPLE</th> </tr> </thead> <tbody> <tr>
+        <td>name<sup><font color=red>* required</font></sup></td> <td>Name of
+        the node group(<b>valid-range:</b> 1-100 characters)</td> <td>{"name":
+        "site1"}</td> </tr> <tr> <td>description</td> <td>Description of the
+        node group (<b>valid-range:</b> 1-256 characters)</td> <td>{"name":
+        "site2", "description": "sample"}</td> </tr> <tr>
+        <td>query-attempts</td> <td>The number of times Cisco ISE attempts to
+        perform the cache entry query. (<b>valid-range:</b> 0 - 5,
+        <b>default-value:</b> 1)</td> <td>{"name": "site3","marCache":
+        {"query-attempts": 1}}</td> </tr> <tr> <td>query-timeout</td> <td>The
+        time, in seconds, after which a cache entry query times out.
+        (<b>valid-range:</b> 1 - 10, <b>default-value:</b> 2) second(s)</td>
+        <td>{"name": "site4","marCache": {"query-timeout": 2}}</td> </tr>
+        <td>replication-attempts</td> <td>The number of times Cisco ISE attempts
+        to perform MAR cache entry replication. (<b>valid-range:</b> 0 - 5,
+        <b>default-value:</b> 2)</td> <td>{"name": "site5","marCache":
+        {"replication-attempts": 2}}</td> </tr> <tr>
+        <td>replication-timeout</td> <td>The time, in seconds, after which the
+        cache entry replication times out. (<b>valid-range:</b> 1 - 10,
+        <b>default-value:</b> 5) second(s)</td> <td>{"name": "site6","marCache":
+        {"replication-timeout": 5}}</td> </tr> </tbody> </table></br>
+        <span><b>NOTE 1: </b>: Node group name and description cannot contain
+        any of the following characters: ! % ^ : ; , . ~ @ # & [ { ( | ) } ] ` >
+        <  / \ " - + = ?</br> <b>NOTE 2: </b>: Parameter marCache stands for
+        Machine Access Restriction (MAR) cache that provides an additional means
+        of controlling authorization for Active Directory-authentication users.
+        We can enable the marCache for a nodegroup by providing key "marCache"
+        in json request. Additionally we may also provide any combination of
+        parameters - query-attempts, query-timeout, replication-attempts,
+        replication-timeout in marCache object. If no value is specified for a
+        particular parameter its default value will be recorded.If no marCache
+        object is given, marCache will be considered as disabled.  </br></span>
+        <div>
+      tags:
+        - Node Group
+      requestBody:
+        description: Details of new node group to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeGroupConfig'
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict. Node group already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node-group/{nodeGroupName}:
+    get:
+      summary: Retrieve the details of a node group
+      operationId: getNodeGroup
+      description: >-
+        This API retrieves the details of a node group in the cluster using a
+        node group name.
+      tags:
+        - Node Group
+      parameters:
+        - name: nodeGroupName
+          in: path
+          description: Name of the existing node group.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9_ ]{1,100}$
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeGroupResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node groups not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update an existing node group.
+      operationId: updateNodeGroup
+      description: Update an existing node group.
+      tags:
+        - Node Group
+      parameters:
+        - name: nodeGroupName
+          in: path
+          description: Name of the existing node group.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9_ ]{1,100}$
+            type: string
+      requestBody:
+        description: Details of the exiting node group that must be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeGroupConfig'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: >-
+            Forbidden [Updating a node group whose name does not match with the
+            payload is forbidden].
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node group does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '405':
+          description: Invalid input.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a node group.
+      operationId: deleteNodeGroup
+      description: >-
+        Delete an existing node group in the cluster. Deleting the node group
+        does not delete the nodes, but failover is no longer carried out among
+        the nodes.
+      tags:
+        - Node Group
+      parameters:
+        - name: nodeGroupName
+          in: path
+          description: Name of the existing node group.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9_ ]{1,100}$
+            type: string
+        - name: forceDelete
+          in: query
+          description: >-
+            Force delete the group even if the node group contains one or more
+            nodes.
+          required: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden [Node group contains one or more nodes.]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node-group/{nodeGroupName}/add-node:
+    post:
+      summary: Add a node to a node group.
+      operationId: addNode
+      description: >-
+        <div> <style type="text/css" scoped> .nodeGroupTable td ,
+        .nodeGroupTable th { padding: 5px 10px !important; text-align: left;}
+        </style> <span>This API adds a node to the node group in the cluster.
+        When a node that belongs to a node group fails, another node in the same
+        node group issues a Change of Authorization (CoA) for all the
+        URL-redirected sessions on the failed node.</span><br> </br><span>The
+        following parameters are used in the request body of the
+        API:</span></br> <table class="nodeGroupTable"> <thead> <tr>
+        <th>PARAMETER</th> <th>DESCRIPTION</th> <th>EXAMPLE</th> </tr> </thead>
+        <tbody> <tr> <td>hostname<sup><font color=red>*
+        required</font></sup></td> <td>Name of the host name </td>
+        <td>{"hostname": "isenode"}</td> </tr> </tbody> </table></br> <div>
+      tags:
+        - Node Group
+      parameters:
+        - name: nodeGroupName
+          in: path
+          description: Name of the existing node group.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9_ ]{1,100}$
+            type: string
+      requestBody:
+        description: Hostname of the node that must be added to the node group.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Hostname'
+            example:
+              Hostname: isenode
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node/Nodegroup not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict. The node is already part of a node group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node-group/{nodeGroupName}/remove-node:
+    post:
+      summary: Remove a node from a node group.
+      operationId: removeNode
+      description: >-
+        <div> <style type="text/css" scoped> .nodeGroupTable td ,
+        .nodeGroupTable th { padding: 5px 10px !important; text-align: left;}
+        </style> <span>Purpose of this API is to remove a node from a node group
+        in the cluster. Removing node from the node group does not delete the
+        node, but failover is no longer carried out if the node is not part any
+        node group.</span><br> </br><span>The following parameters are used in
+        the request body of the API:</span></br> <table class="nodeGroupTable">
+        <thead> <tr> <th>PARAMETER</th> <th>DESCRIPTION</th> <th>EXAMPLE</th>
+        </tr> </thead> <tbody> <tr> <td>hostname<sup><font color=red>*
+        required</font></sup></td> <td>Name of the host name </td>
+        <td>{"hostname": "isenode"}</td> </tr> </tbody> </table></br> <div>
+      tags:
+        - Node Group
+      parameters:
+        - name: nodeGroupName
+          in: path
+          description: Name of the existing node group.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9_ ]{1,100}$
+            type: string
+      requestBody:
+        description: Hostname of the node that must be deleted from the node group.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Hostname'
+            example:
+              Hostname: isenode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Node not found in the node group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/node-group/{nodeGroupName}/node:
+    get:
+      summary: Retrieve the list of nodes in a given node group.
+      operationId: getNodes
+      description: >-
+        This API retrieves the list of nodes associated with a node group in the
+        cluster with a given node group name.
+      tags:
+        - Node Group
+      parameters:
+        - name: nodeGroupName
+          in: path
+          description: Name of the existing node group.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9_ ]{1,100}$
+            type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeGroupNodesResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node group not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/pan-ha:
+    get:
+      summary: Get the current configuration of the PAN HA.
+      operationId: getPANHaStatus
+      description: >-
+        In a high availability configuration, the primary PAN is in active
+        state. The secondary PAN (backup PAN) is in standby state, which means
+        that it receives all the configuration updates from the primary PAN, but
+        is not active in the Cisco ISE cluster. You can configure Cisco ISE to
+        automatically promote the secondary PAN when the primary PAN becomes
+        unavailable.
+      tags:
+        - PAN HA
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PanHAResponse'
+        default:
+          description: An unexpected error has occured.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Enable, update or disable PAN failover configuration.
+      operationId: updatePanHA
+      description: >-
+        To deploy the auto-failover feature, you must have at least three nodes,
+        where two of the nodes assume the Administration persona, and one node
+        acts as the health check node. A health check node is a
+        non-administration node and can be a Policy Service, Monitoring, or
+        pxGrid node, or any combination of these. If the PANs are in different
+        data centers, you must have a health check node for each PAN. <br> All
+        the fields are mandatory to enable PanHA. <br> Values of failedAttempts,
+        pollingInterval, primaryHealthCheckNode, and secondaryHealthCheckNode
+        are not considered when the isEnable value is "false" in the request
+        body.
+      tags:
+        - PAN HA
+      requestBody:
+        description: Configure PAN HA.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PanHA'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deployment/promote:
+    post:
+      summary: >-
+        Promote the secondary PAN in a multi-node cluster to the role of primary
+        PAN.
+      operationId: promoteNode
+      description: >
+        Execute this API in the secondary PAN in the cluster to promote the node
+        to primary PAN.  Ensure that the API Gateway setting is enabled in the
+        secondary PAN.
+      tags:
+        - Node Deployment
+      responses:
+        '200':
+          description: |
+            Node promotion initiated from secondary PAN to primary PAN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid inputs have been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /node/{hostname}/interface:
+    get:
+      summary: Get the list of interfaces on a node in a cluster.
+      description: |
+        This API retrieves the list of interfaces on a node in a cluster.
+      tags:
+        - Node Services
+      operationId: getInterfaces
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterfacesResponse'
+        '404':
+          description: Node not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /node/{hostname}/sxp-interface:
+    get:
+      summary: Get the interface configured for SXP.
+      description: |
+        This API retrieves the SXP interface.
+      tags:
+        - Node Services
+      operationId: getSxpInterface
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterfaceResponse'
+        '400':
+          description: Bad input [SXP service is not enabled on the node].
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Configure the interface for use with SXP.
+      description: |
+        This API configures the SXP interface.
+      tags:
+        - Node Services
+      operationId: setSxpInterface
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      requestBody:
+        description: Configure the SXP interface.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interface'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad input [SXP service is not enabled on the node].
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Node not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /profile/{hostname}:
+    get:
+      summary: Retrieve the profiler probe configuration of a PSN.
+      description: |
+        This API retrieves the profiler probe configuration of a PSN.
+      tags:
+        - Node Services
+      operationId: getProfilerProbeConfig
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilingConfigurationResponse'
+        '404':
+          description: Node not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error, the node is not a PSN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update the profiler probe configuration of a PSN.
+      description: |
+        This API updates the profiler probe configuration of a PSN. 
+      operationId: setProfilerProbeConfig
+      tags:
+        - Node Services
+      parameters:
+        - name: hostname
+          in: path
+          description: Hostname of the node.
+          required: true
+          schema:
+            pattern: '[a-zA-Z][\w\-]*'
+            maxLength: 64
+            minLength: 1
+            type: string
+            example: isenode
+      requestBody:
+        description: Profiler probe configuration of a node in the deployment.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilingConfiguration'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad input.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: >-
+            A node with the specified hostname could not be found in the
+            cluster.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    Description:
+      maxLength: 256
+      minLength: 1
+      pattern: '[a-zA-Z][a-zA-Z0-9\\-_ ]*'
+      type: string
+    DeploymentNodesResponse:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeploymentNode'
+          example: TBD
+        version:
+          type: string
+          example: 1.0.0
+    NodeRegistrationRequest:
+      type: object
+      properties:
+        fqdn:
+          $ref: '#/components/schemas/FQDN'
+        userName:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+          example: changeMe
+        allowCertImport:
+          type: boolean
+          example: false
+          description: >
+            Consent to import the self-signed certificate of the registering
+            node.
+        roles:
+          $ref: '#/components/schemas/Roles'
+        services:
+          $ref: '#/components/schemas/Services'
+      required:
+        - fqdn
+        - userName
+        - password
+        - allowCertImport
+        - roles
+        - services
+      example: TBD
+    NodeUpdateRequest:
+      type: object
+      properties:
+        roles:
+          $ref: '#/components/schemas/Roles'
+        services:
+          $ref: '#/components/schemas/Services'
+      required:
+        - roles
+        - services
+      example: TBD
+    DeploymentNode:
+      type: object
+      properties:
+        hostname:
+          pattern: '[a-zA-Z][\w\-]*'
+          maxLength: 64
+          minLength: 1
+          type: string
+          example: isenode
+        fqdn:
+          $ref: '#/components/schemas/FQDN'
+        ipAddress:
+          $ref: '#/components/schemas/IPAddress'
+        roles:
+          $ref: '#/components/schemas/Roles'
+        services:
+          $ref: '#/components/schemas/Services'
+        nodeStatus:
+          $ref: '#/components/schemas/NodeStatus'
+      required:
+        - hostname
+        - fqdn
+        - ipAddress
+        - services
+      example: TBD
+    DeploymentNodeResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/DeploymentNode'
+        version:
+          type: string
+          example: 1.0.0
+    FQDN:
+      maxLength: 64
+      minLength: 1
+      pattern: >-
+        ^(?=.{2,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-|_){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-|_){0,61}[0-9A-Za-z])?)*(?:\.[A-Za-z](?:(?:[A-Za-z]|-){0,61}[A-Za-z])?)+\.?$
+      type: string
+    HATimeout:
+      minimum: 30
+      maximum: 300
+      type: integer
+    HAAttempts:
+      minimum: 2
+      maximum: 60
+      type: integer
+    IPAddress:
+      type: string
+      format: ipv4 | ipv6
+    Hostname:
+      type: object
+      properties:
+        hostname:
+          pattern: '[a-zA-Z][\w\-]*'
+          maxLength: 64
+          minLength: 1
+          type: string
+          example: isenode
+    NodeGroupConfig:
+      type: object
+      properties:
+        name:
+          pattern: ^[a-zA-Z0-9_ ]{1,100}$
+          type: string
+          example: site1
+        description:
+          $ref: '#/components/schemas/Description'
+        marCache:
+          type: object
+          properties:
+            replication-timeout:
+              description: >
+                The time, in seconds, after which the cache entry replication
+                times out. (1 - 10).
+              minimum: 1
+              maximum: 10
+              default: 5
+              type: integer
+              example: 5
+            replication-attempts:
+              description: >
+                The number of times Cisco ISE attempts to perform MAR cache
+                entry replication. (0 - 5).
+              minimum: 0
+              maximum: 5
+              default: 2
+              type: integer
+              example: 2
+            query-timeout:
+              description: >
+                The time, in seconds, after which the cache entry query times
+                out. (1 - 10).
+              minimum: 1
+              maximum: 10
+              default: 2
+              type: integer
+              example: 2
+            query-attempts:
+              description: >
+                The number of times Cisco ISE attempts to perform the cache
+                entry query. (0 - 5).
+              minimum: 0
+              maximum: 5
+              default: 1
+              example: 1
+              type: integer
+          example: TBD
+      required:
+        - name
+    NodeGroupsResponse:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeGroupConfig'
+          example: TBD
+        version:
+          type: string
+          example: 1.0.0
+    NodeGroupResponse:
+      type: object
+      properties:
+        response:
+          type: object
+          $ref: '#/components/schemas/NodeGroupConfig'
+          example: TBD
+        version:
+          type: string
+          example: 1.0.0
+    NodeGroupNodesResponse:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hostname'
+          example:
+            - hostname: isenode1
+            - hostname: isenode2
+        version:
+          type: string
+          example: 1.0.0
+    NodeStatus:
+      type: string
+      enum:
+        - Connected
+        - Disconnected
+        - InProgress
+        - ReplicationStopped
+        - RegistrationFailed
+        - NotInSync
+        - NotUpgraded
+        - NotApplicable
+    PanHAResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/PanHA'
+          example: TBD
+        version:
+          type: string
+          example: 1.0.0
+    PanHA:
+      type: object
+      properties:
+        isEnabled:
+          type: boolean
+          example: true
+        primaryHealthCheckNode:
+          description: >
+            Hostname of the health check node that monitors the primary PAN.
+
+            We recommend that the health check node be placed in the same data
+            center as the primary PAN.
+          $ref: '#/components/schemas/Hostname'
+        secondaryHealthCheckNode:
+          description: >
+            Hostname of the health check node that monitors secondary PAN.
+
+            We recommend that the health check node be placed in the same data
+            center as the secondary PAN.
+          $ref: '#/components/schemas/Hostname'
+        pollingInterval:
+          description: |
+            Administration nodes are checked after each interval.
+            Seconds (30 - 300) <br>
+            The default value is 120.
+          default: 120
+          type: integer
+          example: 120
+        failedAttempts:
+          description: >
+            Failover occurs if the primary PAN is down for the specified number
+            of failure polls.
+
+            Count (2 - 60).<br>
+
+            The default value is 5.
+          default: 5
+          type: integer
+          example: 5
+      required:
+        - isEnabled
+    Roles:
+      type: array
+      items:
+        type: string
+        enum:
+          - PrimaryAdmin
+          - SecondaryAdmin
+          - PrimaryMonitoring
+          - SecondaryMonitoring
+          - PrimaryDedicatedMonitoring
+          - SecondaryDedicatedMonitoring
+          - Standalone
+    Port:
+      type: integer
+      minimum: 0
+      maximum: 65535
+    ProfilingConfigurationResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/ProfilingConfiguration'
+        version:
+          type: string
+          example: TBD
+    ProfilingConfiguration:
+      type: object
+      properties:
+        netflow:
+          $ref: '#/components/schemas/NetflowProbe'
+          example: TBD
+        dhcp:
+          $ref: '#/components/schemas/DhcpProbe'
+          example: TBD
+        dhcpSpan:
+          $ref: '#/components/schemas/DhcpSpanProbe'
+          example: TBD
+        http:
+          $ref: '#/components/schemas/HttpProbe'
+          example: TBD
+        radius:
+          $ref: '#/components/schemas/RadiusProbe'
+          example: TBD
+        nmap:
+          $ref: '#/components/schemas/NmapProbe'
+          example: TBD
+        dns:
+          $ref: '#/components/schemas/DnsProbe'
+          example: TBD
+        snmpQuery:
+          $ref: '#/components/schemas/SnmpQueryProbe'
+          example: TBD
+        snmpTrap:
+          $ref: '#/components/schemas/SnmpTrapProbe'
+          example: TBD
+        activeDirectory:
+          $ref: '#/components/schemas/ActiveDirectoryProbe'
+          example: TBD
+        pxgrid:
+          $ref: '#/components/schemas/PxGridProbe'
+          example: TBD
+    NetflowProbe:
+      description: >-
+        The NetFlow probe collects the NetFlow packets that are sent to it from
+        routers.
+      properties:
+        interface:
+          type: string
+          default: GigabitEthernet0
+          example: GigabitEthernet0
+        port:
+          $ref: '#/components/schemas/Port'
+          default: 9996
+      example: TBD
+    DhcpProbe:
+      description: The DHCP probe listens for DHCP packets from IP helpers.
+      properties:
+        interface:
+          type: string
+          example: GigabitEthernet0
+        port:
+          $ref: '#/components/schemas/Port'
+          default: 67
+      example: TBD
+    DhcpSpanProbe:
+      description: The DHCP SPAN probe collects DHCP packets.
+      properties:
+        interface:
+          type: string
+          default: GigabitEthernet0
+          example: GigabitEthernet0
+      example: TBD
+    HttpProbe:
+      description: The HTTP probe receives and parses HTTP packets.
+      properties:
+        interface:
+          type: string
+          default: GigabitEthernet0
+          example: GigabitEthernet0
+      example: TBD
+    RadiusProbe:
+      description: >-
+        The RADIUS probe collects RADIUS session attributes as well as CDP,
+        LLDP, DHCP, HTTP, and MDM attributes from IOS Sensors.
+      type: array
+      minItems: 0
+      maxItems: 0
+      items:
+        type: object
+    NmapProbe:
+      description: The NMAP probe scans endpoints for open ports and OS.
+      type: array
+      minItems: 0
+      maxItems: 0
+      items:
+        type: object
+    DnsProbe:
+      description: The DNS probe performs a DNS lookup for the FQDN.
+      properties:
+        timeout:
+          type: integer
+          default: 2
+          example: 2
+      example: TBD
+    SnmpQueryProbe:
+      description: >-
+        The SNMP query probe collects details from network devices such as
+        interface, CDP, LLDP, and ARP.
+      properties:
+        retries:
+          type: integer
+          default: 2
+          example: 2
+        timeout:
+          type: integer
+          default: 1000
+          example: 1000
+        eventTimeout:
+          type: integer
+          default: 30
+          example: 30
+      example: TBD
+    SnmpTrapProbe:
+      description: >-
+        The SNMP trap probe receives linkup, linkdown, and MAC notification
+        traps from network devices.
+      properties:
+        linkTrapQuery:
+          type: boolean
+          default: true
+          example: true
+        macTrapQuery:
+          type: boolean
+          default: true
+          example: true
+        interface:
+          type: string
+          default: GigabitEthernet0
+          example: GigabitEthernet0
+        port:
+          $ref: '#/components/schemas/Port'
+          default: 162
+      example: TBD
+    ActiveDirectoryProbe:
+      description: >-
+        The Active Directory probe queries the Active Directory for Windows
+        information.
+      properties:
+        daysBeforeRescan:
+          type: integer
+          default: 1
+          example: 1
+      example: TBD
+    PxGridProbe:
+      description: >-
+        The pxGrid probe fetches attributes of MAC address or IP address as a
+        subscriber from the pxGrid queue.
+      type: array
+      minItems: 0
+      maxItems: 0
+      items:
+        type: object
+    Services:
+      type: array
+      items:
+        type: string
+        enum:
+          - Session
+          - Profiler
+          - TC-NAC
+          - SXP
+          - DeviceAdmin
+          - PassiveIdentity
+          - pxGrid
+          - pxGridCloud
+    Timeout:
+      minimum: 1
+      maximum: 10
+      type: integer
+    InterfacesResponse:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interface'
+          example: TBD
+        version:
+          type: string
+          example: 1.0.0
+    InterfaceResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/Interface'
+        version:
+          type: string
+          example: 1.0.0
+    Interface:
+      type: object
+      properties:
+        interface:
+          type: string
+          example: GigabitEthernet 0
+      required:
+        - interface
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Message'
+        version:
+          type: string
+          example: 1.0.0
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          $ref: '#/components/schemas/Message'
+        version:
+          type: string
+          example: 1.0.0
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Success
+    DeploymentTaskResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/DeploymentTask'
+        version:
+          type: string
+          example: 1.0.0
+    DeploymentTask:
+      type: object
+      properties:
+        id:
+          type: string
+          description: >-
+            ID which can be used to track the status of the deployment task
+            using the Task Service API.
+          example: a1714b90-be06-11eb-bf27-c208c4aa1432
+        message:
+          type: string
+          example: >-
+            Deployment task initiated. You can use the Task Service Status API
+            to get the status of the task.
+  parameters:
+    filtering:
+      name: filter
+      in: query
+      required: false
+      description: >-
+        <div> <style type="text/css" scoped> .apiServiceTable td,
+        .apiServiceTable th { padding: 5px 10px !important; text-align: left; }
+        </style> <span> <b>Simple filtering</b> is available through the filter
+        query string parameter. The structure of a filter is a triplet of field
+        operator and value, separated by dots. More than one filter can be sent.
+        The logical operator common to all filter criteria is AND by default,
+        and can be changed by using the <i>"filterType=or"</i> query string
+        parameter. Each resource Data model description should specify if an
+        attribute is a filtered field. </span> <br /> <table
+        class="apiServiceTable"> <thead> <tr> <th>OPERATOR</th>
+        <th>DESCRIPTION</th> </tr> </thead> <tbody> <tr> <td>EQ</td>
+        <td>Equals</td> </tr> <tr> <td>NEQ</td> <td>Not Equals</td> </tr> <tr>
+        <td>STARTSW</td> <td>Starts With</td> </tr> <tr> <td>NSTARTSW</td>
+        <td>Not Starts With</td> </tr> <tr> <td>ENDSW</td> <td>Ends With</td>
+        </tr> <tr> <td>NENDSW</td> <td>Not Ends With</td> </tr> <tr>
+        <td>CONTAINS</td> <td>Contains</td> </tr> <tr> <td>NCONTAINS</td>
+        <td>Not Contains</td> </tr> </tbody> </table> </div>
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      allowReserved: true
+    filtertype:
+      name: filterType
+      in: query
+      description: >-
+        The logical operator common to all filter criteria is AND by default,
+        and can be changed by using this parameter.
+      required: false
+      schema:
+        type: string
+        enum:
+          - AND
+          - OR
+        default: AND

@@ -1,0 +1,864 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - OIDC
+  version: 1.0.0
+servers:
+  - url: https://10.56.13.171:443
+    description: Inferred Url
+tags:
+  - name: oidc-api-controller
+    description: the oidc API
+paths:
+  /api/v1/oidc:
+    get:
+      tags:
+        - OIDC
+      summary: Get the list of all OIDC configurations
+      description: OIDC - List of OIDC configurations
+      operationId: getOidcList
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: List of all OIDC configurations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OidcInfoListResponseEntity'
+                exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - OIDC
+      summary: Create a new OIDC configuration
+      description: OIDC - Create a new OIDC configuration
+      operationId: createOidc
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OidcInfo'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '201':
+          description: OIDC configuration created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/oidc/fetch-metadata:
+    post:
+      tags:
+        - OIDC
+      summary: Fetch OIDC provider metadata
+      description: Retrieves the OpenID provider metadata for a given issuer URL.
+      operationId: fetchOidcMetadata
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FetchMetadataRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: OIDC provider metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OidcMetadataResponseEntity'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: >-
+            Internal Server Error [Returned when retrieval of list of tiers
+            configured failed]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/oidc/{name}:
+    get:
+      tags:
+        - OIDC
+      summary: Get the specified OIDC configuration
+      description: OIDC - Get the OIDC configuration specified.
+      operationId: getOidcByName
+      parameters:
+        - name: name
+          in: path
+          description: >-
+            This name is used to update, delete or retrieve the specific OIDC
+            configuration.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: OIDC configuration info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OidcInfoResponseEntity'
+                exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - OIDC
+      summary: Update the specified OIDC configuration
+      description: OIDC - Update the OIDC configuration specified.
+      operationId: updateOidcByName
+      parameters:
+        - name: name
+          in: path
+          description: >-
+            This name is used to update, delete or retrieve the specific OIDC
+            configuration.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OidcInfo'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successfully updated the OIDC configuration
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - OIDC
+      summary: Delete the specified OIDC configuration
+      description: OIDC- Delete the OIDC configuration specified.
+      operationId: deleteOidcByName
+      parameters:
+        - name: name
+          in: path
+          description: >-
+            This name is used to update, delete or retrieve the specific OIDC
+            configuration.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Successfully deleted the OIDC configuration
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/oidc/{name}/attributes-from-idP:
+    get:
+      tags:
+        - OIDC
+      summary: Get the list of all attributes from Identity Provider
+      description: Attributes - List of all attributes from the identity provider
+      operationId: fetchAttributesListFromIdP
+      parameters:
+        - name: name
+          in: path
+          description: OIDC configuration name whose groups should be fetched.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: List of all attributes from the identity provider
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/Attribute'
+                  exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/oidc/{name}/groups-from-entra:
+    get:
+      tags:
+        - OIDC
+      summary: Get groups for the specified OIDC Identity Provider
+      description: >-
+        Retrieves all directory groups that are reachable through the  
+        configured OIDC provider (e.g. Azure Entra). 
+      operationId: fetchGroupsFromIdp
+      parameters:
+        - name: name
+          in: path
+          description: OIDC configuration name whose groups should be fetched.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: filter
+          in: query
+          description: filter
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: _qph_
+          in: header
+          description: Base64 encoded original query string supplied by the QPH plug-in
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupListResponseEntity'
+                exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: >-
+            Internal Server Error [Returned when retrieval of list of tiers
+            configured failed]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/oidc/{name}/portal-redirects:
+    get:
+      tags:
+        - OIDC
+      summary: >-
+        Get the list of all portals configured with oidc and their redirect uri
+        to configure in OIDC server
+      description: >-
+        List of all portals configured with oidc with redirect uri to configure
+        in OIDC server
+      operationId: getPortalRedirectList
+      parameters:
+        - name: name
+          in: path
+          description: >-
+            OIDC configuration name whose portals and redirect URIs should be
+            fetched.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: request Id, will return in the response headers, and appear in logs
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: >-
+            List of all portals configured with oidc and their redirect uri to
+            configure in OIDC server
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/PortalRedirect'
+                  exampleSetFlag: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: The operation is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+components:
+  schemas:
+    Attribute:
+      title: Attribute
+      type: object
+      properties:
+        name:
+          type: string
+          description: OIDC Attribute name
+          example: attribute1
+          exampleSetFlag: true
+        type:
+          type: string
+          description: Attribute type
+          example: STRING
+          exampleSetFlag: true
+          enum:
+            - BOOLEAN
+            - DATE
+            - INT
+            - STRING
+      description: OIDC attribute configuration format
+      exampleSetFlag: false
+    Error:
+      title: Error
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: '400'
+          exampleSetFlag: true
+        message:
+          type: string
+          description: Error message
+          example: Bad Request
+          exampleSetFlag: true
+      exampleSetFlag: false
+    FetchMetadataRequest:
+      title: FetchMetadataRequest
+      required:
+        - issuerUrl
+      type: object
+      properties:
+        issuerUrl:
+          type: string
+          description: The base issuer URL of the OpenID provider
+          example: https://login.microsoftonline.com/common/v2.0
+          exampleSetFlag: true
+      exampleSetFlag: false
+    Group:
+      title: Group
+      type: object
+      properties:
+        id:
+          type: string
+          description: OIDC Group ID
+          example: 1y568sg7823fgs7
+          exampleSetFlag: true
+        name:
+          type: string
+          description: name of the OIDC Group
+          example: oidcGroup1
+          exampleSetFlag: true
+      description: OIDC Group configuration format
+      exampleSetFlag: false
+    GroupListResponseEntity:
+      title: GroupListResponseEntity
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Group'
+            exampleSetFlag: false
+        version:
+          type: string
+          example: 1.0.0
+          exampleSetFlag: true
+      exampleSetFlag: false
+    LifetimeAdvancedSettings:
+      title: LifetimeAdvancedSettings
+      type: object
+      properties:
+        maxSessionDuration:
+          type: integer
+          description: >-
+            Maximum session duration in days. Evaluated only when
+            maxSessionDurationEnabled is true. 
+          format: int32
+          example: 30
+          exampleSetFlag: true
+        maxSessionDurationEnabled:
+          type: boolean
+          description: 'When true, the maximum session-duration limit is enforced. '
+          example: true
+          exampleSetFlag: true
+        maxSessionIdle:
+          type: integer
+          description: >-
+            Maximum idle time in minutes. Evaluated only when
+            maxSessionIdleEnabled is true. 
+          format: int32
+          example: 7
+          exampleSetFlag: true
+        maxSessionIdleEnabled:
+          type: boolean
+          description: >-
+            When true, a session that is idle longer than the configured number
+            of days is invalidated. 
+          example: true
+          exampleSetFlag: true
+        userInfoCacheLifetime:
+          type: integer
+          description: >-
+            Lifetime of a cached user-info object, in minutes. 1 disables
+            expiry. 43200 = 30 days. 
+          format: int32
+          example: 15
+          exampleSetFlag: true
+        userInfoCacheTimeLimit:
+          type: boolean
+          description: >-
+            When true, cached user-info objects expire after
+            userInfoCacheLifetime minutes.  When false, they never expire. 
+          example: true
+          exampleSetFlag: true
+      description: >-
+        Advanced lifetime controls for an OIDC session and its cached
+        user-info. 
+      exampleSetFlag: false
+    OidcInfo:
+      title: OidcInfo
+      type: object
+      properties:
+        attributeFetchMethod:
+          type: string
+          description: >-
+            Attribute fetch method - OIDC (ID Token / userinfo_endpoint) or
+            GRAPH (Available for Azure_EntraID only)
+          example: OIDC
+          exampleSetFlag: true
+          enum:
+            - GRAPH
+            - OIDC
+        attributes:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Attribute'
+            exampleSetFlag: false
+        clientID:
+          type: string
+          description: Client ID
+          example: 11111111-1111-1111-1111-111111111111
+          exampleSetFlag: true
+        clientSecret:
+          type: string
+          description: Client secret to connect to the OIDC provider
+          example: secret
+          exampleSetFlag: true
+        description:
+          type: string
+          description: Description of OIDC configuration
+          example: OIDC configuration
+          exampleSetFlag: true
+        groups:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Group'
+            exampleSetFlag: false
+        idpType:
+          type: string
+          description: Name of the Identity provider
+          example: Azure_EntraID
+          exampleSetFlag: true
+          enum:
+            - Azure_EntraID
+            - Generic
+        issuerUrl:
+          type: string
+          description: URL of Issuer
+          example: https://login.microsoftonline.com/1234/v2.0
+          exampleSetFlag: true
+        lifetimeAdvancedSettings:
+          $ref: '#/components/schemas/LifetimeAdvancedSettings'
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Name of the OIDC configuration
+          example: oidc
+          exampleSetFlag: true
+      description: OIDC information
+      exampleSetFlag: false
+    OidcInfoListResponseEntity:
+      title: OidcInfoListResponseEntity
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/OidcInfo'
+            exampleSetFlag: false
+        version:
+          type: string
+          example: 1.0.0
+          exampleSetFlag: true
+      exampleSetFlag: false
+    OidcInfoResponseEntity:
+      title: OidcInfoResponseEntity
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/OidcInfo'
+          exampleSetFlag: true
+        version:
+          type: string
+          example: 1.0.0
+          exampleSetFlag: true
+      exampleSetFlag: false
+    OidcMetadataResponseEntity:
+      title: OidcMetadataResponseEntity
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          type: object
+          description: >-
+            Raw OpenID provider metadata as returned by the well-known
+            configuration endpoint.
+          exampleSetFlag: true
+        version:
+          type: string
+          example: 1.0.0
+          exampleSetFlag: true
+      exampleSetFlag: false
+    PortalRedirect:
+      title: PortalRedirect
+      type: object
+      properties:
+        portal:
+          type: string
+          description: Portal configured with OIDC
+          example: Self-Registered Guest Portal (default)
+          exampleSetFlag: true
+        redirectUri:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Portal name and redirect uri format
+      exampleSetFlag: false

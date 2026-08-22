@@ -1,0 +1,1655 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - Profiler
+  version: 1.0.0
+servers:
+  - url: https://10.76.231.217:443
+    description: Inferred Url
+tags:
+  - name: profiler-api-controller
+    description: the profiler API
+paths:
+  /api/v1/profiler/endpoint-custom-dictionary:
+    get:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Get endpoint custom dictionary
+      operationId: fetchEndpointDictionary
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+  /api/v1/profiler/endpoint-direct-dictionary:
+    get:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Get endpoint direct dictionary
+      operationId: fetchDictionaryAllConnectorConfigInfo
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+  /api/v1/profiler/policy:
+    get:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Get policy
+      description: Returns a list of policies. If "name", "id", and "type" are not provided, all policies are returned. "name", "id" and "type" are AND conditons.
+      operationId: listPolicy
+      parameters:
+        - name: name
+          in: query
+          description: Filter policies by comma separated names
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: id
+          in: query
+          description: Filter policies by comma separated IDs
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: type
+          in: query
+          description: Filter policies by type
+          required: false
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - CUSTOM
+              - DIRECT
+              - ML
+      responses:
+        '200':
+          description: Array of policies
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/ProfilePolicyWithId'
+                  exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Update policy
+      operationId: updatePolicies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/ProfilePolicyWithId'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Create policy
+      operationId: createPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/ProfilePolicy'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Delete policy by ID
+      operationId: deletePolicyByIds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                type: string
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/profiler/policy-export:
+    get:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Export policy JSON file
+      operationId: exportPolicy
+      responses:
+        '200':
+          description: JSON file successfully exported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InlineResponse200'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: File not found
+        '500':
+          description: Internal server error
+      security:
+        - BasicAuth: []
+  /api/v1/profiler/policy-status:
+    put:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Update policy status by ID
+      operationId: updatePolicyStatusById
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/PolicyAndStatus'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+                exampleSetFlag: true
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/profiler/policy/duplicate-check:
+    post:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Check duplicate condition
+      operationId: duplicateConditionCheck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseProfilePolicy'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DuplicateCheckResponseMessage'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+  /api/v1/profiler/policy/mfc-values:
+    get:
+      tags:
+        - Profiler Policy Management (Custom/Direct/ML -Rules)
+      summary: Get profileLabel values
+      description: Returns a list of matched profileLabel values for the profileLabel type
+      operationId: getMatchingMFCValues
+      parameters:
+        - name: pattern
+          in: query
+          description: ProfileLabel value search pattern
+          required: true
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: type
+          in: query
+          description: ProfileLabel type
+          required: true
+          style: form
+          schema:
+            type: string
+            exampleSetFlag: true
+            enum:
+              - MFCInfoEndpointType
+              - MFCInfoHardwareManufacturer
+              - MFCInfoHardwareModel
+              - MFCInfoOperatingSystem
+      responses:
+        '200':
+          description: Filtered result of profileLabel values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFCValuesPojo'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+components:
+  schemas:
+    BaseCustomPolicy:
+      title: BaseCustomPolicy
+      properties:
+        condition:
+          $ref: '#/components/schemas/Condition'
+          exampleSetFlag: true
+        policyId:
+          type: string
+          exampleSetFlag: true
+        profileLabel:
+          $ref: '#/components/schemas/ProfileLabel'
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/BaseProfilePolicy'
+          exampleSetFlag: false
+        - title: BaseCustomPolicy
+          required:
+            - profilingType
+          type: object
+          properties:
+            condition:
+              $ref: '#/components/schemas/Condition'
+              exampleSetFlag: true
+            policyId:
+              type: string
+              exampleSetFlag: true
+            profileLabel:
+              $ref: '#/components/schemas/ProfileLabel'
+              exampleSetFlag: true
+            profilingType:
+              type: string
+              exampleSetFlag: true
+              enum:
+                - CUSTOM
+                - DIRECT
+                - ML
+          exampleSetFlag: false
+    BaseDirectPolicy:
+      title: BaseDirectPolicy
+      properties:
+        directMapRules:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/DirectMapRule'
+            exampleSetFlag: false
+        policyId:
+          type: string
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/BaseProfilePolicy'
+          exampleSetFlag: false
+        - title: BaseDirectPolicy
+          required:
+            - profilingType
+          type: object
+          properties:
+            directMapRules:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/DirectMapRule'
+                exampleSetFlag: false
+            policyId:
+              type: string
+              exampleSetFlag: true
+            profilingType:
+              type: string
+              exampleSetFlag: true
+              enum:
+                - CUSTOM
+                - DIRECT
+                - ML
+          exampleSetFlag: false
+    BaseProfilePolicy:
+      title: BaseProfilePolicy
+      required:
+        - profilingType
+      type: object
+      properties:
+        policyId:
+          type: string
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+      exampleSetFlag: false
+    Condition:
+      title: Condition
+      required:
+        - conditionType
+      type: object
+      properties:
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: false
+    ConditionAndBlock:
+      title: ConditionAndBlock
+      required:
+        - children
+        - conditionType
+      type: object
+      properties:
+        children:
+          type: array
+          description: In case type is andBlock or orBlock addtional conditions will be aggregated under this logical (OR/AND) condition
+          example: '[{"name":"Radius condition","description":"Match only radius requests","id":"ad947f38-7063-4da2-8723-652e0ca2ea41","conditionType":"ConditionReference","isNegate":false},{"name":"Tacacs condition","description":"Match only tacacs condition","id":"ad947f38-7063-4da2-8723-652e0ca2eb52","conditionType":"ConditionReference","isNegate":false}]'
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Condition'
+            exampleSetFlag: false
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: false
+    ConditionAttributes:
+      title: ConditionAttributes
+      properties:
+        attributeName:
+          type: string
+          description: Dictionary attribute name
+          example: UserName
+          exampleSetFlag: true
+        attributeValue:
+          type: string
+          description: <ul><li>Attribute value for condition</li> <li>Value type is specified in dictionary object</li> <li>if multiple values allowed is specified in dictionary object</li></ul>
+          example: cisco
+          exampleSetFlag: true
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        dictionaryName:
+          type: string
+          description: Dictionary name
+          example: Network Access
+          exampleSetFlag: true
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+        operator:
+          type: string
+          description: Equality operator
+          example: equals
+          exampleSetFlag: true
+          enum:
+            - contains
+            - equals
+            - notContains
+            - notEquals
+            - startsWith
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/Condition'
+          exampleSetFlag: false
+        - title: ConditionAttributes
+          required:
+            - attributeName
+            - attributeValue
+            - conditionType
+            - dictionaryName
+            - operator
+          type: object
+          properties:
+            attributeName:
+              type: string
+              description: Dictionary attribute name
+              example: UserName
+              exampleSetFlag: true
+            attributeValue:
+              type: string
+              description: <ul><li>Attribute value for condition</li> <li>Value type is specified in dictionary object</li> <li>if multiple values allowed is specified in dictionary object</li></ul>
+              example: cisco
+              exampleSetFlag: true
+            conditionType:
+              type: string
+              description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+              example: ConditionAttributes
+              exampleSetFlag: true
+              enum:
+                - ConditionAndBlock
+                - ConditionAttributes
+                - ConditionOrBlock
+                - ConditionReference
+                - LibraryConditionAndBlock
+                - LibraryConditionAttributes
+                - LibraryConditionOrBlock
+                - TimeAndDateCondition
+            dictionaryName:
+              type: string
+              description: Dictionary name
+              example: Network Access
+              exampleSetFlag: true
+            isNegate:
+              type: boolean
+              description: Indicates whereas this condition is in negate mode
+              example: false
+              exampleSetFlag: true
+            operator:
+              type: string
+              description: Equality operator
+              example: equals
+              exampleSetFlag: true
+              enum:
+                - contains
+                - equals
+                - notContains
+                - notEquals
+                - startsWith
+          description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+          exampleSetFlag: false
+    ConditionOrBlock:
+      title: ConditionOrBlock
+      required:
+        - children
+        - conditionType
+      type: object
+      properties:
+        children:
+          type: array
+          description: In case type is andBlock or orBlock addtional conditions will be aggregated under this logical (OR/AND) condition
+          example: '[{"name":"Radius condition","description":"Match only radius requests","id":"ad947f38-7063-4da2-8723-652e0ca2ea41","conditionType":"ConditionReference","isNegate":false},{"name":"Tacacs condition","description":"Match only tacacs condition","id":"ad947f38-7063-4da2-8723-652e0ca2eb52","conditionType":"ConditionReference","isNegate":false}]'
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Condition'
+            exampleSetFlag: false
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: false
+    ConditionReference:
+      title: ConditionReference
+      required:
+        - conditionType
+        - id
+      type: object
+      properties:
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        description:
+          type: string
+          description: Condition description
+          readOnly: true
+          example: Match only radius requests
+          exampleSetFlag: true
+        id:
+          type: string
+          description: UUID for condition
+          format: uuid
+          example: 12345678-f0e7-456b-a2d1-876543320123
+          exampleSetFlag: true
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Library condition name
+          readOnly: true
+          example: Radius Condition
+          exampleSetFlag: true
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: false
+    CustomPolicy:
+      title: CustomPolicy
+      properties:
+        condition:
+          $ref: '#/components/schemas/Condition'
+          exampleSetFlag: true
+        matchedEndpoints:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        name:
+          type: string
+          exampleSetFlag: true
+        policyId:
+          type: string
+          exampleSetFlag: true
+        profileLabel:
+          $ref: '#/components/schemas/ProfileLabel'
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+        rulePriority:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        status:
+          type: boolean
+          example: false
+          exampleSetFlag: true
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/ProfilePolicy'
+          exampleSetFlag: false
+        - title: CustomPolicy
+          required:
+            - policyId
+            - profilingType
+          type: object
+          properties:
+            condition:
+              $ref: '#/components/schemas/Condition'
+              exampleSetFlag: true
+            matchedEndpoints:
+              type: integer
+              format: int32
+              exampleSetFlag: true
+            name:
+              type: string
+              exampleSetFlag: true
+            policyId:
+              type: string
+              exampleSetFlag: true
+            profileLabel:
+              $ref: '#/components/schemas/ProfileLabel'
+              exampleSetFlag: true
+            profilingType:
+              type: string
+              exampleSetFlag: true
+              enum:
+                - CUSTOM
+                - DIRECT
+                - ML
+            rulePriority:
+              type: integer
+              format: int32
+              exampleSetFlag: true
+            status:
+              type: boolean
+              example: false
+              exampleSetFlag: true
+          exampleSetFlag: false
+    DatesRange:
+      title: DatesRange
+      required:
+        - endDate
+        - startDate
+      type: object
+      properties:
+        endDate:
+          type: string
+          example: '2022-05-10'
+          exampleSetFlag: true
+        startDate:
+          type: string
+          example: '2022-05-06'
+          exampleSetFlag: true
+      description: <p>Defines for which date/s TimeAndDate condition will be matched<br> Options are - Date range, for specific date, the same date should be used for start/end date <br> Default - no specific dates<br> In order to reset the dates to have no specific dates Date format - yyyy-mm-dd (MM = month, dd = day, yyyy = year)</p>
+      exampleSetFlag: false
+    DirectMapRule:
+      title: DirectMapRule
+      type: object
+      properties:
+        matchedAttribute:
+          $ref: '#/components/schemas/RuleMapping'
+          exampleSetFlag: true
+        profileLabel:
+          $ref: '#/components/schemas/RuleMapping'
+          exampleSetFlag: true
+      exampleSetFlag: false
+    DirectPolicy:
+      title: DirectPolicy
+      required:
+        - policyId
+        - profilingType
+      type: object
+      properties:
+        condition:
+          $ref: '#/components/schemas/Condition'
+          exampleSetFlag: true
+        directMapRules:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/DirectMapRule'
+            exampleSetFlag: false
+        matchedEndpoints:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        name:
+          type: string
+          exampleSetFlag: true
+        policyId:
+          type: string
+          exampleSetFlag: true
+        profileLabel:
+          $ref: '#/components/schemas/ProfileLabel'
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+        rulePriority:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        status:
+          type: boolean
+          example: false
+          exampleSetFlag: true
+      exampleSetFlag: false
+    DuplicateCheckResponseMessage:
+      title: DuplicateCheckResponseMessage
+      type: object
+      properties:
+        isDuplicate:
+          type: boolean
+          example: false
+          exampleSetFlag: true
+        matchedPolicy:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    Error:
+      title: Error
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    HoursRange:
+      title: HoursRange
+      required:
+        - endTime
+        - startTime
+      type: object
+      properties:
+        endTime:
+          type: string
+          example: '15:00'
+          exampleSetFlag: true
+        startTime:
+          type: string
+          example: '08:00'
+          exampleSetFlag: true
+      description: <p>Defines for which hours a TimeAndDate condition will be matched<br> Time foramt - hh:mm  ( h = hour , mm = minutes ) <br> Default - All Day </p>
+      exampleSetFlag: false
+    InlineResponse200:
+      title: InlineResponse200
+      type: object
+      properties:
+        message:
+          type: string
+          example: File export successful
+          exampleSetFlag: true
+      exampleSetFlag: false
+    LibraryConditionAndBlock:
+      title: LibraryConditionAndBlock
+      properties:
+        children:
+          type: array
+          description: In case type is andBlock or orBlock addtional conditions will be aggregated under this logical (OR/AND) condition
+          example: '[{"name":"Radius condition","description":"Match only radius requests","id":"ad947f38-7063-4da2-8723-652e0ca2ea41","conditionType":"ConditionReference","isNegate":false},{"name":"Tacacs condition","description":"Match only tacacs condition","id":"ad947f38-7063-4da2-8723-652e0ca2eb52","conditionType":"ConditionReference","isNegate":false}]'
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Condition'
+            exampleSetFlag: false
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        description:
+          type: string
+          description: Condition description
+          example: Match only radius requests
+          exampleSetFlag: true
+        id:
+          type: string
+          description: condition ID
+          format: uuid
+          example: 12345678-f0e7-456b-a2d1-876543320123
+          exampleSetFlag: true
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Condition name, [Valid characters are alphanumerics, underscore, hyphen, space]
+          example: Children conditions OR Block
+          exampleSetFlag: true
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/Condition'
+          exampleSetFlag: false
+        - title: LibraryConditionAndBlock
+          required:
+            - children
+            - conditionType
+            - name
+          type: object
+          properties:
+            children:
+              type: array
+              description: In case type is andBlock or orBlock addtional conditions will be aggregated under this logical (OR/AND) condition
+              example: '[{"name":"Radius condition","description":"Match only radius requests","id":"ad947f38-7063-4da2-8723-652e0ca2ea41","conditionType":"ConditionReference","isNegate":false},{"name":"Tacacs condition","description":"Match only tacacs condition","id":"ad947f38-7063-4da2-8723-652e0ca2eb52","conditionType":"ConditionReference","isNegate":false}]'
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/Condition'
+                exampleSetFlag: false
+            conditionType:
+              type: string
+              description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+              example: ConditionAttributes
+              exampleSetFlag: true
+              enum:
+                - ConditionAndBlock
+                - ConditionAttributes
+                - ConditionOrBlock
+                - ConditionReference
+                - LibraryConditionAndBlock
+                - LibraryConditionAttributes
+                - LibraryConditionOrBlock
+                - TimeAndDateCondition
+            description:
+              type: string
+              description: Condition description
+              example: Match only radius requests
+              exampleSetFlag: true
+            id:
+              type: string
+              description: condition ID
+              format: uuid
+              example: 12345678-f0e7-456b-a2d1-876543320123
+              exampleSetFlag: true
+            isNegate:
+              type: boolean
+              description: Indicates whereas this condition is in negate mode
+              example: false
+              exampleSetFlag: true
+            name:
+              type: string
+              description: Condition name, [Valid characters are alphanumerics, underscore, hyphen, space]
+              example: Children conditions OR Block
+              exampleSetFlag: true
+          description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+          exampleSetFlag: false
+    LibraryConditionAttributes:
+      title: LibraryConditionAttributes
+      properties:
+        attributeName:
+          type: string
+          description: Dictionary attribute name
+          example: UserName
+          exampleSetFlag: true
+        attributeValue:
+          type: string
+          description: <ul><li>Attribute value for condition</li> <li>Value type is specified in dictionary object</li> <li>if multiple values allowed is specified in dictionary object</li></ul>
+          example: cisco
+          exampleSetFlag: true
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        description:
+          type: string
+          description: Conditiopn description
+          example: Match only radius requests
+          exampleSetFlag: true
+        dictionaryName:
+          type: string
+          description: Dictionary name
+          example: Network Access
+          exampleSetFlag: true
+        id:
+          type: string
+          description: condition ID
+          format: uuid
+          example: 12345678-f0e7-456b-a2d1-876543320123
+          exampleSetFlag: true
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Condition name, [Valid characters are alphanumerics, underscore, hyphen, space]
+          example: Wired_MAB
+          exampleSetFlag: true
+        operator:
+          type: string
+          description: Equality operator
+          example: equals
+          exampleSetFlag: true
+          enum:
+            - contains
+            - equals
+            - notContains
+            - notEquals
+            - startsWith
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/Condition'
+          exampleSetFlag: false
+        - title: LibraryConditionAttributes
+          required:
+            - attributeName
+            - attributeValue
+            - conditionType
+            - dictionaryName
+            - name
+            - operator
+          type: object
+          properties:
+            attributeName:
+              type: string
+              description: Dictionary attribute name
+              example: UserName
+              exampleSetFlag: true
+            attributeValue:
+              type: string
+              description: <ul><li>Attribute value for condition</li> <li>Value type is specified in dictionary object</li> <li>if multiple values allowed is specified in dictionary object</li></ul>
+              example: cisco
+              exampleSetFlag: true
+            conditionType:
+              type: string
+              description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+              example: ConditionAttributes
+              exampleSetFlag: true
+              enum:
+                - ConditionAndBlock
+                - ConditionAttributes
+                - ConditionOrBlock
+                - ConditionReference
+                - LibraryConditionAndBlock
+                - LibraryConditionAttributes
+                - LibraryConditionOrBlock
+                - TimeAndDateCondition
+            description:
+              type: string
+              description: Conditiopn description
+              example: Match only radius requests
+              exampleSetFlag: true
+            dictionaryName:
+              type: string
+              description: Dictionary name
+              example: Network Access
+              exampleSetFlag: true
+            id:
+              type: string
+              description: condition ID
+              format: uuid
+              example: 12345678-f0e7-456b-a2d1-876543320123
+              exampleSetFlag: true
+            isNegate:
+              type: boolean
+              description: Indicates whereas this condition is in negate mode
+              example: false
+              exampleSetFlag: true
+            name:
+              type: string
+              description: Condition name, [Valid characters are alphanumerics, underscore, hyphen, space]
+              example: Wired_MAB
+              exampleSetFlag: true
+            operator:
+              type: string
+              description: Equality operator
+              example: equals
+              exampleSetFlag: true
+              enum:
+                - contains
+                - equals
+                - notContains
+                - notEquals
+                - startsWith
+          description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+          exampleSetFlag: false
+    LibraryConditionOrBlock:
+      title: LibraryConditionOrBlock
+      properties:
+        children:
+          type: array
+          description: In case type is andBlock or orBlock addtional conditions will be aggregated under this logical (OR/AND) condition
+          example: '[{"name":"Radius condition","description":"Match only radius requests","id":"ad947f38-7063-4da2-8723-652e0ca2ea41","conditionType":"ConditionReference","isNegate":false},{"name":"Tacacs condition","description":"Match only tacacs condition","id":"ad947f38-7063-4da2-8723-652e0ca2eb52","conditionType":"ConditionReference","isNegate":false}]'
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/Condition'
+            exampleSetFlag: false
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        description:
+          type: string
+          description: Condition description
+          example: Match only radius requests
+          exampleSetFlag: true
+        id:
+          type: string
+          description: condition ID
+          format: uuid
+          example: 12345678-f0e7-456b-a2d1-876543320123
+          exampleSetFlag: true
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Condition name, [Valid characters are alphanumerics, underscore, hyphen, space]
+          example: Children_Block
+          exampleSetFlag: true
+      description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/Condition'
+          exampleSetFlag: false
+        - title: LibraryConditionOrBlock
+          required:
+            - children
+            - conditionType
+            - name
+          type: object
+          properties:
+            children:
+              type: array
+              description: In case type is andBlock or orBlock addtional conditions will be aggregated under this logical (OR/AND) condition
+              example: '[{"name":"Radius condition","description":"Match only radius requests","id":"ad947f38-7063-4da2-8723-652e0ca2ea41","conditionType":"ConditionReference","isNegate":false},{"name":"Tacacs condition","description":"Match only tacacs condition","id":"ad947f38-7063-4da2-8723-652e0ca2eb52","conditionType":"ConditionReference","isNegate":false}]'
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/Condition'
+                exampleSetFlag: false
+            conditionType:
+              type: string
+              description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+              example: ConditionAttributes
+              exampleSetFlag: true
+              enum:
+                - ConditionAndBlock
+                - ConditionAttributes
+                - ConditionOrBlock
+                - ConditionReference
+                - LibraryConditionAndBlock
+                - LibraryConditionAttributes
+                - LibraryConditionOrBlock
+                - TimeAndDateCondition
+            description:
+              type: string
+              description: Condition description
+              example: Match only radius requests
+              exampleSetFlag: true
+            id:
+              type: string
+              description: condition ID
+              format: uuid
+              example: 12345678-f0e7-456b-a2d1-876543320123
+              exampleSetFlag: true
+            isNegate:
+              type: boolean
+              description: Indicates whereas this condition is in negate mode
+              example: false
+              exampleSetFlag: true
+            name:
+              type: string
+              description: Condition name, [Valid characters are alphanumerics, underscore, hyphen, space]
+              example: Children_Block
+              exampleSetFlag: true
+          description: <ul><li>Hierarchical structure which defines a set of conditions for which authentication or authorization policy rules could be matched.</li> <li>Logical operations(AND, OR) relationship between conditions are supported</li> <li>Each condition can have subconditions with relation to logical operations</li></ul>
+          exampleSetFlag: false
+    MFCValuesPojo:
+      title: MFCValuesPojo
+      type: object
+      properties:
+        admin:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        system:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      exampleSetFlag: false
+    PolicyAndStatus:
+      title: PolicyAndStatus
+      required:
+        - policyId
+        - status
+      type: object
+      properties:
+        policyId:
+          type: string
+          exampleSetFlag: true
+        status:
+          type: boolean
+          example: false
+          exampleSetFlag: true
+      exampleSetFlag: false
+    ProfileLabel:
+      title: ProfileLabel
+      type: object
+      properties:
+        MFCInfoEndpointType:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        MFCInfoHardwareManufacturer:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        MFCInfoHardwareModel:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        MFCInfoOperatingSystem:
+          type: array
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      exampleSetFlag: false
+    ProfilePolicy:
+      title: ProfilePolicy
+      required:
+        - profilingType
+      type: object
+      properties:
+        condition:
+          $ref: '#/components/schemas/Condition'
+          exampleSetFlag: true
+        name:
+          type: string
+          exampleSetFlag: true
+        profileLabel:
+          $ref: '#/components/schemas/ProfileLabel'
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+        rulePriority:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        status:
+          type: boolean
+          example: false
+          exampleSetFlag: true
+      exampleSetFlag: false
+    ProfilePolicyWithId:
+      title: ProfilePolicyWithId
+      required:
+        - policyId
+        - profilingType
+      type: object
+      properties:
+        condition:
+          $ref: '#/components/schemas/Condition'
+          exampleSetFlag: true
+        matchedEndpoints:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        name:
+          type: string
+          exampleSetFlag: true
+        policyId:
+          type: string
+          exampleSetFlag: true
+        profileLabel:
+          $ref: '#/components/schemas/ProfileLabel'
+          exampleSetFlag: true
+        profilingType:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - CUSTOM
+            - DIRECT
+            - ML
+        rulePriority:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        status:
+          type: boolean
+          example: false
+          exampleSetFlag: true
+      exampleSetFlag: false
+    RuleMapping:
+      title: RuleMapping
+      type: object
+      properties:
+        attributeValue:
+          type: string
+          example: endpointType/OS
+          exampleSetFlag: true
+        dictionaryName:
+          type: string
+          example: JAMF/MFC
+          exampleSetFlag: true
+      exampleSetFlag: false
+    TimeAndDateCondition:
+      title: TimeAndDateCondition
+      properties:
+        conditionType:
+          type: string
+          description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+          example: ConditionAttributes
+          exampleSetFlag: true
+          enum:
+            - ConditionAndBlock
+            - ConditionAttributes
+            - ConditionOrBlock
+            - ConditionReference
+            - LibraryConditionAndBlock
+            - LibraryConditionAttributes
+            - LibraryConditionOrBlock
+            - TimeAndDateCondition
+        datesRange:
+          $ref: '#/components/schemas/DatesRange'
+          exampleSetFlag: true
+        datesRangeException:
+          $ref: '#/components/schemas/DatesRange'
+          exampleSetFlag: true
+        description:
+          type: string
+          description: Condition description
+          example: Optional description
+          exampleSetFlag: true
+        hoursRange:
+          $ref: '#/components/schemas/HoursRange'
+          exampleSetFlag: true
+        hoursRangeException:
+          $ref: '#/components/schemas/HoursRange'
+          exampleSetFlag: true
+        id:
+          type: string
+          format: uuid
+          exampleSetFlag: true
+        isNegate:
+          type: boolean
+          description: Indicates whereas this condition is in negate mode
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Condition name
+          example: TimeAndDate Condition
+          exampleSetFlag: true
+        weekDays:
+          type: array
+          description: <p>Defines for which days this condition will be matched<br> Days format - Arrays of WeekDay enums <br> Default - List of All week days</p>
+          example: '["Sunday","Monday","Tuesday"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+            enum:
+              - Friday
+              - Monday
+              - Saturday
+              - Sunday
+              - Thursday
+              - Tuesday
+              - Wednesday
+        weekDaysException:
+          type: array
+          description: <p>Defines for which days this condition will NOT be matched<br> Days format - Arrays of WeekDay enums <br> Default - Not enabled</p>
+          example: '["Tuesday"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+            enum:
+              - Friday
+              - Monday
+              - Saturday
+              - Sunday
+              - Thursday
+              - Tuesday
+              - Wednesday
+      description: Condition based on time and date.
+      exampleSetFlag: true
+      allOf:
+        - $ref: '#/components/schemas/Condition'
+          exampleSetFlag: false
+        - title: TimeAndDateCondition
+          required:
+            - conditionType
+            - name
+          type: object
+          properties:
+            conditionType:
+              type: string
+              description: <ul><li>Inidicates whether the record is the condition itself(data) or a logical(or,and) aggregation</li> <li>Data type enum(reference,single) indicates than "conditonId" OR "ConditionAttrs" fields should contain condition data but not both</li> <li>Logical aggreation(and,or) enum indicates that additional conditions are present under the children field</li></ul>
+              example: ConditionAttributes
+              exampleSetFlag: true
+              enum:
+                - ConditionAndBlock
+                - ConditionAttributes
+                - ConditionOrBlock
+                - ConditionReference
+                - LibraryConditionAndBlock
+                - LibraryConditionAttributes
+                - LibraryConditionOrBlock
+                - TimeAndDateCondition
+            datesRange:
+              $ref: '#/components/schemas/DatesRange'
+              exampleSetFlag: true
+            datesRangeException:
+              $ref: '#/components/schemas/DatesRange'
+              exampleSetFlag: true
+            description:
+              type: string
+              description: Condition description
+              example: Optional description
+              exampleSetFlag: true
+            hoursRange:
+              $ref: '#/components/schemas/HoursRange'
+              exampleSetFlag: true
+            hoursRangeException:
+              $ref: '#/components/schemas/HoursRange'
+              exampleSetFlag: true
+            id:
+              type: string
+              format: uuid
+              exampleSetFlag: true
+            isNegate:
+              type: boolean
+              description: Indicates whereas this condition is in negate mode
+              example: false
+              exampleSetFlag: true
+            name:
+              type: string
+              description: Condition name
+              example: TimeAndDate Condition
+              exampleSetFlag: true
+            weekDays:
+              type: array
+              description: <p>Defines for which days this condition will be matched<br> Days format - Arrays of WeekDay enums <br> Default - List of All week days</p>
+              example: '["Sunday","Monday","Tuesday"]'
+              exampleSetFlag: true
+              items:
+                type: string
+                exampleSetFlag: false
+                enum:
+                  - Friday
+                  - Monday
+                  - Saturday
+                  - Sunday
+                  - Thursday
+                  - Tuesday
+                  - Wednesday
+            weekDaysException:
+              type: array
+              description: <p>Defines for which days this condition will NOT be matched<br> Days format - Arrays of WeekDay enums <br> Default - Not enabled</p>
+              example: '["Tuesday"]'
+              exampleSetFlag: true
+              items:
+                type: string
+                exampleSetFlag: false
+                enum:
+                  - Friday
+                  - Monday
+                  - Saturday
+                  - Sunday
+                  - Thursday
+                  - Tuesday
+                  - Wednesday
+          description: Condition based on time and date.
+          exampleSetFlag: false

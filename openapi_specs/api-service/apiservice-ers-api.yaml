@@ -1,0 +1,85 @@
+openapi: 3.0.1
+info:
+  title: ERS API
+  version: 1.0.0
+  description: >
+    This API is used to enable or disable the ERS API on Cisco ISE. It can also be used to retrieve the status of the ERS API on Cisco ISE. 
+tags:
+  - name: ersAPI
+    description: the ERS API
+paths:
+  /admin/API/NetworkAccessConfig/ERS:
+    get:
+      summary: Retrieve the status of the ERS API from Cisco ISE
+      description: |
+        This API is used to retrieve the status of the ERS API from Cisco ISE.
+      operationId: retrieveERSAPIStatus
+      tags:
+        - ERSapi
+      responses:
+        '200':
+          description: Success
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ersConfig'
+    put:
+      summary: Updates the ERS API status on Cisco ISE.
+      description: >
+        This API is used to update the status of the ERS API on Cisco ISE.
+      operationId: updateERSAPIStatus
+      tags:
+        - ERSapi
+      parameters:
+        - $ref: '#/components/parameters/Content-Type-Header'
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/updateErsConfig'
+      responses:
+        '200':
+          description: Changed configuration    
+components:
+  parameters:
+    Content-Type-Header:
+      in: header
+      name: Content-Type
+      description: >-
+        The Content-Type header is used to indicate the media type of the request body payload.
+      schema:
+        type: string
+      required: true
+  schemas:
+    ersConfig:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        isCSRFCheck:
+          type: boolean
+          example: false
+        isPapEnabled:
+          type: boolean
+          example: false
+        isPsnsEnabled:
+          type: boolean
+          example: true
+        
+    updateErsConfig:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        isCSRFCheck:
+          type: boolean
+          example: true
+        isPapEnabled:
+          type: boolean
+          example: true
+        isPsnsEnabled:
+          type: boolean
+          example: true
+                

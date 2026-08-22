@@ -20,13 +20,13 @@ all_guidance = await service.list_api_guidance(active_only=False)
 
 # Create or update
 guidance = await service.upsert_api_guidance(
-    api_name="manage",
-    display_name="Nexus Dashboard Manage API",
-    description="NDFC fabric management",
+    api_name="ise",
+    display_name="Cisco ISE External RESTful Services (ERS) API",
+    description="ISE network access device management",
     general_guidance="Best practices...",
     common_patterns="Common patterns...",
     gotchas="Watch out for...",
-    examples=[{"use_case": "Deploy fabric", "steps": [...]}],
+    examples=[{"use_case": "Onboard a device", "steps": [...]}],
     is_active=True,
     section_order=1
 )
@@ -39,20 +39,20 @@ deleted = await service.delete_api_guidance("manage")
 
 ```python
 # Get by API and category name
-category = await service.get_category_guidance("manage", "fabric")
+category = await service.get_category_guidance("ise", "network")
 
 # List all (optionally filter by API)
 all_categories = await service.list_category_guidance()
-manage_categories = await service.list_category_guidance(api_name="manage")
+ise_categories = await service.list_category_guidance(api_name="ise")
 inactive = await service.list_category_guidance(active_only=False)
 
 # Create or update (API guidance must exist first)
 category = await service.upsert_category_guidance(
-    api_name="manage",
-    category_name="fabric",
-    display_name="Fabric Management",
-    description="Create and manage fabrics",
-    usage_tips="Use Easy_Fabric template",
+    api_name="ise",
+    category_name="network",
+    display_name="Network Access Devices",
+    description="Onboard and manage network access devices",
+    usage_tips="Create device groups before the devices that reference them",
     prerequisites="Switches reachable",
     related_categories=["switches", "networks"],
     is_active=True
@@ -67,13 +67,13 @@ deleted = await service.delete_category_guidance(category_id=1)
 ```python
 # Create new workflow
 workflow = await service.create_workflow(
-    name="deploy_fabric",
-    display_name="Deploy New Fabric",
-    description="End-to-end fabric deployment",
-    use_case="Setting up new DC fabric",
+    name="network_device_onboarding",
+    display_name="Network Access Device Onboarding",
+    description="End-to-end device onboarding",
+    use_case="Adding a new RADIUS/TACACS+ client",
     prerequisites="Switches powered on",
     estimated_duration="10-15 minutes",
-    use_case_tags=["fabric", "deployment"],
+    use_case_tags=["onboarding", "network-device"],
     is_active=True
 )
 
@@ -83,7 +83,7 @@ workflow = await service.get_workflow(workflow_id=1)
 # List workflows
 all_workflows = await service.list_workflows()
 active_workflows = await service.list_workflows(active_only=True)
-fabric_workflows = await service.list_workflows(use_case_tag="fabric")
+onboarding_workflows = await service.list_workflows(use_case_tag="network-device")
 
 # Update workflow
 workflow = await service.update_workflow(
@@ -101,12 +101,12 @@ workflow = await service.set_workflow_steps(
     steps=[
         {
             "step_order": 1,
-            "step_name": "Create Fabric",
-            "operation_name": "manage_create_fabric",
-            "description": "Create fabric with VXLAN template",
-            "parameters": {"fabric_name": "DC1"},
-            "expected_result": "Fabric created",
-            "validation": "Check fabric list",
+            "step_name": "Create Network Device",
+            "operation_name": "ise_networkdevice_create",
+            "description": "Create the device with its groups and shared secret",
+            "parameters": {"body": {"NetworkDevice": {"name": "branch-sw-01"}}},
+            "expected_result": "201 Created with the UUID in Location",
+            "validation": "Read back with ise_networkdevice_getByName",
             "notes": "Optional notes"
         },
         {
@@ -122,7 +122,7 @@ workflow = await service.set_workflow_steps(
 
 ```python
 # Get by operation name
-override = await service.get_tool_override("manage_deploy_fabric")
+override = await service.get_tool_override("ise_ancendpoint_apply")
 
 # Get all as dict {operation_name: override}
 all_overrides = await service.get_all_tool_overrides()
@@ -133,17 +133,17 @@ inactive_overrides = await service.list_tool_overrides(active_only=False)
 
 # Create or update
 override = await service.upsert_tool_override(
-    operation_name="manage_deploy_fabric",
-    custom_description="Deploy fabric configuration to switches",
+    operation_name="ise_ancendpoint_apply",
+    custom_description="Contain an endpoint by applying an ANC policy to its MAC",
     usage_guidance="Always verify config first",
-    parameter_guidance={"fabric_name": "Must match exactly"},
-    examples=[{"description": "Deploy DC1 fabric"}],
+    parameter_guidance={"policyName": "Must match an existing ANC policy exactly"},
+    examples=[{"description": "Quarantine a compromised laptop"}],
     warnings="This modifies production network",
     is_active=True
 )
 
 # Delete
-deleted = await service.delete_tool_override("manage_deploy_fabric")
+deleted = await service.delete_tool_override("ise_ancendpoint_apply")
 ```
 
 ## System Prompt Sections (3 methods)
@@ -175,8 +175,8 @@ prompt = await service.generate_system_prompt()
 
 # Enhance tool description
 operation = {
-    "operationId": "manage_deploy_fabric",
-    "description": "Deploy fabric configuration",
+    "operationId": "ise_ancendpoint_apply",
+    "description": "apply",
     ...
 }
 enhanced_desc = await service.build_enhanced_tool_description(operation)
@@ -193,26 +193,26 @@ async def setup_guidance():
 
     # 1. Create API guidance
     await service.upsert_api_guidance(
-        api_name="manage",
-        display_name="Nexus Dashboard Manage API",
+        api_name="ise",
+        display_name="Cisco ISE External RESTful Services (ERS) API",
         general_guidance="Always verify state before changes",
         is_active=True
     )
 
     # 2. Add category
     await service.upsert_category_guidance(
-        api_name="manage",
-        category_name="fabric",
-        display_name="Fabric Management",
-        usage_tips="Use Easy_Fabric template",
+        api_name="ise",
+        category_name="network",
+        display_name="Network Access Devices",
+        usage_tips="Create device groups before the devices that reference them",
         is_active=True
     )
 
     # 3. Create workflow
     workflow = await service.create_workflow(
-        name="deploy_fabric",
-        display_name="Deploy New Fabric",
-        description="Complete fabric deployment",
+        name="network_device_onboarding",
+        display_name="Network Access Device Onboarding",
+        description="Complete device onboarding",
         is_active=True
     )
 
@@ -222,17 +222,17 @@ async def setup_guidance():
         steps=[
             {
                 "step_order": 1,
-                "step_name": "Create Fabric",
-                "operation_name": "manage_create_fabric",
-                "description": "Create fabric",
-                "parameters": {"fabric_name": "DC1"}
+                "step_name": "Create Network Device",
+                "operation_name": "ise_networkdevice_create",
+                "description": "Create the network device",
+                "parameters": {"body": {"NetworkDevice": {"name": "branch-sw-01"}}}
             }
         ]
     )
 
     # 5. Add tool override
     await service.upsert_tool_override(
-        operation_name="manage_deploy_fabric",
+        operation_name="ise_ancendpoint_apply",
         custom_description="CRITICAL: Deploys to production",
         warnings="Cannot rollback automatically",
         is_active=True
@@ -279,10 +279,10 @@ All `upsert_*` methods create if not exists, update if exists:
 
 ```python
 # First call creates
-guidance = await service.upsert_api_guidance(api_name="manage", ...)
+guidance = await service.upsert_api_guidance(api_name="ise", ...)
 
 # Second call updates
-guidance = await service.upsert_api_guidance(api_name="manage", ...)
+guidance = await service.upsert_api_guidance(api_name="ise", ...)
 ```
 
 ### Active Filtering
@@ -330,16 +330,16 @@ All JSON fields accept Python dicts/lists:
 ```python
 # examples field
 examples=[
-    {"use_case": "Deploy fabric", "steps": ["create", "deploy"]},
+    {"use_case": "Onboard a device", "steps": ["create", "read back"]},
     {"use_case": "Add network", "steps": ["verify", "create"]}
 ]
 
 # use_case_tags field
-use_case_tags=["fabric", "deployment", "production"]
+use_case_tags=["onboarding", "network-device", "production"]
 
 # parameter_guidance field
 parameter_guidance={
-    "fabric_name": "Must match existing fabric",
+    "policyName": "Must match an existing ANC policy",
     "force": "Use with caution"
 }
 ```

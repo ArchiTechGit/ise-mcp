@@ -143,7 +143,7 @@ export default function ClustersPage() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Cluster Management</h2>
             <p className="text-gray-600">
-              Manage Nexus Dashboard cluster connections and credentials
+              Manage Cisco ISE deployment connections and credentials
             </p>
           </div>
           <button
@@ -297,7 +297,7 @@ export default function ClustersPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-gray-900 placeholder:text-gray-400"
-                    placeholder="my-nexus-cluster"
+                    placeholder="my-ise-deployment"
                   />
                   {editingCluster && (
                     <p className="mt-1 text-xs text-gray-500">Cluster name cannot be changed</p>
@@ -314,7 +314,7 @@ export default function ClustersPage() {
                     value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder:text-gray-400"
-                    placeholder="https://nexus-dashboard.example.com"
+                    placeholder="https://ise.example.com:9060"
                   />
                 </div>
 

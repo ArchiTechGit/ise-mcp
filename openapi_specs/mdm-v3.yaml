@@ -1,0 +1,387 @@
+swagger: '2.0'
+info:
+  description: |
+    This document describes the version 3 of the REST APIs supported within Cisco ISE  Release 3.x. Cisco ISE Release 3.1 is also backward compatible with version 1 & version 2.<br><br>
+    **Note:** 
+    * MDM API, unlike the other APIs in this documentation, is an API where Cisco ISE makes call outwards to a third parties.<br>
+    * API version 1 will be phased out in the near future.
+    <br><br><h2>API Response time & expectation</h2>
+    <p>Compliance query response is expected to be fast. Expectation is for compliance queries to respond within 200 milliseconds. Anything above 300ms will have an impact on end user's access and experience.  Delay in response will affect the system in scale/burst scenarios.</p>
+    
+  version: 3.0.0
+  title: Mobile Device Management APIs
+    
+tags:
+- name: mdm-server-info
+- name: mdm-device-attributes
+- name: mdm-action
+- name: mdm-messaging
+
+paths:
+  /<mdm-server>/ciscoise/mdminfo/: 
+    get:
+      tags: 
+      - mdm-server-info
+      summary: Get the MDM server information
+      description: "This API (available since version 2) is used for initially adding an MDM vendor in the Cisco ISE server. This is similar to the version 1 and version 2 APIs, except that in addition it provides information about the API version used by Cisco ISE as a URL query parameter.<br><br><b>NOTE</b>: The URL required for sending the MDM Server Info api request is fixed because the API path (obtained from the REST webservice response for the MDM Server Info API) is not yet known to Cisco ISE.<br><br>Base API for version 3 remains similar. In the response it is mandatory for the partner MDM server to share the vendor, product_name & product_version for version 3 and above.<br><br>
+      Example: https://mdm-server/ciscoise/mdminfo/?ise_api_version={max_ise_supported_api_version}"
+      consumes:
+      - application/xml
+      produces:
+      - application/xml
+      parameters:
+      - name: ise_api_version
+        in: query
+        type: integer
+        required: true
+      - name: Resources
+        type: string
+        in: header
+        description:
+          "<table>
+          <tr><td><b>Attribute Name</b></td><td><b>Type</b></td><td><b>Required</b></td><td><b>Description</b></td></tr>
+          <tr><td>name</td><td>String</td><td>Yes</td><td>mdminfo</td></tr>
+          <tr><td>api_version</td><td>Integer</td><td>Yes</td><td>Response from MDM server with supported version, should be equal to or less than ISE supported version shared in API call/request URL</td></tr>
+          <tr><td>api_path</td><td>String</td><td>Yes</td><td>API path to get device compliance or non-compliance information</td></tr>
+          <tr><td>redirect_url</td><td>String</td><td>Yes</td><td>URL for end users to register or enroll to MDM server</td></tr>
+          <tr><td>query_max_size</td><td>Integer</td><td>Yes</td><td>Maximum number of records that can be retrieved at a time during bulk retrievals (Eg. Non compliance API response)</td></tr>
+          <tr><td>messaging_support</td><td>Boolean</td><td>Yes</td><td>Indicates if messaging is supported through MDM server</td></tr>
+          <tr><td>vendor</td><td>String</td><td>Yes</td><td>Name of the MDM partner (Mandatory from version 3)</td></tr>
+          <tr><td>product_name</td><td>String</td><td>Yes</td><td>Name of the MDM server (Mandatory from version 3)</td></tr>
+          <tr><td>product_version</td><td>String</td><td>Yes</td><td>Version of the MDM server  (Mandatory from version 3)</td></tr>
+          </table>"
+      responses: 
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/mdm-server-info"
+  
+  /<mdm-server>/{api_path}/devices/: 
+    get:
+      tags:
+      - mdm-device-attributes
+      summary: Get the device attributes from the MDM server
+      description: "This API is used for query device attributes. We can give a query category such as  GUID, Hostname, MAC address, compliance status,  User, and the Attribute filter.<br><br>The maximum number of devices returned is the value of “query_max_size” returned from “mdm server info API” (API #1), default is 5000. The Cisco ISE initial call of this API will pass paging info “0”. If MDM have more than 'query_max_size' number of devices to return, it can design its own paging scheme, just return the paging_info in its response, which will be part of the URL in next call from Cisco ISE. If paging info is “0” in response, or it doesn’t return paging info in its response, means all record has been returned, then Cisco ISE will not make further calls for the query.<br><br>Similar to earlier version API is used to get device attributes particularly compliance data based on GUID (MDM ID), it is the key identity of the device managed by vendor .  Vendor is expected to have unique id for each device it is managing, GUID is expected to be less than 128 bytes in size.  Previously in v1/v2 MAC Address, UDID, IMEI, MEID were available as unique identifiers.  With v3, GUID & hostname are additional identifiers added to the list. MDM.DaysSinceLastCheckin - Number of days since a user last checked in or synched a device with MDM server, from 1 to 365 days.<br><br>
+      Example: https://mdm-server/ciscoise/mdmapi/v3/devices/?paging=<paging>&querycriteria=<Query Criteria category>value=<Query Criteria value>&filter=<Attribute filter>"
+      consumes:
+      - application/xml
+      produces:
+      - application/xml
+      parameters:
+      - name: api_path
+        in: path
+        description: api_path obtained from GET operation of mdm-server-info
+        type: string
+        required: true
+      - name: paging
+        in: query
+        description: "0 means first call."
+        type: integer
+        required: true
+      - name: querycriteria
+        in: query
+        description: "<ul><li>guid: Recommended to follow standard based on RFC 4122, expected to be unique identifier for the device with maximum length of 128 bytes.</li><li>guidhn (hostname): Standard or traditional hostname assigned to device, expected to be unique identifier for the device</li><li>MAC address</li><li>compliance </li><li>macaddress: standardize as 12 HEX without separator</li><li>MEID (Mobile Equipment Identifier): 14 character HEX code or 10 digit decimal code)</li><li>UDID (Unique Device Identifier)</li><li>IMEI (International Mobile Station Equipment Identity)</li><li>compliance: true/false</li><li>username: free form string</li></ul>"
+        type: string
+        required: true
+      - name: value
+        in: query
+        description: "Value corresponding to the Query criteria category."
+        type: string
+        required: true
+      - name: filter
+        in: query
+        type: string
+        description: "<table><tr><b><td><b>Attribute Name</b></td><td><b>Type</b></td><td><b>Description</b></td></b></tr><tr><td>register_status</td><td>boolean</td><td>true or false</td></tr><tr><td>Compliance Status</td><td>boolean</td><td>true or false</td></tr><tr><td>disk_encryption_on</td><td>boolean</td><td>true or false</td></tr><tr><td>pin_lock_on</td><td>boolean</td><td>true or false</td></tr><tr><td>jail_broken</td><td>boolean</td><td>true or false</td></tr><tr><td>manufacturer</td><td>String</td><td>For example: Samsung</td></tr><tr><td>Model</td><td>String</td><td></td></tr><tr><td>IMEI</td><td>String</td><td></td></tr><tr><td>MEID</td><td>String</td><td></td></tr><tr><td>UDID</td><td>String</td><td></td></tr><tr><td>Serial Number</td><td>String</td><td></td></tr><tr><td>OS_version</td><td>String</td><td></td></tr><tr><td>Phone Number</td><td>String</td><td></td></tr><tr><td>lastCheckinTimeStamp</td><td>String</td><td>last logon (check-in) time in milliseconds since Epoch</td></tr><tr><td>GUID</td><td>String</td><td>required if query is based on legacy Macddress/UDID/IMEI</td></tr><tr><td>MAC addresses</td><td>String</td><td>comma separated max 5 MAC addresses</td></tr><tr><td>period</td><td>String</td><td>Time period in days</td></tr></table>"
+        required: true
+      - name: Authorization
+        in: header
+        description: "{username}:{password}"
+        type: string
+        required: true
+      - name: Example
+        in: header
+        description: "<b>API to get device attributes using guid as device identifier :</b>
+                      <br>https://mdm-server/ise/mdm/api/devices/?paging=0&querycriteria=guid&value=000000000000&filter=all 
+                      <br><b>API to get multiple non-compliant devices attributes using guid as device identifier :</b>
+                      <br>https://mdm-server/ise/mdm/api/devices/?paging=0&querycriteria=compliance&value=false&deviceidentifier=guid&filter=all   -> guid for all devices
+                      <br>If the device is not enrolled (an unregistered device) to the any mdm server then the expected response from the mdm server should be empty deviceList in v2 and v3. 
+                      <br><b>API to get device attributes using previously supported macaddress/udid/imei/meid as device identifier will be supported with version 3 attributes as well.</b>
+                      <br>URL for macaddress/udid/imei/meid based compliance check will remain the same as in version 2, below is example for macaddress
+                      <br>https://mdm-server/ise/mdm/api/devices/?paging=0&querycriteria=macaddress&value=000000000000&filter=all
+                      <br>Response for this will include additional parameters(guid, lastCheckinTimeStamp) in version 3
+                      <br><b>API to get multiple non-compliant devices attributes using macaddress as device identifier</b>
+                      <br>https://mdm-server/ise/mdm/api/devices/?paging=0&querycriteria=compliance&value=false&deviceidentifier=macaddress&filter=all
+                      <br>If the device is not enrolled (an unregistered device) to the any mdm server then the expected response from the mdm server should be empty deviceList in v2 and v3." 
+        type: string
+      responses: 
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/mdm-device-attributes-response"                
+            
+  /<mdm-server>/{api_path}/action/actionType=<action type>: 
+    post:
+      tags:
+      - mdm-action   
+      summary: Send the action commands to the MDM server
+      description: "This API allows Cisco ISE to send action command to MDM to perform certain actions, like wipe out config, etc. Supports guid & guidhn as device identifiers while sending action requests."
+      consumes:
+      - application/xml
+      produces:
+      - application/xml
+      parameters:
+      - name: api_path
+        in: path
+        description: api_path obtained from GET operation of mdm-server-info
+        type: string
+        required: true
+      - name: actionType
+        in: query
+        description: "full_wipe, corporate_wipe or pin_lock"
+        type: string
+        required: true
+      - name: Authorization
+        in: header
+        description: "{username}:{password}"
+        type: string
+        required: true
+      - in: body
+        name: request
+        schema:
+          $ref: '#/definitions/mdm-action-request'
+      responses: 
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/mdm-action-response"
+
+  /<mdm-server>/{api_path}/sendmessage: 
+    put:
+      tags:
+      - mdm-messaging
+      summary: Send the message through MDM server to end user
+      description: "This API allows Cisco ISE to send messages through MDM to end user mobile devices (assuming MDM has messaging system to communicate with mobile devices).   Supports guid & guidhn as device identifiers while sending action requests.<br><br>
+      **Note**: : Implementation of this API is optional at this point, vendor implementation of this  API will also need to add flag “messaging_support” in response of API#1 to signify that the messaging API  is implemented."
+      consumes:
+      - application/xml
+      produces:
+      - application/xml
+      parameters:
+      - name: api_path
+        in: path
+        description: api_path obtained from GET operation of mdm-server-info
+        type: string
+        required: true
+      - name: Authorization
+        in: header
+        description: "{username}:{password}"
+        type: string
+        required: true
+      - in: body
+        name: request
+        schema:
+          $ref: '#/definitions/mdm-messaging-request'
+      responses: 
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/mdm-messaging-response"
+            
+definitions:
+  mdm-server-info:
+    type: object
+    properties:
+      name:
+        type: string
+        example: mdminfo
+      api_version:
+        type: integer
+        example: 3
+      api_path:
+        type: string
+        example: /ciscoise/mdmapi/v3
+      redirect_url:
+        type: string
+        example: https://login.mobileiron.com/
+      query_max_size:
+        type: integer
+        example: 1000
+      messaging_support:
+        type: boolean
+        example: true
+      vendor:
+        type: string
+        example: MobileIron
+      product_name:
+        type: string
+        example: MobileIron Cloud
+      product_version:
+        type: string
+        example: "76.0.0.22"
+
+  mdm-device-attributes-response:
+    type: object
+    properties:
+      name:
+        type: string
+        example: attributes
+      api_version:
+        type: integer
+        example: 3
+      paging_info:
+        type: integer
+        example: 0
+      server_busy_wait_seconds:
+        type: integer
+        example: 0
+      deviceList:
+        type: object
+        properties:
+          device:
+            type: object
+            properties:
+              guid:
+                type: string
+                example: "1759c0fd-c8da-49e8-b14f-19d85acfacea"
+              attributes:
+                type: object
+                properties:
+                  register_status:
+                    type: boolean
+                    example: true
+                  compliance:
+                    type: object
+                    properties:
+                      status:
+                        type: boolean
+                        example: false
+                      failure_reason:
+                        type: string
+                        example: something not compliant
+                      remediation:
+                        type: string
+                        example: instruction on how to rememdiate
+                  disk_encryption_on:
+                    type: boolean
+                    example: true
+                  pin_lock_on:
+                    type: boolean
+                    example: true
+                  jail_broken:
+                    type: boolean
+                    example: false
+                  manufacturer:
+                    type: string
+                    example: Apple
+                  model:
+                    type: string
+                    example: iPad 8th Gen 10.2-inch (Wi-Fi Only)
+                  udid:
+                    type: string
+                    example: 00008020-0015784C218A402E
+                  serial_number:
+                    type: string
+                    example: F9GDX3RQQ1GC
+                  os_version:
+                    type: string
+                    example: iOS 14.4
+                  phone_number:
+                    type: string
+                    example: PDA 2
+                  lastCheckinTimeStamp:
+                    type: string
+                    example: 1621571561000
+                  guid:
+                    type: string
+                    example: 1759c0fd-c8da-49e8-b14f-19d85acfacea
+                  macaddresses:
+                    type: string
+                    example: F434F0A1E478                  
+        
+  mdm-action-request:
+    type: object
+    properties:
+      identifier:
+        type: object
+        properties:
+          guid:
+            type: string
+            example: "000000000000"
+            
+  mdm-action-response:
+    type: object
+    properties:
+      name:
+        type: string
+        example: action
+      api_version:
+        type: integer
+        example: 3
+      deviceList:
+        type: object
+        properties:
+          device:
+            type: object
+            properties:
+              guid:
+                type: string
+                example: "000000000000"
+              result:
+                type: object
+                properties:
+                  action_status:
+                    type: boolean
+                    example: true
+                  failure_reason:
+                    type: string
+                    example: something not compliant
+                    
+  mdm-messaging-request:
+    type: object
+    properties:
+      identifier:
+        type: object
+        properties:
+          guid:
+            type: string
+            example: "000000000000"
+      message:
+        type: object
+        properties:
+          message_type:
+            type: string
+            example: Alert
+          message_header:
+            type: string
+            example: Need your action in the next 10 minutes
+          message_body:
+            type: string
+            example: Your device is not compliant for the following reason, please take action in the next 10 minutes, otherwise you network access will be revoked
+            
+  mdm-messaging-response:
+    type: object
+    properties:
+      name:
+        type: string
+        example: sendmessage
+      api_version:
+        type: integer
+        example: 3
+      deviceList:
+        type: object
+        properties:
+          device:
+            type: object
+            properties:
+              guid:
+                type: string
+                example: "000000000000"
+              result:
+                type: object
+                properties:
+                  message_status:
+                    type: boolean
+                    example: false
+                  failure_reason:
+                    type: string
+                    example: something happened, message is not sent

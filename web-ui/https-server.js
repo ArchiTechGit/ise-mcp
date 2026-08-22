@@ -8,8 +8,8 @@
  *   SSL_ENABLED      - Enable HTTPS (default: true)
  *   SSL_CERTFILE     - Path to SSL certificate (default: /app/certs/server.crt)
  *   SSL_KEYFILE      - Path to SSL private key (default: /app/certs/server.key)
- *   PORT             - External HTTPS port (default: 7443)
- *   INTERNAL_PORT    - Internal Next.js port (default: 7100)
+ *   PORT             - External HTTPS port (default: 7447)
+ *   INTERNAL_PORT    - Internal Next.js port (default: 7104)
  *   HOSTNAME         - Server hostname (default: 0.0.0.0)
  */
 
@@ -25,8 +25,8 @@ const httpProxy = require('http-proxy');
 
 const sslEnabled = process.env.SSL_ENABLED === 'true';
 const hostname = process.env.HOSTNAME || '0.0.0.0';
-const externalPort = parseInt(process.env.PORT || '7443', 10);
-const internalPort = parseInt(process.env.INTERNAL_PORT || '7100', 10);
+const externalPort = parseInt(process.env.PORT || '7447', 10);
+const internalPort = parseInt(process.env.INTERNAL_PORT || '7104', 10);
 const backendApiUrl = process.env.BACKEND_API_URL?.replace(/\/$/, '');
 
 if (!backendApiUrl) {

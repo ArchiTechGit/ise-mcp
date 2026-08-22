@@ -1,4 +1,4 @@
-"""FastAPI web application for Nexus Dashboard MCP Server management UI."""
+"""FastAPI web application for the Cisco ISE MCP Server management UI."""
 
 import csv
 import io
@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import get_db
 from src.config.settings import get_settings
+from src.models.api_endpoint import APIEndpoint
 from src.models.audit import AuditLog
 from src.models.cluster import Cluster
 from src.models.security import SecurityConfig
@@ -25,7 +26,7 @@ from src.services.role_service import RoleService
 from src.services.ldap_service import LDAPService
 from src.services.guidance_service import GuidanceService
 from src.services.tool_profile_service import ToolProfileService
-from src.services.nexus_api import NexusAPIClient
+from src.services.ise_api import ISEAPIClient
 from src.utils.encryption import decrypt_password
 from src.api.mcp_transport import router as mcp_router
 
@@ -35,8 +36,8 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Nexus Dashboard MCP Server - Web API",
-    description="REST API for managing Nexus Dashboard MCP Server via web UI",
+    title="Cisco ISE MCP Server - Web API",
+    description="REST API for managing the Cisco ISE MCP Server via web UI",
     version="1.0.0",
 )
 
@@ -582,7 +583,7 @@ startup_time = datetime.utcnow()
 
 # ==================== Authentication Helpers ====================
 
-SESSION_COOKIE_NAME = "nexus_session"
+SESSION_COOKIE_NAME = "ise_session"
 
 
 async def get_current_user(
@@ -763,6 +764,13 @@ async def get_stats():
         )
         audit_logs_count = audit_count.scalar() or 0
 
+        # Count operations from the synced endpoint registry rather than a
+        # constant, so the figure tracks the spec instead of drifting from it.
+        operation_count = await session.execute(
+            select(func.count()).select_from(APIEndpoint)
+        )
+        total_operations = operation_count.scalar() or 0
+
         # Get security config
         security_result = await session.execute(
             select(SecurityConfig).limit(1)
@@ -771,7 +779,7 @@ async def get_stats():
         edit_mode = security_config.edit_mode_enabled if security_config else False
 
     return {
-        "total_operations": 1371,  # Total across all 5 APIs (manage 497, analyze 316, infra 280, oneManage 132, orchestration 146)
+        "total_operations": total_operations,
         "clusters_configured": clusters_configured,
         "audit_logs_count": audit_logs_count,
         "edit_mode_enabled": edit_mode,
@@ -910,7 +918,7 @@ async def delete_cluster(name: str):
 async def test_cluster_connection(cluster_data: ClusterCreate):
     """Test cluster connection without saving.
 
-    Creates a temporary NexusAPIClient and attempts to authenticate
+    Creates a temporary ISEAPIClient and attempts to authenticate
     to verify the connection and credentials are valid.
 
     If password is empty, attempt to use stored credentials from the database
@@ -946,7 +954,7 @@ async def test_cluster_connection(cluster_data: ClusterCreate):
                     }
 
         # Create a temporary API client with provided credentials
-        client = NexusAPIClient(
+        client = ISEAPIClient(
             base_url=url,
             username=username,
             password=password,
@@ -1017,7 +1025,7 @@ async def test_existing_cluster_connection(name: str):
             raise HTTPException(status_code=404, detail=f"Cluster '{name}' not found or inactive")
 
         # Create a temporary API client with stored credentials
-        client = NexusAPIClient(
+        client = ISEAPIClient(
             base_url=credentials["url"],
             username=credentials["username"],
             password=credentials["password"],

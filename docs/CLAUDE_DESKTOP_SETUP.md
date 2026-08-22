@@ -2,11 +2,11 @@
 
 ## Overview
 
-This guide explains how to connect Claude Desktop to the Nexus Dashboard MCP Server, enabling Claude to interact with your Cisco Nexus Dashboard infrastructure.
+This guide explains how to connect Claude Desktop to the Cisco ISE MCP Server, enabling Claude to interact with your Cisco ISE infrastructure.
 
 ## Prerequisites
 
-- Nexus Dashboard MCP Server deployed and running
+- Cisco ISE MCP Server deployed and running
 - Claude Desktop installed
 - For remote connections: Node.js 18+ installed locally
 
@@ -29,11 +29,11 @@ For accessing the MCP server running on a remote host:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://YOUR_SERVER_IP:8444/mcp/sse",
+        "https://YOUR_SERVER_IP:8448/mcp/sse",
         "--transport",
         "sse-only"
       ]
@@ -57,12 +57,12 @@ For Claude Desktop running on the same machine as Docker:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "docker",
       "args": [
         "exec",
         "-i",
-        "nd_mcp_mcp_server",
+        "ise_mcp_mcp_server",
         "python",
         "src/main.py"
       ]
@@ -95,8 +95,8 @@ $env:NODE_TLS_REJECT_UNAUTHORIZED=0
 
 1. Download the server certificate:
    ```bash
-   openssl s_client -connect YOUR_SERVER_IP:8444 -showcerts </dev/null 2>/dev/null | \
-     openssl x509 -outform PEM > nexus-mcp.crt
+   openssl s_client -connect YOUR_SERVER_IP:8448 -showcerts </dev/null 2>/dev/null | \
+     openssl x509 -outform PEM > ise-mcp.crt
    ```
 
 2. Add to your system's trust store:
@@ -109,7 +109,7 @@ $env:NODE_TLS_REJECT_UNAUTHORIZED=0
 After restarting Claude Desktop:
 
 1. Look for the MCP server indicator (hammer icon) in Claude Desktop
-2. You should see "nexus-dashboard" listed as an available server
+2. You should see "ise" listed as an available server
 3. The indicator should show a green status
 
 ### Test Query
@@ -117,39 +117,42 @@ After restarting Claude Desktop:
 Try asking Claude:
 
 ```
-"List all fabrics in my Nexus Dashboard"
+"List all network devices in my ISE deployment"
 ```
 
 or
 
 ```
-"Show me the health status of my clusters"
+"Show me the nodes in my ISE deployment"
 ```
 
 ## Available Operations
 
 ### Read Operations (Always Available)
 
-- Get fabrics, templates, policies
-- List anomalies and advisories
-- Query inventory and topology
-- View configurations and status
-- Get health metrics
+- List and inspect network access devices and device groups
+- Look up internal users, identity groups, and endpoints
+- Read authorization profiles, dACLs, and allowed protocol services
+- Review TrustSec SGTs, SGACLs, and the egress matrix
+- Query guest accounts, sponsor groups, and portals
+- Inspect deployment nodes, certificates, and Active Directory join points
 
 ### Write Operations (Requires Edit Mode)
 
 Write operations are disabled by default. To enable:
 
-1. Go to Web UI: `https://YOUR_SERVER_IP:7443`
+1. Go to Web UI: `https://YOUR_SERVER_IP:7447`
 2. Navigate to **Security** page
 3. Enable **Edit Mode**
 4. Optionally whitelist specific operations
 
 Once enabled, you can:
-- Create/update/delete fabrics
-- Manage templates and policies
-- Configure devices
-- Deploy configurations
+- Onboard, update, and delete network access devices
+- Create and manage internal users, identity groups, and endpoints
+- Edit authorization profiles, dACLs, and allowed protocols
+- Change TrustSec SGTs, SGACLs, and matrix cells
+- Manage the guest account lifecycle
+- Apply and clear ANC containment actions
 
 ## Secure Access with API Token
 
@@ -173,11 +176,11 @@ docker compose up -d
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://YOUR_SERVER_IP:8444/mcp/sse",
+        "https://YOUR_SERVER_IP:8448/mcp/sse",
         "--transport",
         "sse-only",
         "--header",
@@ -199,7 +202,7 @@ docker compose up -d
 
 2. **Check server logs:**
    ```bash
-   docker compose logs -f nd_mcp_mcp_server
+   docker compose logs -f ise_mcp_mcp_server
    ```
 
 3. **Verify Claude Desktop config syntax:**
@@ -209,28 +212,28 @@ docker compose up -d
 
 4. **Test the SSE endpoint:**
    ```bash
-   curl -k https://YOUR_SERVER_IP:8444/mcp/sse
+   curl -k https://YOUR_SERVER_IP:8448/mcp/sse
    ```
 
 ### Permission Errors
 
 - Check edit mode setting in Web UI
 - Verify your user has appropriate role assignments
-- Review audit logs: `https://YOUR_SERVER_IP:7443/audit`
+- Review audit logs: `https://YOUR_SERVER_IP:7447/audit`
 
 ### Connection Errors
 
 1. **Test network connectivity:**
    ```bash
-   curl -k https://YOUR_SERVER_IP:8444/api/health
+   curl -k https://YOUR_SERVER_IP:8448/api/health
    ```
 
 2. **Check firewall rules:**
-   - Port 8444 must be accessible
+   - Port 8448 must be accessible
 
 3. **Verify SSL certificate:**
    ```bash
-   openssl s_client -connect YOUR_SERVER_IP:8444 -servername YOUR_SERVER_IP
+   openssl s_client -connect YOUR_SERVER_IP:8448 -servername YOUR_SERVER_IP
    ```
 
 ### SSL/Certificate Errors
@@ -246,16 +249,16 @@ If you see "self-signed certificate" or "unable to verify" errors:
 ### View Real-Time Logs
 
 ```bash
-docker compose logs -f nd_mcp_mcp_server
+docker compose logs -f ise_mcp_mcp_server
 ```
 
 ### Audit Log Access
 
 All MCP operations are logged. View them at:
-- Web UI: `https://YOUR_SERVER_IP:7443/audit`
+- Web UI: `https://YOUR_SERVER_IP:7447/audit`
 - Database:
   ```bash
-  docker compose exec nd_mcp_postgres psql -U mcp_user -d nexus_mcp -c \
+  docker compose exec ise_mcp_postgres psql -U mcp_user -d ise_mcp -c \
     "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT 20;"
   ```
 
@@ -264,33 +267,33 @@ All MCP operations are logged. View them at:
 ### Read-Only Examples
 
 ```
-"Show me all fabrics configured in Nexus Dashboard"
+"Show me all network devices configured in ISE"
 
-"What anomalies have been detected in the last 24 hours?"
+"What does ISE know about the endpoint with MAC 00:11:22:33:44:55?"
 
-"List all devices in the inventory"
+"List every network device whose name contains 'branch'"
 
-"Get the configuration of fabric 'Production-DC1'"
+"Get the configuration of the network device 'branch-sw-01'"
 
-"Show me the topology of fabric 'Test-Fabric'"
+"Show me the TrustSec egress matrix"
 
-"What is the health status of my clusters?"
+"Which nodes are in my ISE deployment and what personas do they run?"
 ```
 
 ### Write Mode Examples (After Enabling)
 
 ```
-"Create a new fabric named 'Development-Fabric'"
+"Onboard a new network device called 'branch-sw-01' at 10.1.1.1"
 
-"Update the description of fabric 'Test-Fabric' to 'QA Environment'"
+"Add the endpoint 00:11:22:33:44:55 to the Blocked_List identity group"
 
-"Deploy the template 'Base-Config' to fabric 'Production-DC1'"
+"Quarantine the endpoint 00:11:22:33:44:55 using the ANC policy 'Quarantine'"
 ```
 
 ## Best Practices
 
 1. **Start Read-Only:** Test queries before enabling write mode
-2. **Use Specific Queries:** Include fabric names and device IDs
+2. **Use Specific Queries:** Include device names, MAC addresses, and UUIDs
 3. **Monitor Logs:** Keep `docker compose logs -f` running during testing
 4. **Review Audit:** Check audit logs after operations
 5. **Limit Access:** Use API tokens in shared environments

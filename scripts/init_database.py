@@ -131,25 +131,25 @@ async def main():
         # Bootstrap from environment only if no cluster exists
         settings = get_settings()
 
-        if settings.nexus_cluster_url and settings.nexus_username and settings.nexus_password:
+        if settings.ise_host_url and settings.ise_username and settings.ise_password:
             logger.info("No existing cluster found - bootstrapping from environment")
-            logger.info(f"Creating default cluster: {settings.nexus_cluster_url}")
+            logger.info(f"Creating default ISE deployment: {settings.ise_host_url}")
 
             await credential_manager.store_credentials(
                 name="default",
-                url=settings.nexus_cluster_url,
-                username=settings.nexus_username,
-                password=settings.nexus_password,
-                verify_ssl=settings.nexus_verify_ssl,
+                url=settings.ise_host_url,
+                username=settings.ise_username,
+                password=settings.ise_password,
+                verify_ssl=settings.ise_verify_ssl,
             )
 
             logger.info("Default cluster created successfully")
             logger.info("NOTE: Future changes should be made via Web UI, not .env file")
         else:
-            logger.warning("No Nexus Dashboard credentials found in environment")
+            logger.warning("No ISE credentials found in environment")
             logger.warning(
                 "Please configure a cluster via the Web UI or set "
-                "NEXUS_CLUSTER_URL, NEXUS_USERNAME, and NEXUS_PASSWORD for first-time setup"
+                "ISE_HOST_URL, ISE_USERNAME, and ISE_PASSWORD for first-time setup"
             )
 
     except Exception as e:

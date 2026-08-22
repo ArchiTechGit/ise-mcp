@@ -1,6 +1,6 @@
 # Multi-User Role-Based Access Control (RBAC)
 
-This document describes the multi-user authentication and authorization system for Nexus Dashboard MCP Server.
+This document describes the multi-user authentication and authorization system for Cisco ISE MCP Server.
 
 ## Architecture Overview
 
@@ -123,7 +123,7 @@ Each user has a unique API token stored in `users.api_token`. Configure Claude D
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
@@ -194,19 +194,19 @@ When a user connects via Claude Desktop:
 │                    MCP Tool Filtering                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  All Tools (1,371+)                                             │
+│  All Tools (1007)                                             │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │ manage_createVlan, manage_updateVlan, manage_deleteVlan, │   │
-│  │ analyze_getInsights, infra_deployPolicy, ...             │   │
+│  │ ise_networkdevice_create, ise_networkdevice_update, ise_networkdevice_delete, │   │
+│  │ ise_endpoint_getAll, ise_ancendpoint_apply, ...             │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                              │                                  │
 │                              │ User: network_operator           │
 │                              │ Roles: [Network Operator]        │
-│                              │ Allowed: [manage_*, analyze_*]   │
+│                              │ Allowed: [ise_networkdevice_*, ise_endpoint_*]   │
 │                              ▼                                  │
 │  Filtered Tools                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │ manage_createVlan, manage_updateVlan, analyze_getInsights│   │
+│  │ ise_networkdevice_create, ise_networkdevice_update, ise_endpoint_getAll│   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -234,7 +234,7 @@ When a user connects via Claude Desktop:
 
 ## Cluster Access Control
 
-The system enforces cluster-level access control in addition to operation-level permissions. Users can only interact with Nexus Dashboard clusters they are explicitly assigned to.
+The system enforces cluster-level access control in addition to operation-level permissions. Users can only interact with ISE deployments they are explicitly assigned to.
 
 ### Cluster Assignment Model
 
@@ -245,14 +245,14 @@ The system enforces cluster-level access control in addition to operation-level 
 │                                                                 │
 │  User attempts to execute MCP tool                              │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │ tools/call { name: "manage_getVlans",                    │   │
-│  │              arguments: { cluster: "prod-nexus" } }      │   │
+│  │ tools/call { name: "ise_networkdevice_getAll",                    │   │
+│  │              arguments: { cluster: "prod-ise" } }        │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                              │                                  │
 │                              ▼                                  │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │              Step 1: Operation Permission Check          │   │
-│  │  Does user have "manage_getVlans" in their roles?        │   │
+│  │  Does user have "ise_networkdevice_getAll" in their roles?        │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                              │                                  │
 │                              ▼                                  │
@@ -267,7 +267,7 @@ The system enforces cluster-level access control in addition to operation-level 
 │                              ▼                                  │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │              Step 3: Execute Tool                        │   │
-│  │  Forward request to Nexus Dashboard cluster              │   │
+│  │  Forward request to ISE deployment              │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -297,7 +297,7 @@ When cluster access is denied, users receive:
 {
   "error": {
     "code": -32600,
-    "message": "Cluster access denied for user 'john.doe': Access denied to cluster 'prod-nexus'"
+    "message": "Cluster access denied for user 'john.doe': Access denied to cluster 'prod-ise'"
   }
 }
 ```
@@ -338,9 +338,9 @@ Response:
     "id": 5,
     "username": "network_operator",
     "clusters": [
-      {"id": 1, "name": "prod-nexus"},
-      {"id": 2, "name": "dev-nexus"},
-      {"id": 3, "name": "test-nexus"}
+      {"id": 1, "name": "prod-ise"},
+      {"id": 2, "name": "dev-ise"},
+      {"id": 3, "name": "test-ise"}
     ]
   }
 }

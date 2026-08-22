@@ -1,7 +1,7 @@
 """Service for managing API guidance, workflows, and system prompts.
 
 This service provides methods for managing the API Guidance System, which enhances
-Claude's ability to work with Nexus Dashboard APIs through customizable guidance,
+Claude's ability to work with the Cisco ISE ERS API through customizable guidance,
 workflows, tool descriptions, and system prompts.
 """
 
@@ -861,7 +861,7 @@ class GuidanceService:
         async with self.db.session() as session:
             result = await session.execute(select(APIEndpoint))
             endpoints = result.scalars().all()
-            valid_ops = {f"{ep.api_name}_{ep.operation_id}" for ep in endpoints}
+            valid_ops = {ep.tool_name or ep.operation_id for ep in endpoints}
 
         step_output_keys: Dict[str, str] = {}
         prev_order = 0

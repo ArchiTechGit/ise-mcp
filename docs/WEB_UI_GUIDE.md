@@ -1,6 +1,6 @@
 # Web UI User Guide
 
-The Nexus Dashboard MCP Server includes a modern web interface for managing clusters, security settings, and viewing audit logs.
+The Cisco ISE MCP Server includes a modern web interface for managing clusters, security settings, and viewing audit logs.
 
 ## Getting Started
 
@@ -42,7 +42,7 @@ The main dashboard provides:
 
 **Path:** `/clusters`
 
-Manage Nexus Dashboard cluster connections with full CRUD operations:
+Manage ISE deployment connections with full CRUD operations:
 
 #### Features
 - **View All Clusters**: Table view showing name, URL, username, status, and SSL verification
@@ -56,7 +56,7 @@ Manage Nexus Dashboard cluster connections with full CRUD operations:
 1. Click "Add New Cluster"
 2. Fill in the form:
    - **Cluster Name**: Unique identifier (cannot be changed later)
-   - **URL**: Full URL to Nexus Dashboard (e.g., `https://nexus.example.com`)
+   - **URL**: Full URL to the ISE Primary PAN, including the ERS port (e.g., `https://ise.example.com:9060`)
    - **Username**: Admin username
    - **Password**: Admin password (stored securely in Vault)
    - **Verify SSL**: Check to validate SSL certificates
@@ -97,7 +97,7 @@ Configure operations that should always be read-only, even when edit mode is ena
 3. Operations appear as blue tags
 4. Click the × on any tag to remove it
 
-**Example use case:** Force operations like `get-sites`, `list-fabrics` to always be read-only.
+**Example use case:** Force operations like `ise_networkdevice_getAll`, `ise_sgt_getAll` to always be read-only.
 
 #### Blocked Operations
 
@@ -183,7 +183,7 @@ Displays detailed information for each operation:
 
 The top navigation bar is consistent across all pages:
 
-- **Nexus Dashboard MCP Server** (logo/home link)
+- **Cisco ISE MCP Server** (logo/home link)
 - **Dashboard**: Overview and statistics
 - **Clusters**: Cluster management
 - **Security**: Security settings
@@ -309,6 +309,6 @@ All components use Tailwind CSS. Modify `web-ui/src/app/globals.css` for global 
 ## Support
 
 For issues or questions:
-- Check the logs: `docker-compose logs nd_mcp_web_ui`
+- Check the logs: `docker-compose logs ise_mcp_web_ui`
 - Review API documentation: `/docs/API_REFERENCE.md`
 - Check backend health: `http://localhost:8000/health`

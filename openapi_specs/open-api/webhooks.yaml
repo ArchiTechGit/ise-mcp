@@ -1,0 +1,1088 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - Webhook
+  version: 1.0.0
+servers:
+  - url: https://10.106.141.112:4443
+    description: Inferred Url
+tags:
+  - name: webhooks-api-controller
+    description: the webhooks API
+paths:
+  /api/v1/webhooks:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Retrieve all the Webhooks present in system
+      description: This API retrieves all the Webhooks present in the system
+      operationId: getAllWebhooks
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookListResponseWrapper'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    put:
+      tags:
+        - WebhookConfigurations Services
+      summary: Update the Webhook Configuration status
+      description: This API updates the Webhook Configuration status for multiple configurations.
+      operationId: setWebhookConfigStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/WebhookStatusRequest'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookStatusResponseWrapper'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - WebhookConfigurations Services
+      summary: Create a new Webhook Configuration
+      description: This API creates a new Webhook Configuration.
+      operationId: createWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Unexpected Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Webhook with the same name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    delete:
+      tags:
+        - WebhookConfigurations Services
+      summary: Delete Bulk Webhook Configurations
+      description: This API removes multiple Webhook Configurations for the given list of IDs provided in the payload.
+      operationId: bulkDeleteWebhooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookIdsRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveWebhookResponseWrapper'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/webhooks/alarms:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Get All Alarm Rules
+      description: Retrieve all Alarm Rules available in the system
+      operationId: getAllAlarmRules
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleListResponseWrapper'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/webhooks/alarms/{id}:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Get Alarm Rule by ID
+      description: Retrieve an Alarm Rule using its unique ID
+      operationId: getAlarmRuleById
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier for the Alarm Rule
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleResponseWrapper'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Alarm Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/webhooks/{id}:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Retrieve the Webhook by its id
+      description: This API retrieves the Webhook by its id
+      operationId: getWebhookById
+      parameters:
+        - name: id
+          in: path
+          description: The id is used to fetch the Webhook Configuration
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    put:
+      tags:
+        - WebhookConfigurations Services
+      summary: Update the Webhook Configuration
+      description: This API updates the Webhook Configuration for the given ID.
+      operationId: updateWebhook
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier of the Webhook Configuration to update
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponseWrapper'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+    delete:
+      tags:
+        - WebhookConfigurations Services
+      summary: Remove the Webhook Configuration
+      description: This API removes the Webhook Configuration for the given ID.
+      operationId: removeWebhook
+      parameters:
+        - name: id
+          in: path
+          description: The id is used to fetch the Webhook Configuration to be removed
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveWebhookResponseWrapper'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/webhooks/{id}/alarms:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Get Alarms for a Specific Webhook
+      description: Retrieve all Alarms associated with a specific Webhook ID.
+      operationId: getAlarmsByWebhookId
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Webhook for which Alarms are to be retrieved.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleListResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleListResponseWrapper'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleListResponseWrapper'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleListResponseWrapper'
+                exampleSetFlag: false
+    put:
+      tags:
+        - WebhookConfigurations Services
+      summary: Associate Alarm Rule with a Webhook Configuration
+      description: This API associates specified Alarm Rule names with a Webhook Configuration identified by its ID.
+      operationId: associateAlarmRules
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Webhook Configuration to associate with Alarm Rule names
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlarmRuleIdsRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAlarmRlAssoResponseWrapper'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/webhooks/{id}/alarms/{alarmId}:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Get a Specific Alarm for a Webhook
+      description: Retrieve a specific Alarm associated with a given Webhook ID and Alarm ID.
+      operationId: getAlarmByWebhookAndAlarmId
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Webhook.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: alarmId
+          in: path
+          description: The ID of the specific Alarm to retrieve.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlarmRuleResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook or Alarm not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+  /api/v1/webhooks/{id}/deliveries:
+    get:
+      tags:
+        - WebhookConfigurations Services
+      summary: Retrieve the recent 10 Webhook Deliveries
+      description: This API retrieves the recent 10 Webhook Deliveries associated with the specified Webhook Configuration ID.
+      operationId: getRecentWebhookDeliveriesByConfigurationId
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Webhook Configuration
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentWebhookDeliveriesResponseWrapper'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Webhook Id not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                exampleSetFlag: false
+components:
+  schemas:
+    AlarmRuleIdsRequest:
+      title: AlarmRuleIdsRequest
+      type: object
+      properties:
+        alarmRuleIds:
+          type: array
+          description: A list of unique alarm rule IDs to be processed in the operation, such as removal or association with a webhook configuration.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Represents the request payload for operations that involve specifying a list of alarm rule IDs. This is typically used for removing or associating alarm rules with a webhook configuration.
+      exampleSetFlag: false
+    AlarmRuleListResponseWrapper:
+      title: AlarmRuleListResponseWrapper
+      type: object
+      properties:
+        rulesRes:
+          type: array
+          description: A list of alarm rules, each containing details such as ID, name, description, category, severity, and type ID.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AlarmRuleResponse'
+            exampleSetFlag: false
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for retrieving a list of alarm rules. This object contains an array of alarm rule details and the version of the API or response format being used.
+      exampleSetFlag: false
+    AlarmRuleResponse:
+      title: AlarmRuleResponse
+      type: object
+      properties:
+        category:
+          type: string
+          description: The category of the alarm rule
+          example: Posture
+          exampleSetFlag: true
+        description:
+          type: string
+          description: A detailed description of the alarm rule
+          example: Alarm Rule Description.
+          exampleSetFlag: true
+        id:
+          type: string
+          description: The id of Alarm Rule
+          example: 909uhjm
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the alarm rule
+          example: Critical Posture Alarm.
+          exampleSetFlag: true
+        severity:
+          type: string
+          description: The severity level of the alarm rule
+          example: High.
+          exampleSetFlag: true
+        typeId:
+          type: integer
+          description: The type ID of the alarm rule
+          format: int32
+          example: 2000
+          exampleSetFlag: true
+      description: Represents the response object for an alarm rule. This object provides detailed information about a specific alarm rule, including its unique identifier, name, description, category, severity, and type ID.
+      exampleSetFlag: false
+    AlarmRuleResponseWrapper:
+      title: AlarmRuleResponseWrapper
+      type: object
+      properties:
+        alarmRule:
+          $ref: '#/components/schemas/AlarmRuleResponse'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or response format.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for retrieving the details of a single alarm rule. This object contains the alarm rule details along with the version of the API or response format being used.
+      exampleSetFlag: false
+    ErrorResponse:
+      title: ErrorResponse
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Message'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the error response object for API operations. This object provides details about an error that occurred during the API call, including an error message and the version of the API or response format.
+      exampleSetFlag: false
+    Message:
+      title: Message
+      type: object
+      properties:
+        message:
+          type: string
+          description: A string containing a brief message about the result of the operation, such as "Success" for successful operations or an error message for failures.
+          example: Success
+          exampleSetFlag: true
+      description: Represents a simple message object used in API responses. This object typically contains a single message string that provides information about the success, error, or status of an operation.
+      exampleSetFlag: false
+    RecentWebhookDeliveriesResponse:
+      title: RecentWebhookDeliveriesResponse
+      type: object
+      properties:
+        alarmAuditId:
+          type: string
+          description: The ID of the associated alarm audit record
+          example: abcde12345
+          exampleSetFlag: true
+        alarmId:
+          type: string
+          description: The unique identifier of the alarm associated with the delivery
+          example: '12345'
+          exampleSetFlag: true
+        deliveredAt:
+          type: string
+          description: The timestamp when the delivery was delivered in UTC time format
+          exampleSetFlag: true
+        failureReason:
+          type: string
+          description: The reason for delivery failure, if applicable
+          example: Network Error
+          exampleSetFlag: true
+        httpResponseCode:
+          type: integer
+          description: The http response code
+          format: int32
+          example: 200
+          exampleSetFlag: true
+        id:
+          type: string
+          description: The unique identifier of the webhook delivery record
+          example: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+          exampleSetFlag: true
+        latency:
+          type: string
+          description: Difference of Delivered and Triggered time
+          example: 5 seconds
+          exampleSetFlag: true
+        status:
+          type: string
+          description: The status of the webhook delivery
+          example: Success
+          exampleSetFlag: true
+          enum:
+            - Failed
+            - Success
+        triggeredAt:
+          type: string
+          description: The timestamp when the delivery was triggered in UTC time format
+          exampleSetFlag: true
+        webhookConfigurationId:
+          type: string
+          description: The ID of the associated webhook configuration
+          example: abcde12345
+          exampleSetFlag: true
+        webhookPayload:
+          type: object
+          description: The payload delivered by the webhook
+          example: '{"key1":"value1","key2":"value2"}'
+          exampleSetFlag: true
+      description: Represents the details of a recent webhook delivery. This object provides comprehensive information about the delivery, including the associated alarm, payload, status, response codes, timestamps, and any failure reasons.
+      exampleSetFlag: false
+    RecentWebhookDeliveriesResponseWrapper:
+      title: RecentWebhookDeliveriesResponseWrapper
+      type: object
+      properties:
+        deliveries:
+          type: array
+          description: A list of recent webhook delivery records, including details such as payload, status, response code, and timestamps.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/RecentWebhookDeliveriesResponse'
+            exampleSetFlag: false
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for retrieving recent webhook delivery records. This object contains a list of recent webhook delivery details and the version of the API or response format being used.
+      exampleSetFlag: false
+    RemoveWebhookResponse:
+      title: RemoveWebhookResponse
+      type: object
+      properties:
+        code:
+          type: integer
+          description: The status code of the removal operation. Typically, `200` indicates success.
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          description: A message describing the outcome of the operation, such as confirmation of successful removal or details about any errors encountered.
+          example: Webhook Removed Successfully
+          exampleSetFlag: true
+      description: Represents the response object for the operation to remove a webhook configuration. This object provides the status code of the operation and a message indicating whether the removal was successful or if an issue occurred.
+      exampleSetFlag: false
+    RemoveWebhookResponseWrapper:
+      title: RemoveWebhookResponseWrapper
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/RemoveWebhookResponse'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for the operation to remove a webhook configuration. This wrapper includes the response object with details about the removal operation and the version of the API or response format.
+      exampleSetFlag: false
+    ValidationErrorResponse:
+      title: ValidationErrorResponse
+      type: object
+      properties:
+        error:
+          type: object
+          additionalProperties:
+            type: string
+            exampleSetFlag: false
+          description: A map of validation errors, where each key is a field name and the value is the error message for that field.
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the validation error response object for API operations. This object provides details about validation errors that occurred during the API call, including a map of field-specific error messages and the version of the API or response format.
+      exampleSetFlag: false
+    WebhookAlarmResponse:
+      title: WebhookAlarmResponse
+      type: object
+      properties:
+        alarmRules:
+          type: array
+          description: A list of alarm rules associated with the webhook configuration.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/AlarmRuleResponse'
+            exampleSetFlag: false
+        id:
+          type: string
+          description: The unique identifier of the webhook configuration.
+          example: 78jhgghh
+          exampleSetFlag: true
+      description: Represents the response object for operations involving webhook configurations and their associated alarm rules. This object includes the unique identifier of the webhook and a list of alarm rules associated with it.
+      exampleSetFlag: false
+    WebhookAlarmRlAssoResponseWrapper:
+      title: WebhookAlarmRlAssoResponseWrapper
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/WebhookAlarmResponse'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for operations that associate alarm rules with a webhook configuration. This wrapper includes the detailed response object with the updated webhook and alarm rule associations, as well as the API version information.
+      exampleSetFlag: false
+    WebhookIdsRequest:
+      title: WebhookIdsRequest
+      required:
+        - ids
+      type: object
+      properties:
+        ids:
+          type: array
+          description: List of webhook IDs to be removed.
+          example: '["id1","id2","id3"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Represents the request payload for operations that involve specifying a list of webhook IDs. This is typically used for removing multiple webhooks in a single operation.
+      exampleSetFlag: false
+    WebhookListResponseWrapper:
+      title: WebhookListResponseWrapper
+      type: object
+      properties:
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+        webhookList:
+          type: array
+          description: A list of webhook configurations, including details such as ID, name, URL, secret, status, and certificate validation settings.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/WebhookResponse'
+            exampleSetFlag: false
+      description: Represents the response wrapper for retrieving a list of webhook configurations. This object contains an array of webhook configuration details and the version of the API or response format being used.
+      exampleSetFlag: false
+    WebhookRequest:
+      title: WebhookRequest
+      type: object
+      properties:
+        ignoreCertificate:
+          type: boolean
+          description: Indicates if the URL's certificate should be validated against the trusted store
+          example: true
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The unique name of the webhook configuration. Must be between 1 and 128 characters.
+          example: MyWebhook
+          exampleSetFlag: true
+        secret:
+          type: string
+          description: The secret key used for authentication
+          example: mySecret
+          exampleSetFlag: true
+        status:
+          type: string
+          description: The operational status of the webhook. Can be either `ENABLED` or `DISABLED`.
+          example: ENABLED
+          exampleSetFlag: true
+          enum:
+            - DISABLED
+            - ENABLED
+        url:
+          type: string
+          description: Must be a valid URL starting with https
+          example: https://example.com/webhook
+          exampleSetFlag: true
+      description: Represents the request payload for creating or updating a Webhook Configuration. This object contains all the necessary attributes required to define a webhook, including its name, URL, secret, status, and certificate validation settings.
+      exampleSetFlag: false
+    WebhookResponse:
+      title: WebhookResponse
+      type: object
+      properties:
+        alarmRules:
+          type: array
+          description: A list of alarm rule IDs associated with the webhook configuration. Each entry represents the primary ID (`alarmId`) of an alarm rule.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        averageLatency24Hrs:
+          type: string
+          description: The average of all the latencies of the Webhook invocations in the last 24 hours.
+          example: ENABLED
+          exampleSetFlag: true
+        hits24Hrs:
+          type: integer
+          description: Number of times the Webhook has been invoked in the last 24 Hours.
+          format: int32
+          exampleSetFlag: true
+        id:
+          type: string
+          description: The unique identifier of the webhook configuration.
+          example: 78jhgghh
+          exampleSetFlag: true
+        ignoreCertificate:
+          type: boolean
+          description: Indicates whether the webhook's URL certificate is validated against the trusted store.
+          example: true
+          exampleSetFlag: true
+        lastTriggeredTime:
+          type: string
+          description: The Latest time stamp of when the Webhook was invoked in UTC time format.
+          example: ENABLED
+          exampleSetFlag: true
+        name:
+          type: string
+          description: The name of the webhook configuration.
+          example: MyWebhook
+          exampleSetFlag: true
+        secret:
+          type: string
+          description: The secret key associated with the webhook for authentication purposes.
+          example: mySecret
+          exampleSetFlag: true
+        status:
+          type: string
+          description: The operational status of the webhook. Possible values are `ENABLED` or `DISABLED`.
+          example: ENABLED
+          exampleSetFlag: true
+        url:
+          type: string
+          description: The URL where webhook payloads are sent. Must be a valid HTTPS URL.
+          example: https://example.com/webhook
+          exampleSetFlag: true
+      description: 'Represents the response object for webhook-related API operations. This object contains all the attributes of a webhook configuration,  including its unique identifier, name, URL, secret key, status, and certificate validation settings. '
+      exampleSetFlag: false
+    WebhookResponseWrapper:
+      title: WebhookResponseWrapper
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/WebhookResponse'
+          exampleSetFlag: true
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+      description: Represents the response wrapper for webhook-related API operations. It contains the detailed response object for the webhook operation along with the version of the API or response format.
+      exampleSetFlag: false
+    WebhookStatusRequest:
+      title: WebhookStatusRequest
+      required:
+        - id
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the webhook configuration.
+          exampleSetFlag: true
+        status:
+          type: boolean
+          description: The status to update for the webhook configuration.
+          example: true
+          exampleSetFlag: true
+      description: Represents the request payload for updating the status of a webhook configuration. This object includes the unique identifier of the webhook and the new status (enabled or disabled) to be applied.
+      exampleSetFlag: false
+    WebhookStatusResponse:
+      title: WebhookStatusResponse
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the webhook configuration.
+          example: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+          exampleSetFlag: true
+        status:
+          type: string
+          description: The operational status of the webhook. Possible values are `ENABLED` or `DISABLED`.
+          example: ENABLED
+          exampleSetFlag: true
+      description: Represents the response object for a webhook configuration status update operation. This object includes the unique identifier of the webhook and its updated status.
+      exampleSetFlag: false
+    WebhookStatusResponseWrapper:
+      title: WebhookStatusResponseWrapper
+      type: object
+      properties:
+        version:
+          type: string
+          description: The version of the API or the response format being used.
+          example: 1.0.0
+          exampleSetFlag: true
+        webhookList:
+          type: array
+          description: A list of webhook configurations, including details such as ID and status.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/WebhookStatusResponse'
+            exampleSetFlag: false
+      description: Represents the response wrapper for operations that update the status of webhook configurations. This wrapper includes a list of webhook configurations with their updated statuses and the API version information.
+      exampleSetFlag: false

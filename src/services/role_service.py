@@ -362,6 +362,8 @@ class RoleService:
                 search_term = f"%{search.lower()}%"
                 query = query.where(
                     APIEndpoint.operation_id.ilike(search_term) |
+                    APIEndpoint.tool_name.ilike(search_term) |
+                    APIEndpoint.path.ilike(search_term) |
                     APIEndpoint.http_method.ilike(search_term)
                 )
 
@@ -379,7 +381,9 @@ class RoleService:
             operations = []
             for ep in endpoints:
                 operations.append({
-                    "name": f"{ep.api_name}_{ep.operation_id}",
+                    # The MCP tool name is what RBAC matches on
+                    "name": ep.tool_name or ep.operation_id,
+                    "operation_id": ep.operation_id,
                     "method": ep.http_method,
                     "path": ep.path,
                     "api_name": ep.api_name,
@@ -408,7 +412,8 @@ class RoleService:
                 if ep.api_name not in grouped:
                     grouped[ep.api_name] = []
                 grouped[ep.api_name].append({
-                    "name": f"{ep.api_name}_{ep.operation_id}",
+                    "name": ep.tool_name or ep.operation_id,
+                    "operation_id": ep.operation_id,
                     "method": ep.http_method,
                     "path": ep.path,
                     "description": ep.description or f"{ep.http_method} {ep.path}",

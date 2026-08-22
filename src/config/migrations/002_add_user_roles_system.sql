@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS roles (
 CREATE TABLE IF NOT EXISTS role_operations (
     id SERIAL PRIMARY KEY,
     role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    operation_name VARCHAR(255) NOT NULL,  -- e.g., "manage_createVlan"
+    operation_name VARCHAR(255) NOT NULL,  -- e.g., "ise_networkdevice_create"
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(role_id, operation_name)
 );

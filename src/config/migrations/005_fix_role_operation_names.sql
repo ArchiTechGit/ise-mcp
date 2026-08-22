@@ -1,20 +1,17 @@
--- Migration 005: Fix role operation names to include API prefix
+-- Migration 005: Align role operation names with MCP tool names
 --
--- Root cause: Operations stored in role_operations used unprefixed names
--- (e.g., "createVlan") but MCP tool names use "{api_name}_{operation_id}"
--- format (e.g., "manage_createVlan"). This caused role-based filtering to
--- never match, making manually-created roles ineffective.
+-- Historically this migration prefixed role_operations entries with the API
+-- name, because tool names were "{api_name}_{operation_id}".
+--
+-- That no longer holds for the ISE ERS API: the specification declares no
+-- operationId, so operation IDs are synthesized from each operation's tag and
+-- summary (see src/core/tool_naming.py). Blindly prefixing would produce names
+-- that never match a real tool, silently disabling role-based filtering.
+--
+-- Migration 011 adds api_endpoints.tool_name and sync_api_endpoints()
+-- populates it, so the mapping is resolved there instead. This migration now
+-- only removes duplicate role_operations rows left over from earlier schemas.
 
--- Update existing role_operations that have unprefixed names by looking up
--- the api_name from the api_endpoints table
-UPDATE role_operations ro
-SET operation_name = ep.api_name || '_' || ro.operation_name
-FROM api_endpoints ep
-WHERE ro.operation_name = ep.operation_id
-  AND ro.operation_name NOT LIKE '%\_%';
-
--- Handle potential duplicates after prefix update (if somehow both prefixed
--- and unprefixed versions exist)
 DELETE FROM role_operations
 WHERE id NOT IN (
     SELECT MIN(id)

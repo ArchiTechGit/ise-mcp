@@ -1,4 +1,4 @@
-"""Configuration settings for Nexus Dashboard MCP Server."""
+"""Configuration settings for the Cisco ISE MCP Server."""
 
 import os
 from functools import lru_cache
@@ -20,26 +20,46 @@ class Settings(BaseSettings):
 
     # Database Configuration
     database_url: str = Field(
-        default="postgresql://mcp_user:changeme@localhost:5432/nexus_mcp",
+        default="postgresql://mcp_user:changeme@localhost:5432/ise_mcp",
         description="PostgreSQL database connection URL"
     )
 
-    # Nexus Dashboard Configuration
-    nexus_cluster_url: str = Field(
-        default="https://192.168.70.101",
-        description="Nexus Dashboard cluster URL"
+    # Cisco ISE Configuration
+    ise_host_url: str = Field(
+        default="https://192.168.70.101:9060",
+        description=(
+            "ISE Primary PAN base URL, including the ERS port "
+            "(ERS listens on 9060, not 443)"
+        )
     )
-    nexus_username: str = Field(
-        default="admin",
-        description="Nexus Dashboard username"
+    ise_username: str = Field(
+        default="ersadmin",
+        description="ERS admin username (must belong to an ERS Admin or ERS Operator group)"
     )
-    nexus_password: str = Field(
+    ise_password: str = Field(
         default="",
-        description="Nexus Dashboard password"
+        description="ERS admin password"
     )
-    nexus_verify_ssl: bool = Field(
+    ise_verify_ssl: bool = Field(
         default=False,
-        description="Verify SSL certificates for Nexus Dashboard connections"
+        description="Verify SSL certificates for ISE connections"
+    )
+    ise_cts_port: int = Field(
+        default=9063,
+        description=(
+            "Port serving the TrustSec (CTS) subset of the ERS API. Requests to "
+            "/ctsapi/ paths are re-pointed here; set to 0 to disable when ISE is "
+            "behind a proxy that serves both on one port."
+        )
+    )
+    ise_admin_port: int = Field(
+        default=443,
+        description=(
+            "Port of the ISE API gateway, which serves the Open API "
+            "(/api/v1/...) and the admin family (/admin/API/..., covering the "
+            "API Service and the Monitoring API). Requests to those paths are "
+            "re-pointed here; set to 0 to disable."
+        )
     )
 
     # Security Configuration
@@ -77,7 +97,7 @@ class Settings(BaseSettings):
     # API Configuration
     api_timeout: int = Field(
         default=30,
-        description="Nexus Dashboard API request timeout in seconds"
+        description="ISE API request timeout in seconds"
     )
     api_retry_attempts: int = Field(
         default=3,

@@ -52,11 +52,19 @@ logs/
 htmlcov/
 
 # Next.js
+# This project's UI lives in web-ui/, not web/ - the web/ entries are kept for
+# any legacy checkout, but web-ui/ is what actually needs ignoring.
 web/.next/
 web/out/
 web/node_modules/
 web/.turbo
 web/build
+web-ui/.next/
+web-ui/out/
+web-ui/node_modules/
+web-ui/.turbo
+web-ui/build
+node_modules/
 
 # Misc
 *.bak

@@ -1,4 +1,4 @@
-# Nexus Dashboard MCP Server - User Guide
+# Cisco ISE MCP Server - User Guide
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -15,14 +15,14 @@
 
 ## Overview
 
-The **Nexus Dashboard MCP Server** is a Model Context Protocol (MCP) server that provides programmatic access to Cisco Nexus Dashboard APIs through Claude AI. It includes a comprehensive web-based management interface for configuration, monitoring, and auditing.
+The **Cisco ISE MCP Server** is a Model Context Protocol (MCP) server that provides programmatic access to Cisco ISE APIs through Claude AI. It includes a comprehensive web-based management interface for configuration, monitoring, and auditing.
 
 ### What Does It Do?
 
-This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infrastructure, enabling:
+This tool acts as a bridge between Claude AI and your Cisco ISE infrastructure, enabling:
 
-- **AI-Powered Network Operations**: Use natural language to query and manage your network fabric
-- **Centralized Management**: Single interface to manage multiple Nexus Dashboard clusters
+- **AI-Powered Access Control**: Use natural language to query and manage network access, identities, and TrustSec policy
+- **Centralized Management**: Single interface to manage multiple ISE deployments
 - **Audit & Compliance**: Complete audit trail of all operations with client IP tracking
 - **Security Controls**: Granular permission management and read-only mode
 - **Health Monitoring**: Real-time status of all services and components
@@ -42,7 +42,7 @@ This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infr
        │ MCP Protocol
        │
 ┌──────┴──────────────────────────────────┐
-│    Nexus Dashboard MCP Server           │
+│    Cisco ISE MCP Server           │
 │                                          │
 │  ┌────────────┐      ┌────────────┐    │
 │  │ MCP Server │◄────►│  Web API   │    │
@@ -60,10 +60,10 @@ This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infr
 │  └─────────────────┘                   │
 └─────────────────────────────────────────┘
        │
-       │ Nexus Dashboard APIs
+       │ Cisco ISE APIs
        │
 ┌──────┴──────────────────────────────────┐
-│    Cisco Nexus Dashboard Clusters       │
+│    Cisco ISE Clusters       │
 │                                          │
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐ │
 │  │ Cluster │  │ Cluster │  │ Cluster │ │
@@ -76,8 +76,8 @@ This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infr
 
 1. **MCP Server** (Port: stdio)
    - Implements Model Context Protocol
-   - Loads 1,371 operations from Nexus Dashboard OpenAPI specs
-   - Executes API calls to Nexus Dashboard clusters
+   - Loads 1,007 operations from 33 Cisco ISE OpenAPI specs (ERS, Open API, MnT, API Service)
+   - Executes API calls to ISE deployments
    - Logs all operations to audit database
 
 2. **Web API** (Port: 8002)
@@ -91,7 +91,7 @@ This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infr
    - Real-time health monitoring
    - Audit log viewer with export
 
-4. **PostgreSQL Database** (Port: 15432)
+4. **PostgreSQL Database** (Port: 15436)
    - Stores cluster configurations
    - Audit log persistence
    - Security settings
@@ -102,7 +102,7 @@ This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infr
 ## Key Features
 
 ### 1. Multi-Cluster Management
-- Connect to multiple Nexus Dashboard instances
+- Connect to multiple Cisco ISE instances
 - Encrypted credential storage (Fernet encryption)
 - SSL verification options
 - Test connectivity before saving
@@ -133,13 +133,23 @@ This tool acts as a bridge between Claude AI and your Cisco Nexus Dashboard infr
 - Response time metrics
 - Auto-refresh every 30 seconds
 
-### 5. 1,371 Operations Available
-Supports all Nexus Dashboard DCNM APIs including:
-- **Manage API** (497 operations): Fabrics, switches, VLANs, VRFs, networks, interfaces
-- **Analyze API** (316 operations): Telemetry, insights, anomalies, compliance
-- **Infra API** (280 operations): Cluster, system health, licensing, user management
-- **OneManage API** (132 operations): Multi-cluster fabric handling, device inventory, topology
-- **Orchestrator API** (146 operations): Multi-site policy orchestration and segmentation/security enforcement
+### 5. 1,007 Operations Available
+Covers the whole ISE ERS API, grouped by resource family:
+- **Guest** (90 operations): Guest users and types, sponsor groups, portals
+- **Identity** (74 operations): Internal users, identity groups, endpoints, profiling
+- **TrustSec** (69 operations): SGTs, SGACLs, egress matrix, SG mappings, SXP
+- **Network** (58 operations): Network access devices, device groups, RADIUS/TACACS+ servers
+- **Deployment** (53 operations): Nodes, certificates, Active Directory, LDAP, pxGrid
+- **Policy** (40 operations): Authorization profiles, dACLs, allowed protocols
+- **Threat** (11 operations): ANC policies and endpoint containment
+
+Beyond ERS: the **Open API** (30 specs, 590 operations) adds policy sets and
+authorization rules, TrustSec classification policy, certificates, deployment and
+upgrade; **Monitoring / MnT** (20 operations) reports live session state; and the
+**API Service** (2 operations) toggles the Open API.
+
+> At 1,007 tools, assign every non-admin user a tool profile — there is one per
+> category. The Administrator role bypasses filtering and sees everything.
 
 ---
 
@@ -147,8 +157,8 @@ Supports all Nexus Dashboard DCNM APIs including:
 
 ### Prerequisites
 - Docker and Docker Compose installed
-- Cisco Nexus Dashboard cluster(s) accessible
-- Admin credentials for Nexus Dashboard
+- Cisco ISE cluster(s) accessible
+- Admin credentials for Cisco ISE
 
 ### Quick Start
 
@@ -167,7 +177,7 @@ Supports all Nexus Dashboard DCNM APIs including:
    - Click "Add New Cluster"
    - Fill in details:
      - Name: `production` (friendly name)
-     - URL: `https://nexus-dashboard.example.com` (your Nexus Dashboard IP)
+     - URL: `https://ise.example.com:9060` (your Cisco ISE IP)
      - Username: `admin`
      - Password: (your password)
      - SSL Verification: OFF (if using self-signed certs)
@@ -181,8 +191,8 @@ Supports all Nexus Dashboard DCNM APIs including:
    - Click "Save Configuration"
 
 5. **Use with Claude**:
-   - Claude AI can now query your Nexus Dashboard
-   - Example: "Show me all fabrics in my production cluster"
+   - Claude AI can now query your Cisco ISE
+   - Example: "Show me all network devices in my production ISE deployment"
    - MCP Server will execute the API call and return results
 
 ---
@@ -195,7 +205,7 @@ Supports all Nexus Dashboard DCNM APIs including:
 - Links to main features
 
 ### Clusters Page
-**Purpose**: Manage Nexus Dashboard cluster connections
+**Purpose**: Manage ISE deployment connections
 
 **Features**:
 - View all configured clusters
@@ -222,9 +232,9 @@ Supports all Nexus Dashboard DCNM APIs including:
 - Empty list = All operations allowed (when edit mode ON)
 - Populated list = Only listed operations allowed
 - Example operations:
-  - `manage_createVlan`
-  - `manage_deleteNetwork`
-  - `analyze_getInsights`
+  - `ise_networkdevice_create`
+  - `ise_identitygroup_delete`
+  - `ise_endpoint_getAll`
 
 **Workflow**:
 1. Enable/disable edit mode using toggle
@@ -400,14 +410,14 @@ Result: All operations allowed
 **Scenario 3: Limited Write Access**
 ```
 Edit Mode: ON
-Allowed Operations: [manage_createVlan, manage_deleteVlan]
-Result: Only VLAN operations allowed
+Allowed Operations: [ise_networkdevice_create, ise_networkdevice_delete]
+Result: Only network device operations allowed
 ```
 
 **Scenario 4: Specific Read Access**
 ```
 Edit Mode: OFF
-Allowed Operations: [analyze_getInsights]
+Allowed Operations: [ise_endpoint_getAll]
 Result: Only insights analysis allowed
 ```
 
@@ -424,10 +434,10 @@ Result: Only insights analysis allowed
 | Timestamp | When operation occurred | `2025-11-23 12:25:45` |
 | Cluster ID | Database ID of cluster | `1` |
 | Cluster Name | Friendly name | `production` |
-| Cluster Endpoint | IP/URL of cluster | `https://nexus-dashboard.example.com` |
+| Cluster Endpoint | IP/URL of cluster | `https://ise.example.com:9060` |
 | Client IP | Source IP of request | `10.0.1.50` |
 | User ID | (Future: username) | `null` |
-| Operation ID | OpenAPI operation | `manage_createVlan` |
+| Operation ID | OpenAPI operation | `ise_networkdevice_create` |
 | HTTP Method | Request method | `POST` |
 | Path | API endpoint path | `/api/dcnm/vlans` |
 | Request Body | JSON payload | `{"vlanId": "100"}` |
@@ -498,7 +508,7 @@ Find all operations from IP 10.0.1.50:
 
 **1. Security Investigation**
 ```
-Scenario: Unauthorized VLAN deletion
+Scenario: Unauthorized network device deletion
 1. Filter audit logs for deleteVlan operations
 2. Check Client IP column
 3. Identify IP: 10.0.2.99 (not from known subnet)
@@ -541,8 +551,8 @@ docker-compose ps
 **Check logs**:
 ```bash
 docker-compose logs postgres
-docker-compose logs nd_mcp_web_api
-docker-compose logs nd_mcp_web_ui
+docker-compose logs ise_mcp_web_api
+docker-compose logs ise_mcp_web_ui
 ```
 
 **Common Issues**:
@@ -559,20 +569,20 @@ docker-compose ps
 
 **Check web-ui logs**:
 ```bash
-docker-compose logs nd_mcp_web_ui
+docker-compose logs ise_mcp_web_ui
 ```
 
 **Try rebuilding**:
 ```bash
-docker-compose build nd_mcp_web_ui
-docker-compose up -d nd_mcp_web_ui
+docker-compose build ise_mcp_web_ui
+docker-compose up -d ise_mcp_web_ui
 ```
 
 ### Cluster Connection Failed
 
 **Test from command line**:
 ```bash
-curl -k -u admin:password https://nexus-dashboard.example.com/apidocs/
+curl -k -u admin:password https://ise.example.com:9060/apidocs/
 ```
 
 **Common Issues**:
@@ -603,7 +613,7 @@ curl -k -u admin:password https://nexus-dashboard.example.com/apidocs/
    - Make a test query through Claude
    - Check if MCP server is running:
      ```bash
-     docker-compose ps nd_mcp_mcp_server
+     docker-compose ps ise_mcp_mcp_server
      ```
 
 ### Audit Logs Missing Client IP
@@ -623,7 +633,7 @@ curl -k -u admin:password https://nexus-dashboard.example.com/apidocs/
 |---------|------|---------|
 | Web UI | 7001 | Next.js web interface |
 | Web API | 8002 | FastAPI REST API |
-| PostgreSQL | 15432 | Database |
+| PostgreSQL | 15436 | Database |
 | MCP Server | stdio | Model Context Protocol (no port) |
 
 ---
@@ -644,7 +654,7 @@ curl -k -u admin:password https://nexus-dashboard.example.com/apidocs/
 ### Tables
 
 **clusters**:
-- Stores Nexus Dashboard cluster configurations
+- Stores ISE deployment configurations
 - Credentials encrypted with Fernet
 
 **security_config**:

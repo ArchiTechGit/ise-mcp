@@ -1,21 +1,36 @@
-# Nexus Dashboard MCP Server
+# Cisco ISE MCP Server
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](requirements.txt)
 [![Next.js](https://img.shields.io/badge/Next.js-16.0-black?logo=next.js&logoColor=white)](web-ui/package.json)
 
-A comprehensive Model Context Protocol (MCP) server for Cisco Nexus Dashboard, enabling AI agents like Claude to interact with Nexus Dashboard APIs for intelligent network automation and management.
+A comprehensive Model Context Protocol (MCP) server for Cisco Identity Services Engine (ISE), enabling AI agents like Claude to interact with the ISE External RESTful Services (ERS) API for intelligent network access control, identity, and TrustSec automation.
 
 ## Features
 
 ### Core Capabilities
-- **Complete API Coverage**: Access to 1,371 operations across 5 Nexus Dashboard APIs
-  - Manage API (497 operations): Fabrics, switches, VLANs, VRFs, networks, interfaces
-  - Analyze API (316 operations): Telemetry, insights, anomalies, compliance
-  - Infrastructure API (280 operations): Cluster, system health, licensing, user management
-  - OneManage API (132 operations): Multi-cluster fabric handling, device inventory, topology
-  - Orchestrator API (146 operations): Multi-site policy orchestration and segmentation/security enforcement
+- **Complete API Coverage**: Access to **1,007 operations across 33 ISE APIs** — 395 in ERS (by resource family below), 590 across the 30 Open API specs, 20 in Monitoring (MnT), and 2 in the API Service
+  - Network (58 operations): Network access devices, device groups, RADIUS and TACACS+ servers and sequences
+  - Identity (74 operations): Internal users, identity groups, endpoints, endpoint groups, profiling, REST ID stores
+  - Policy (40 operations): Authorization profiles, downloadable ACLs, allowed protocols, certificate profiles
+  - TrustSec (69 operations): SGTs, SGACLs, egress matrix, SG mappings, SXP bindings, CTS queries
+  - Guest (90 operations): Guest users and types, sponsor groups, and the guest, sponsor, hotspot, BYOD and self-registration portals
+  - Threat (11 operations): ANC policies and endpoint containment actions
+  - Deployment (53 operations): Nodes, certificates, Active Directory, LDAP, pxGrid, support bundles
+
+  And beyond ERS:
+  - **Open API** (30 specs, 590 operations): policy sets and authorization rules, TrustSec
+    classification policy, certificates, deployment, upgrade, backup, licensing, alarms,
+    webhooks, pxGrid, and more
+  - **Monitoring / MnT** (20 operations): active sessions, posture and profiler counts,
+    session lookup by MAC, IP or username — the only live-state API here
+  - **API Service** (2 operations): enables or disables the Open API
+
+  > **Tool profiles matter at this scale.** 1,007 tools is well beyond what an MCP
+  > client surfaces (typically 40–128). There is one profile per category, and the
+  > Administrator role bypasses filtering entirely — see
+  > [docs/AVAILABLE_OPERATIONS.md](docs/AVAILABLE_OPERATIONS.md#tool-profiles).
 
 - **Security First**:
   - HTTPS with self-signed certificates (auto-generated)
@@ -30,7 +45,7 @@ A comprehensive Model Context Protocol (MCP) server for Cisco Nexus Dashboard, e
   - User and role management
   - Real-time system health monitoring
   - Audit log viewer with CSV export
-  - Cluster management with connection testing
+  - ISE deployment management with connection testing
   - Security configuration dashboard
   - API guidance and workflow management
 
@@ -45,14 +60,16 @@ A comprehensive Model Context Protocol (MCP) server for Cisco Nexus Dashboard, e
 ### Prerequisites
 
 - **Docker** 20.10+ and Docker Compose 2.0+
-- **Cisco Nexus Dashboard** 4.1+ with NDFC 12.x
+- **Cisco ISE** 3.1+ with the ERS service enabled
+  - Administration > System > Settings > API Settings > ERS Settings -> enable **ERS (Read/Write)** on the Primary PAN
+  - An admin account in the **ERS Admin** group (read/write) or **ERS Operator** group (read-only)
 - **Node.js** 18+ (for remote MCP access via mcp-remote)
 
 ### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/beye91/nexus-dashboard-mcp.git
-cd nexus-dashboard-mcp
+git clone https://github.com/ArchiTechGit/ise-mcp.git
+cd ise-mcp
 
 # Create environment file with your server's IP address
 echo "CERT_SERVER_IP=YOUR_SERVER_IP" > .env
@@ -69,16 +86,16 @@ docker compose up -d --build
 
 This will:
 - Generate self-signed SSL certificates automatically
-- Start PostgreSQL database (port 15432)
-- Start Web API with HTTPS (port 8444)
-- Start Web UI with HTTPS (port 7443)
+- Start PostgreSQL database (port 15436)
+- Start Web API with HTTPS (port 8448)
+- Start Web UI with HTTPS (port 7447)
 - Start MCP Server for Claude integration
 
 ### 3. Initial Setup
 
 1. Open your browser and navigate to:
    ```
-   https://YOUR_SERVER_IP:7443
+   https://YOUR_SERVER_IP:7447
    ```
 
 2. Accept the self-signed certificate warning
@@ -88,12 +105,13 @@ This will:
    - Email: `admin@example.com`
    - Password: `Admin123!` (or your preferred password)
 
-4. Configure your first cluster:
-   - Navigate to **Clusters** page
+4. Configure your first ISE deployment:
+   - Navigate to **ISE Deployments** page
    - Click "Add New Cluster"
-   - Enter your Nexus Dashboard details
+   - Enter the Primary PAN URL **including the ERS port**, e.g. `https://ise.example.com:9060`
+   - Enter the ERS admin username and password
    - Click "Test Connection" to verify
-   - Save the cluster configuration
+   - Save the deployment configuration
 
 ### 4. Configure Claude Desktop
 
@@ -108,11 +126,11 @@ Add to your Claude Desktop configuration:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://YOUR_SERVER_IP:8444/mcp/sse",
+        "https://YOUR_SERVER_IP:8448/mcp/sse",
         "--transport",
         "sse-only"
       ]
@@ -130,12 +148,12 @@ Replace `YOUR_SERVER_IP` with your server's IP address.
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "docker",
       "args": [
         "exec",
         "-i",
-        "nd_mcp_mcp_server",
+        "ise_mcp_mcp_server",
         "python",
         "src/main.py"
       ]
@@ -144,7 +162,7 @@ Replace `YOUR_SERVER_IP` with your server's IP address.
 }
 ```
 
-Restart Claude Desktop, and you'll see the Nexus Dashboard tools available!
+Restart Claude Desktop, and you'll see the ISE tools available!
 
 ## Architecture
 
@@ -156,7 +174,7 @@ Restart Claude Desktop, and you'll see the Nexus Dashboard tools available!
                            |
            +---------------+---------------+
            |                               |
-      Port 7443                       Port 8444
+      Port 7447                       Port 8448
            |                               |
 +----------+----------+    +---------------+--------------+
 |       Web UI        |    |           Web API            |
@@ -169,8 +187,8 @@ Restart Claude Desktop, and you'll see the Nexus Dashboard tools available!
                     +----------------------+----------------------+
                     |                      |                      |
            +--------+--------+    +--------+--------+    +--------+--------+
-           |   PostgreSQL    |    |   MCP Server    |    | Nexus Dashboard |
-           |   Port 15432    |    |   (stdio)       |    |   Clusters      |
+           |   PostgreSQL    |    |   MCP Server    |    |   Cisco ISE     |
+           |   Port 15436    |    |   (stdio)       |    |  Deployments    |
            +-----------------+    +-----------------+    +-----------------+
 
 Certificate Volume: /app/certs/ (auto-generated on first startup)
@@ -180,10 +198,24 @@ Certificate Volume: /app/certs/ (auto-generated on first startup)
 
 | Service | Port | Protocol | Description |
 |---------|------|----------|-------------|
-| Web UI | 7443 | HTTPS | Management interface |
-| Web API | 8444 | HTTPS | REST API and MCP SSE endpoint |
-| PostgreSQL | 15432 | TCP | Database (mapped from 5432) |
-| Internal HTTP | 7100 | HTTP | Internal proxy communication |
+| Web UI | 7447 | HTTPS | Management interface |
+| Web API | 8448 | HTTPS | REST API and MCP SSE endpoint |
+| PostgreSQL | 15436 | TCP | Database (mapped from 5432) |
+| Internal HTTP | 7104 | HTTP | Internal proxy communication |
+
+These defaults are unique per stack so several of these MCP servers can run side by side on one host
+(nexus=7443/8444, catalyst=7444/8445, fmc=7445/8446, vcenter=7446/8447, ise=7447/8448).
+
+### Cisco ISE ports
+
+| Port | Purpose | Setting |
+|------|---------|---------|
+| 9060 | ERS API - every operation except TrustSec (CTS) | from `ISE_HOST_URL` |
+| 9063 | TrustSec (CTS) operations under `/ctsapi/` | `ISE_CTS_PORT` |
+| 443  | API gateway - Open API (`/api/v1/`), API Service and MnT (`/admin/API/`) | `ISE_ADMIN_PORT` |
+
+Set `ISE_HOST_URL` to the Primary PAN including `:9060`. Requests to the other families are re-pointed
+automatically; set the corresponding setting to `0` if a proxy serves them on one port.
 
 ## Environment Variables
 
@@ -203,13 +235,16 @@ SESSION_SECRET_KEY=your-random-secret-key
 DOCKER_EXTERNAL_NETWORK=openshell-cluster-nemoclaw
 
 # Required by Web UI runtime proxy target
-# Docker Compose sets this to http://nd_mcp_web_api:7100 by default
-BACKEND_API_URL=http://nd_mcp_web_api:7100
+# Docker Compose sets this to http://ise_mcp_web_api:7104 by default
+BACKEND_API_URL=http://ise_mcp_web_api:7104
 
-# Optional: Nexus Dashboard defaults (can be configured via Web UI)
-NEXUS_CLUSTER_URL=https://nexus-dashboard.example.com
-NEXUS_USERNAME=admin
-NEXUS_PASSWORD=YourPassword
+# Optional: Cisco ISE defaults (can be configured via Web UI)
+# The URL must include the ERS port - ERS does not answer on 443
+ISE_HOST_URL=https://ise.example.com:9060
+ISE_USERNAME=ersadmin
+ISE_PASSWORD=YourPassword
+ISE_CTS_PORT=9063
+ISE_ADMIN_PORT=443
 ```
 
 **Generate Encryption Key:**
@@ -222,7 +257,7 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 ```env
 # SSL Certificate Configuration
 CERT_DAYS=365                    # Certificate validity (default: 365)
-CERT_CN=nexus-dashboard          # Certificate common name
+CERT_CN=ise-mcp                  # Certificate common name
 
 # Security
 EDIT_MODE_ENABLED=false          # Enable write operations
@@ -237,13 +272,13 @@ LOG_LEVEL=INFO                   # DEBUG, INFO, WARNING, ERROR
 ### HTTPS Configuration
 
 Self-signed certificates are automatically generated on first startup:
-- Stored in Docker volume `nexus-mcp-certs`
+- Stored in Docker volume `ise-mcp-certs`
 - Valid for 365 days (configurable via `CERT_DAYS`)
 - Includes localhost, 127.0.0.1, and your server IP in SAN
 
 To regenerate certificates:
 ```bash
-docker volume rm nexus-mcp-certs
+docker volume rm ise-mcp-certs
 docker compose up -d
 ```
 
@@ -287,17 +322,17 @@ docker compose logs -f
 ### Certificate Issues
 ```bash
 # View certificate details
-docker compose exec nd_mcp_web_api openssl x509 -in /app/certs/server.crt -text -noout
+docker compose exec ise_mcp_web_api openssl x509 -in /app/certs/server.crt -text -noout
 
 # Regenerate certificates
-docker volume rm nexus-mcp-certs
+docker volume rm ise-mcp-certs
 docker compose up -d
 ```
 
 ### Database Issues
 ```bash
 # Connect to database
-docker compose exec nd_mcp_postgres psql -U mcp_user -d nexus_mcp
+docker compose exec ise_mcp_postgres psql -U mcp_user -d ise_mcp
 
 # Check tables
 \dt
@@ -309,10 +344,10 @@ SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT 10;
 ### Network Connectivity
 ```bash
 # Test API endpoint
-curl -k https://localhost:8444/api/health
+curl -k https://localhost:8448/api/health
 
 # Test Web UI
-curl -k https://localhost:7443
+curl -k https://localhost:7447
 ```
 
 ## Development
@@ -321,8 +356,8 @@ curl -k https://localhost:7443
 
 ```bash
 # Clone repository
-git clone https://github.com/beye91/nexus-dashboard-mcp.git
-cd nexus-dashboard-mcp
+git clone https://github.com/ArchiTechGit/ise-mcp.git
+cd ise-mcp
 
 # Create virtual environment
 python -m venv venv
@@ -350,7 +385,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Acknowledgments
 
 - **Anthropic** - For the Claude AI platform and MCP protocol
-- **Cisco** - For Nexus Dashboard APIs
+- **Cisco** - For the Identity Services Engine ERS API
 - **FastMCP** - For the excellent MCP framework
 
 ---

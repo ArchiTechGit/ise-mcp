@@ -1,0 +1,2022 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - Exim
+  version: 1.0.0
+servers:
+  - url: https://10.127.96.224:443
+    description: Inferred Url
+tags:
+  - name: export-api-controller
+    description: the export API
+  - name: import-api-controller
+    description: the import API
+paths:
+  /api/v1/exim/export/posture/cancel:
+    get:
+      tags:
+        - Export-Posture
+      summary: Cancel posture policy export
+      description: Cancels the ongoing posture policy export process and performs cleanup
+      operationId: postureCancelExport
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+  /api/v1/exim/export/posture/complete-export:
+    post:
+      tags:
+        - Export-Posture
+      summary: Export and download posture policies
+      description: >-
+        Initiates the synchronous export of posture policy and the file can be
+        downloaded once export is completed.
+      operationId: exportAndDownloadPosturePolicies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportMapper'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+                exampleSetFlag: false
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/Resource'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+  /api/v1/exim/export/posture/current-status:
+    get:
+      tags:
+        - Export-Posture
+      summary: Get current export posture status
+      description: Retrieve the current posture export status
+      operationId: exportCurrentStatus
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InlineResponse500'
+                exampleSetFlag: false
+  /api/v1/exim/export/posture/discard:
+    get:
+      tags:
+        - Export-Posture
+      summary: Discard posture policy export files
+      description: Cleans up and discards any exported files from the export folder
+      operationId: postureDiscardExport
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+  /api/v1/exim/export/posture/download:
+    get:
+      tags:
+        - Export-Posture
+      summary: Download posture policy export file
+      description: >-
+        Triggers download of the posture export zip file when export mode is
+        local
+      operationId: postureDownloadPolicy
+      responses:
+        '200':
+          description: Export Download status
+          content:
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/Resource'
+                exampleSetFlag: false
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal server error
+  /api/v1/exim/export/posture/exporting:
+    post:
+      tags:
+        - Export-Posture
+      summary: Export posture policies
+      description: Initiates the asynchronous export of posture policy
+      operationId: exportPoliciesBySelectedIds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportMapper'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileStatus'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture:
+    post:
+      tags:
+        - Import-Posture
+      summary: Execute final import
+      description: Execute the final import with all resolved conflicts
+      operationId: executeImport
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /api/v1/exim/import/posture/complete-import:
+    post:
+      tags:
+        - Import-Posture
+      summary: Complete import setup from repository
+      description: >-
+        Simplified import API that retrieves the file from a repository and
+        performs the import.  **What this API does:** 1. Retrieves the ZIP file
+        from the specified repository 2. Auto-configure import details with
+        default values (replace mode) 3. Allows optional policy-specific other
+        condition mappings 4. Executes the import process  **Request
+        Parameters:** - `fileName` (REQUIRED): Name of the file in the
+        repository - `repoName` (REQUIRED): Repository name where the file is
+        located - `encryptionKey` (OPTIONAL): Encryption key if the file is
+        encrypted - `policyConditionMappings` (OPTIONAL): Array of
+        policy-to-condition mappings  **Returns:** Success response with the
+        import execution status.  **Note:** To check the detailed response, use
+        the `/import/posture/status` endpoint. 
+      operationId: executeCompleteImportWithFile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteImportRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/conditions:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get condition conflicts
+      description: Retrieve list of conditions with conflicts that need resolution
+      operationId: getConditionConflicts
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/ConditionConflict'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - Import-Posture
+      summary: Resolve condition conflicts
+      description: Submit resolutions for condition conflicts
+      operationId: resolveConditionConflicts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/ConditionConflictResolution'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/EntityValidationResponse'
+                  exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/details:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get import details
+      description: Retrieve current import configuration and method
+      operationId: getImportDetails
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportDetailsRequest'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - Import-Posture
+      summary: Configure import details
+      description: Set import configuration and method
+      operationId: configureImportDetails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportDetailsRequest'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '422':
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/othercondition:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get condition mapping details
+      description: Retrieve list of condition mappings for posture import
+      operationId: getOtherConditions
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/ConditionMapping'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - Import-Posture
+      summary: Post condition mapping details
+      description: save a list of condition mappings for posture import
+      operationId: saveOtherConditions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/ConditionMapping'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: Error-ModelName{namespace='java.lang', name='Void'}
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/policies:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get policy conflicts
+      description: Retrieve list of policies with conflicts that need resolution
+      operationId: getPolicyConflicts
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/PolicyConflict'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - Import-Posture
+      summary: Resolve policy conflicts
+      description: Submit resolutions for policy conflicts
+      operationId: resolvePolicyConflicts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/PolicyConflictResolution'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/EntityValidationResponse'
+                  exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/remediations:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get remediation conflicts
+      description: Retrieve list of remediations with conflicts that need resolution
+      operationId: getRemediationConflicts
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/RemediationConflict'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - Import-Posture
+      summary: Resolve remediation conflicts
+      description: Submit resolutions for remediation conflicts
+      operationId: resolveRemediationConflicts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/RemediationConflictResolution'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/EntityValidationResponse'
+                  exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/requirements:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get requirement conflicts
+      description: Retrieve list of requirements with conflicts that need resolution
+      operationId: getRequirementConflicts
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/RequirementConflict'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    post:
+      tags:
+        - Import-Posture
+      summary: Resolve requirement conflicts
+      description: Submit resolutions for requirement conflicts
+      operationId: resolveRequirementConflicts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/RequirementConflictResolution'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/EntityValidationResponse'
+                  exampleSetFlag: false
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/rollback:
+    post:
+      tags:
+        - Import-Posture
+      summary: Rollback selected import resources
+      description: Rollback the resources that were part of the last import operation
+      operationId: rollbackImportResources
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/rollback/status:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get current rollback posture status
+      description: Retrieve the current posture rollback status
+      operationId: getRollbackCurrentStatus
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/selectpolicies:
+    post:
+      tags:
+        - Import-Posture
+      summary: Select policies for import
+      description: Submit list of selected policy IDs for import
+      operationId: selectPoliciesForImport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              exampleSetFlag: true
+              items:
+                $ref: '#/components/schemas/PolicyWithRules'
+                exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/PolicyWithRules'
+                  exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/selectrules:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get available policies/rules for selection
+      description: Retrieve list of policies with their rules for user selection
+      operationId: getAvailablePoliciesForSelection
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/PolicyWithRules'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/status:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get current import posture status
+      description: Retrieve the current posture import status
+      operationId: getImportPostureStatus
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportExecutionResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/stepstatus:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get current import step status
+      description: Retrieve the current step in the import process
+      operationId: getImportStepStatus
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepStatusResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/summary:
+    get:
+      tags:
+        - Import-Posture
+      summary: Get import summary
+      description: Retrieve final summary of all policies to be imported
+      operationId: getImportSummary
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                exampleSetFlag: true
+                items:
+                  $ref: '#/components/schemas/PolicyWithRules'
+                  exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+  /api/v1/exim/import/posture/upload:
+    post:
+      tags:
+        - Import-Posture
+      summary: Upload file for exim import
+      description: Upload a file to be imported, returns progress events
+      operationId: uploadImportFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The file to upload
+                  format: binary
+                  exampleSetFlag: true
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadProgressResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+    delete:
+      tags:
+        - Import-Posture
+      summary: Delete uploaded file
+      description: Delete a previously uploaded file by filename
+      operationId: deleteUploadedFile
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: Error-ModelName{namespace='java.lang', name='Void'}
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileValidationResponse'
+                exampleSetFlag: false
+components:
+  schemas:
+    CompleteImportRequest:
+      title: CompleteImportRequest
+      required:
+        - fileName
+        - repoName
+      type: object
+      properties:
+        encryptionKey:
+          type: string
+          description: Optional encryption key for secure import
+          exampleSetFlag: true
+        fileName:
+          type: string
+          description: Name of the file in the repository to import
+          exampleSetFlag: true
+        policyConditionMappings:
+          type: array
+          description: Array of policy to other condition mappings
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/CompleteImportRequestPolicyConditionMappings'
+            exampleSetFlag: false
+        repoName:
+          type: string
+          description: Repository name where the import file is located
+          exampleSetFlag: true
+      description: Request body for the complete posture policy import from repository API.
+      exampleSetFlag: false
+    CompleteImportRequestPolicyConditionMappings:
+      title: CompleteImportRequestPolicyConditionMappings
+      required:
+        - otherConditions
+        - policyName
+      type: object
+      properties:
+        otherConditions:
+          type: string
+          description: Other conditions associated with this policy
+          exampleSetFlag: true
+        policyName:
+          type: string
+          description: Name of the policy
+          exampleSetFlag: true
+      description: Mapping between a posture policy and additional conditions.
+      exampleSetFlag: false
+    ConditionConflict:
+      title: ConditionConflict
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this condition.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        condition:
+          type: array
+          description: List of conflicting condition objects.
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Condition ID with conflict
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Condition name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: List of policies and requirements where the condition is used.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/PolicyWithRequirements'
+            exampleSetFlag: false
+      description: Conflict details for a posture condition.
+      exampleSetFlag: false
+    ConditionConflictResolution:
+      title: ConditionConflictResolution
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this condition.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        condition:
+          type: array
+          description: Array of condition objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Condition ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Condition name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: Array of policy objects with nested requirements
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+      description: Resolution request payload for a condition conflict.
+      exampleSetFlag: false
+    ConditionMapping:
+      title: ConditionMapping
+      type: object
+      properties:
+        additionalRuleId:
+          type: string
+          description: Additional rule ID
+          exampleSetFlag: true
+        conditionObjects:
+          type: array
+          description: Array of condition mapping objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Mapping ID
+          exampleSetFlag: true
+        mappingType:
+          type: string
+          description: Mapping type
+          exampleSetFlag: true
+        operator:
+          type: string
+          description: Operator used in the mapping
+          exampleSetFlag: true
+        policy:
+          $ref: '#/components/schemas/PolicyReference'
+          exampleSetFlag: true
+      description: Mapping definition between a policy and external conditions.
+      exampleSetFlag: false
+    ConflictAction:
+      title: ConflictAction
+      required:
+        - type
+      type: object
+      properties:
+        name:
+          type: string
+          description: New name when `type` is `copy` (omit for `override`)
+          exampleSetFlag: true
+        type:
+          type: string
+          description: Action type. Use `override` to replace, `copy` to duplicate.
+          exampleSetFlag: true
+          enum:
+            - copy
+            - override
+      description: Action that should be taken to resolve a conflict.
+      exampleSetFlag: false
+    EntityValidationResponse:
+      title: EntityValidationResponse
+      required:
+        - message
+        - name
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message for the UI
+          example: Invalid import method specified
+          exampleSetFlag: true
+        name:
+          type: string
+          description: name of the field that validation failed for
+          example: default_policy
+          exampleSetFlag: true
+      description: Validation error entry for an individual entity.
+      exampleSetFlag: false
+    ExportMapper:
+      title: ExportMapper
+      required:
+        - exportMode
+        - exportOption
+        - fileName
+      type: object
+      properties:
+        encryptionKey:
+          type: string
+          description: Encryption key used for securing the export
+          example: Test_30#
+          exampleSetFlag: true
+        exportMode:
+          type: string
+          description: all policies or only selected ones
+          example: exportAll
+          exampleSetFlag: true
+        exportOption:
+          type: string
+          description: Mode of export
+          example: repository
+          exampleSetFlag: true
+        fileName:
+          type: string
+          description: Name of the file to be created
+          example: posture-export
+          exampleSetFlag: true
+        policyIds:
+          type: array
+          description: List of posture policy identifiers selected for export or import.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        repository:
+          type: string
+          description: Repository where the file will be uploaded
+          example: Provide Repository already exist on server
+          exampleSetFlag: true
+      description: Request body for posture policy export configuration.
+      exampleSetFlag: false
+    FileStatus:
+      title: FileStatus
+      required:
+        - message
+        - status
+      type: object
+      properties:
+        message:
+          type: string
+          description: Detailed message about the export status
+          example: Export completed successfully and uploaded to repository
+          exampleSetFlag: true
+        status:
+          type: string
+          description: Status of the export operation
+          example: COMPLETED
+          exampleSetFlag: true
+      description: Status and message for asynchronous file-based operations.
+      exampleSetFlag: false
+    FileValidationResponse:
+      title: FileValidationResponse
+      required:
+        - message
+        - status
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message for the UI
+          example: Invalid import method specified
+          exampleSetFlag: true
+        status:
+          type: integer
+          description: HTTP status code
+          format: int32
+          example: 400
+          exampleSetFlag: true
+      description: Standard validation response for file-related operations.
+      exampleSetFlag: false
+    ImportDetailsRequest:
+      title: ImportDetailsRequest
+      required:
+        - fileName
+        - importFrom
+        - importMethod
+      type: object
+      properties:
+        encryptionKey:
+          type: string
+          description: Encryption key for secure import
+          exampleSetFlag: true
+        fileName:
+          type: string
+          description: File name to import
+          exampleSetFlag: true
+        importFrom:
+          type: string
+          description: Source of import - local file or repository
+          exampleSetFlag: true
+          enum:
+            - local
+            - repository
+        importMethod:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - replace
+            - update
+        message:
+          type: string
+          description: Error or informational message about the import
+          exampleSetFlag: true
+        repoName:
+          type: string
+          description: Repository name (required when importFrom is 'repository')
+          exampleSetFlag: true
+      description: Request body containing details and options for an import operation.
+      exampleSetFlag: false
+    ImportExecutionResponse:
+      title: ImportExecutionResponse
+      required:
+        - status
+      type: object
+      properties:
+        failureCount:
+          type: integer
+          description: Number of failed import items (present when status is error)
+          format: int32
+          example: 3
+          exampleSetFlag: true
+        importSummary:
+          type: array
+          description: Detailed summary of all import items (present when status is error)
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/ImportSummaryItem'
+            exampleSetFlag: false
+        progress:
+          type: integer
+          description: Progress percentage (only present when status is in-progress)
+          format: int32
+          example: 60
+          exampleSetFlag: true
+        status:
+          type: string
+          description: Status of the import operation
+          example: in-progress
+          exampleSetFlag: true
+          enum:
+            - completed
+            - error
+            - in-progress
+            - passed
+            - rolled-back
+        totalCount:
+          type: integer
+          description: Total number of import items (present when status is error)
+          format: int32
+          example: 5
+          exampleSetFlag: true
+      description: >-
+        Response for import execution covering both in-progress and completed
+        states
+      exampleSetFlag: false
+    ImportSummaryItem:
+      title: ImportSummaryItem
+      required:
+        - id
+        - name
+        - status
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: Error message if status is error (optional)
+          example: Network issue
+          exampleSetFlag: true
+        id:
+          type: integer
+          description: Unique identifier for the import item
+          format: int32
+          example: 1
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Name of the import item
+          example: ABC Policy
+          exampleSetFlag: true
+        status:
+          type: string
+          description: Status of the individual import item
+          example: completed
+          exampleSetFlag: true
+          enum:
+            - completed
+            - error
+      description: Summary item for individual import operation
+      exampleSetFlag: false
+    InlineResponse500:
+      title: InlineResponse500
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unable to retrieve export status
+          exampleSetFlag: true
+      exampleSetFlag: false
+    InputStream:
+      title: InputStream
+      type: object
+      exampleSetFlag: false
+    PolicyConflict:
+      title: PolicyConflict
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this policy.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        id:
+          type: string
+          description: policy ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: policy name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: Array of requirement objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            exampleSetFlag: false
+      description: Conflict details for a posture policy object.
+      exampleSetFlag: false
+    PolicyConflictResolution:
+      title: PolicyConflictResolution
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this policy.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Policy ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Policy name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: Array of policy objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+      description: Resolution request payload for a policy conflict.
+      exampleSetFlag: false
+    PolicyReference:
+      title: PolicyReference
+      type: object
+      properties:
+        id:
+          type: string
+          description: Policy ID
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Policy name
+          exampleSetFlag: true
+      description: Lightweight reference to a policy used in conflict responses.
+      exampleSetFlag: false
+    PolicyWithRequirements:
+      title: PolicyWithRequirements
+      type: object
+      properties:
+        id:
+          type: string
+          description: Policy ID
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Policy name
+          exampleSetFlag: true
+        requirement:
+          type: array
+          description: List of requirements under this policy
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/RequirementReference'
+            exampleSetFlag: false
+      description: Policy object that includes a list of associated requirements.
+      exampleSetFlag: false
+    PolicyWithRules:
+      title: PolicyWithRules
+      type: object
+      properties:
+        additionalRules:
+          type: object
+          description: Additional rules object with dynamic properties
+          exampleSetFlag: true
+        agentType:
+          type: string
+          description: Compliance module version
+          exampleSetFlag: true
+        enforcement:
+          type: boolean
+          description: Policy enforcement status
+          example: false
+          exampleSetFlag: true
+        gracePeriod:
+          type: integer
+          description: Grace period in minutes
+          format: int32
+          exampleSetFlag: true
+        id:
+          type: string
+          description: Unique policy identifier
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Policy name
+          exampleSetFlag: true
+        osNameList:
+          type: array
+          description: List of operating system names to which the policy applies.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        percentage:
+          type: integer
+          description: Percentage threshold
+          format: int32
+          exampleSetFlag: true
+        requirementList:
+          type: array
+          description: Array of requirement objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        roleList:
+          type: array
+          description: Array of role objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        selected:
+          type: boolean
+          description: Whether policy is selected for import
+          example: false
+          exampleSetFlag: true
+        source:
+          type: string
+          description: Source of the policy
+          exampleSetFlag: true
+        stealthMode:
+          type: string
+          description: exim type
+          exampleSetFlag: true
+      description: Posture policy along with its rules and related attributes.
+      exampleSetFlag: false
+    RemediationConflict:
+      title: RemediationConflict
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this remediation.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Remediation ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Remediation name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: List of policies and requirements where the remediation is used.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/PolicyWithRequirements'
+            exampleSetFlag: false
+        remediation:
+          type: array
+          description: List of conflicting remediation objects.
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+      description: Conflict details for a remediation object.
+      exampleSetFlag: false
+    RemediationConflictResolution:
+      title: RemediationConflictResolution
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this remediation.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Remediation ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Remediation name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: Array of policy objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        remediation:
+          type: array
+          description: Array of remediation objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+      description: Resolution request payload for a remediation conflict.
+      exampleSetFlag: false
+    RequirementConflict:
+      title: RequirementConflict
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this requirement.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Requirement ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Requirement name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: List of policies where this requirement is used.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/PolicyReference'
+            exampleSetFlag: false
+        requirement:
+          type: array
+          description: Array of requirement objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            exampleSetFlag: false
+      description: Conflict details for a requirement object.
+      exampleSetFlag: false
+    RequirementConflictResolution:
+      title: RequirementConflictResolution
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ConflictAction'
+          exampleSetFlag: true
+        attributeConflicts:
+          type: array
+          description: Names of attributes that are in conflict for this requirement.
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        id:
+          type: string
+          description: Requirement ID
+          exampleSetFlag: true
+        isValidate:
+          type: boolean
+          description: >-
+            A flag which specifies whether to enable or disable validation
+            during conflict resolution. When true, validation is performed. When
+            false, validation is skipped. 
+          example: false
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Requirement name
+          exampleSetFlag: true
+        policy:
+          type: array
+          description: Array of policy objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+        requirement:
+          type: array
+          description: Array of requirement objects with dynamic properties
+          exampleSetFlag: true
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              exampleSetFlag: false
+            exampleSetFlag: false
+      description: Resolution request payload for a requirement conflict.
+      exampleSetFlag: false
+    RequirementReference:
+      title: RequirementReference
+      type: object
+      properties:
+        id:
+          type: string
+          description: Requirement ID
+          exampleSetFlag: true
+        name:
+          type: string
+          description: Requirement name
+          exampleSetFlag: true
+      description: Lightweight reference to a requirement used in conflict responses.
+      exampleSetFlag: false
+    Resource:
+      title: Resource
+      type: object
+      properties:
+        description:
+          type: string
+          exampleSetFlag: true
+        file:
+          type: string
+          format: binary
+          exampleSetFlag: true
+        filename:
+          type: string
+          exampleSetFlag: true
+        inputStream:
+          $ref: '#/components/schemas/InputStream'
+          exampleSetFlag: true
+        open:
+          type: boolean
+          exampleSetFlag: true
+        readable:
+          type: boolean
+          exampleSetFlag: true
+        uri:
+          type: string
+          format: uri
+          exampleSetFlag: true
+        url:
+          type: string
+          format: url
+          exampleSetFlag: true
+      exampleSetFlag: false
+    StepStatusResponse:
+      title: StepStatusResponse
+      type: object
+      properties:
+        importMethod:
+          type: string
+          exampleSetFlag: true
+          enum:
+            - replace
+            - update
+        maxStep:
+          type: integer
+          description: Total number of steps in the import process
+          format: int32
+          example: 5
+          exampleSetFlag: true
+        step:
+          type: integer
+          description: Current step number in the import process
+          format: int32
+          example: 1
+          exampleSetFlag: true
+      description: Response model representing the current step in the import process.
+      exampleSetFlag: false
+    UploadProgressResponse:
+      title: UploadProgressResponse
+      type: object
+      properties:
+        events:
+          type: array
+          description: Ordered list of events describing the progress of the upload.
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/UploadProgressResponseEvents'
+            exampleSetFlag: false
+      description: Response containing upload progress events.
+      exampleSetFlag: false
+    UploadProgressResponseEvents:
+      title: UploadProgressResponseEvents
+      type: object
+      properties:
+        message:
+          type: string
+          description: Additional message about the upload status
+          exampleSetFlag: true
+        status:
+          type: string
+          description: Current status of upload
+          exampleSetFlag: true
+      description: Single upload progress event.
+      exampleSetFlag: false

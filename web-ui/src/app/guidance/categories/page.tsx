@@ -14,7 +14,7 @@ export default function CategoryGuidancePage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryGuidance | null>(null);
   const [formData, setFormData] = useState({
-    api_name: 'manage',
+    api_name: 'ise',
     category_name: '',
     display_name: '',
     description: '',
@@ -24,7 +24,21 @@ export default function CategoryGuidancePage() {
     is_active: true,
   });
 
-  const apiOptions = ['manage', 'analyze', 'infra', 'onemanage', 'orchestration'];
+  // Fetched from the server rather than hardcoded: the registry defines 33 APIs
+  // and a stale literal here would silently file category guidance under an
+  // api_name the server never looks up.
+  const [apiOptions, setApiOptions] = useState<string[]>([]);
+
+  const fetchApiNames = async () => {
+    try {
+      const response = await api.operations.apiNames();
+      setApiOptions(response.data.api_names);
+    } catch {
+      // Non-fatal: the filter falls back to "All APIs" and the form accepts
+      // a typed value, so a failure here does not block editing guidance.
+      setApiOptions([]);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -44,6 +58,10 @@ export default function CategoryGuidancePage() {
     fetchCategories();
   }, [selectedApi]);
 
+  useEffect(() => {
+    fetchApiNames();
+  }, []);
+
   const handleEdit = (category: CategoryGuidance) => {
     setEditingCategory(category);
     setFormData({
@@ -62,7 +80,7 @@ export default function CategoryGuidancePage() {
   const handleCreate = () => {
     setEditingCategory(null);
     setFormData({
-      api_name: selectedApi === 'all' ? 'manage' : selectedApi,
+      api_name: selectedApi === 'all' ? 'ise' : selectedApi,
       category_name: '',
       display_name: '',
       description: '',
