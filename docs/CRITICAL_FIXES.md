@@ -6,7 +6,7 @@ This document describes the five critical fixes implemented to make the platform
 
 ## Phase 1: Operation Name Mismatch Fix
 
-**Problem:** Tool names in MCP use `{api_name}_{operation_id}` format (e.g., `manage_createVlan`) but the operations API returned just `operation_id` (e.g., `createVlan`). This meant role-based tool filtering never matched for manually-created roles.
+**Problem:** Tool names in MCP are synthesized from the spec (e.g., `ise_networkdevice_create`) but the operations API returned just `operation_id` (e.g., `networkdevice_create`). This meant role-based tool filtering never matched for manually-created roles.
 
 **Fix:**
 - `src/services/role_service.py`: `get_all_available_operations()` and `get_operations_by_api()` now return names with the `{api_name}_` prefix
@@ -15,7 +15,7 @@ This document describes the five critical fixes implemented to make the platform
 
 ## Phase 2: Tool Profiles
 
-**Problem:** 1,371+ tools exceed MCP client limits (typically 40-128). Even superusers got everything.
+**Problem:** 1,007 tools far exceed MCP client limits (typically 40-128). Even superusers got everything.
 
 **Solution:** Tool profiles are named subsets of tools assigned to users.
 
@@ -35,9 +35,9 @@ This document describes the five critical fixes implemented to make the platform
 ```
 
 ### Seed Profiles
-- **Fabric Operations** (30 tools) - VLAN, VRF, BD, EPG management
-- **Monitoring & Health** (25 tools) - Read-only monitoring
-- **Troubleshooting** (25 tools) - Network analysis
+- **Device Onboarding** (30 tools) - Network device and device group management
+- **Monitoring & Health** (25 tools) - Read-only deployment and node monitoring
+- **Identity & Endpoints** (25 tools) - User, group, and endpoint lookup
 - **Full Access** (max_tools=0) - No filtering, backward compatible
 
 ## Phase 3: Better Tool Descriptions
@@ -59,11 +59,11 @@ This document describes the five critical fixes implemented to make the platform
 **Solution:** Per-user cluster routing via API token.
 
 ### Changes
-- `NexusDashboardMCP.__init__()` no longer requires cluster_name
+- `ISEMCP.__init__()` no longer requires cluster_name
 - `handle_call_tool()` accepts `cluster_name` parameter
 - `AuthMiddleware` instances cached per cluster (lazy creation)
 - MCP transport resolves target cluster from user's assigned clusters (primary = first)
-- Users with multiple clusters get a `nexus_list_clusters` utility tool
+- Users with multiple deployments get an `ise_list_deployments` utility tool
 - `get_mcp_instance()` creates unbound MCP instance
 
 ### Architecture
@@ -71,7 +71,7 @@ This document describes the five critical fixes implemented to make the platform
 User API Token -> validate_token() -> user.clusters -> primary cluster
                                                      -> handle_call_tool(cluster_name=primary)
                                                      -> AuthMiddleware(primary) [cached]
-                                                     -> Nexus Dashboard API
+                                                     -> Cisco ISE API
 ```
 
 ## Phase 5: Workflow/Use Case Improvements
@@ -113,9 +113,9 @@ condition: {"field": "step_1.output.status", "value": "success"}
 
 Apply in order:
 ```bash
-psql -U nexus_mcp -d nexus_mcp -f src/config/migrations/005_fix_role_operation_names.sql
-psql -U nexus_mcp -d nexus_mcp -f src/config/migrations/006_add_tool_profiles.sql
-psql -U nexus_mcp -d nexus_mcp -f src/config/migrations/007_workflow_and_usecase_improvements.sql
+psql -U ise_mcp -d ise_mcp -f src/config/migrations/005_fix_role_operation_names.sql
+psql -U ise_mcp -d ise_mcp -f src/config/migrations/006_add_tool_profiles.sql
+psql -U ise_mcp -d ise_mcp -f src/config/migrations/007_workflow_and_usecase_improvements.sql
 ```
 
 ## New API Endpoints Summary

@@ -13,8 +13,8 @@ docker compose version
 ### 2. Clone and Configure
 
 ```bash
-git clone https://github.com/beye91/nexus-dashboard-mcp.git
-cd nexus-dashboard-mcp
+git clone https://github.com/ArchiTechGit/ise-mcp.git
+cd ise-mcp
 
 # Configure your server's IP address (required for SSL certificate)
 echo "CERT_SERVER_IP=YOUR_SERVER_IP" > .env
@@ -56,12 +56,12 @@ docker compose ps
 docker compose logs -f
 
 # Test API health
-curl -k https://localhost:8444/api/health
+curl -k https://localhost:8448/api/health
 ```
 
 ### 5. Initial Setup
 
-1. Open browser: `https://YOUR_SERVER_IP:7443`
+1. Open browser: `https://YOUR_SERVER_IP:7447`
 2. Accept the self-signed certificate warning
 3. Create admin account:
    - Username: `admin`
@@ -74,7 +74,7 @@ curl -k https://localhost:8444/api/health
 2. Click **Add New Cluster**
 3. Fill in details:
    - Name: `my-cluster`
-   - URL: `https://nexus-dashboard.example.com`
+   - URL: `https://ise.example.com:9060`
    - Username: `admin`
    - Password: Your password
    - SSL Verification: Off (for self-signed certs)
@@ -94,11 +94,11 @@ Add to your Claude Desktop config file:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://YOUR_SERVER_IP:8444/mcp/sse",
+        "https://YOUR_SERVER_IP:8448/mcp/sse",
         "--transport",
         "sse-only"
       ]
@@ -112,19 +112,19 @@ Replace `YOUR_SERVER_IP` with your server's IP address.
 ### Restart and Test
 
 1. Restart Claude Desktop
-2. Look for MCP icon showing "nexus-dashboard" connected
-3. Try: "List all fabrics in my Nexus Dashboard"
+2. Look for MCP icon showing "ise" connected
+3. Try: "List all network devices in my ISE deployment"
 
 ## Example Queries
 
 ### Read-Only Operations (Always Allowed)
 
 ```
-"Show me all fabrics in my Nexus Dashboard"
+"Show me all network devices in my ISE deployment"
 
-"List recent anomalies detected in the network"
+"What does ISE know about the endpoint with MAC 00:11:22:33:44:55?"
 
-"What's the status of fabric connections?"
+"List the TrustSec security group tags"
 
 "Show inventory of all devices"
 ```
@@ -134,22 +134,22 @@ Replace `YOUR_SERVER_IP` with your server's IP address.
 Enable edit mode in Web UI > Security, then:
 
 ```
-"Create a new fabric named 'Production-DC1'"
+"Onboard a new network device called 'branch-sw-01' at 10.1.1.1"
 
-"Update the description of fabric 'Test-Fabric'"
+"Update the description of the network device 'branch-sw-01'"
 
-"Delete the fabric 'Old-Test'"
+"Delete the network device 'decommissioned-sw'"
 ```
 
 ## Access Points
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Web UI | `https://YOUR_SERVER_IP:7443` | Management dashboard |
-| Web API | `https://YOUR_SERVER_IP:8444` | REST API |
-| API Docs | `https://YOUR_SERVER_IP:8444/docs` | Swagger UI |
-| MCP SSE | `https://YOUR_SERVER_IP:8444/mcp/sse` | Claude endpoint |
-| PostgreSQL | `localhost:15432` | Database |
+| Web UI | `https://YOUR_SERVER_IP:7447` | Management dashboard |
+| Web API | `https://YOUR_SERVER_IP:8448` | REST API |
+| API Docs | `https://YOUR_SERVER_IP:8448/docs` | Swagger UI |
+| MCP SSE | `https://YOUR_SERVER_IP:8448/mcp/sse` | Claude endpoint |
+| PostgreSQL | `localhost:15436` | Database |
 
 ## Troubleshooting
 
@@ -160,8 +160,8 @@ Enable edit mode in Web UI > Security, then:
 docker compose ps
 
 # View logs
-docker compose logs nd_mcp_web_api
-docker compose logs nd_mcp_web_ui
+docker compose logs ise_mcp_web_api
+docker compose logs ise_mcp_web_ui
 
 # Restart
 docker compose down && docker compose up -d
@@ -171,15 +171,15 @@ docker compose down && docker compose up -d
 
 ```bash
 # Regenerate certificates
-docker volume rm nexus-mcp-certs
+docker volume rm ise-mcp-certs
 docker compose up -d
 ```
 
 ### Authentication Failures
 
 ```bash
-# Test Nexus Dashboard connection manually
-curl -k -X POST https://nexus-dashboard.example.com/login \
+# Test Cisco ISE connection manually
+curl -k -X POST https://ise.example.com:9060/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"yourpass"}'
 ```
@@ -188,7 +188,7 @@ curl -k -X POST https://nexus-dashboard.example.com/login \
 
 ```bash
 # Connect to database
-docker compose exec nd_mcp_postgres psql -U mcp_user -d nexus_mcp
+docker compose exec ise_mcp_postgres psql -U mcp_user -d ise_mcp
 
 # Full reset (WARNING: deletes all data!)
 docker compose down -v
@@ -208,7 +208,7 @@ docker compose down
 docker compose logs -f
 
 # Restart a service
-docker compose restart nd_mcp_web_ui
+docker compose restart ise_mcp_web_ui
 
 # Rebuild and restart
 docker compose up -d --build
@@ -233,7 +233,7 @@ docker image prune -f
 
 ## Getting Help
 
-- Issues: https://github.com/beye91/nexus-dashboard-mcp/issues
+- Issues: https://github.com/ArchiTechGit/ise-mcp/issues
 - Documentation: `docs/` directory
 - Troubleshooting: `docs/DEPLOYMENT.md#troubleshooting`
 

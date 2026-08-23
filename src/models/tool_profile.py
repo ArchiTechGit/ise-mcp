@@ -29,7 +29,10 @@ class ToolProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False, index=True)
     description = Column(Text)
-    max_tools = Column(Integer, default=100)  # 0 = no limit (Full Access profile)
+    # Advisory only - no code truncates a tool list to this. The single value
+    # with behaviour attached is 0 which, together with an empty operations
+    # list, marks the Full Access profile (see filter_tools_for_user).
+    max_tools = Column(Integer, default=100)
     is_active = Column(Boolean, default=True, index=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)

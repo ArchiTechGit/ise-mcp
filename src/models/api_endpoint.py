@@ -16,6 +16,9 @@ class APIEndpoint(Base):
     id = Column(Integer, primary_key=True, index=True)
     api_name = Column(String(50), nullable=False, index=True)
     operation_id = Column(String(255), nullable=False)
+    # MCP tool name derived from operation_id (see src/core/tool_naming.py).
+    # RBAC and tool profiles match against this, not operation_id.
+    tool_name = Column(String(64), index=True)
     http_method = Column(String(10), nullable=False)
     path = Column(String(512), nullable=False)
     enabled = Column(Boolean, default=True, index=True)
@@ -36,6 +39,7 @@ class APIEndpoint(Base):
             "id": self.id,
             "api_name": self.api_name,
             "operation_id": self.operation_id,
+            "tool_name": self.tool_name,
             "http_method": self.http_method,
             "path": self.path,
             "enabled": self.enabled,

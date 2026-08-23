@@ -22,7 +22,13 @@ COMMENT ON COLUMN roles.tool_profile_id IS
 
 -- ============================================================================
 -- SEED ADDITIONAL DEFAULT TOOL PROFILES
--- "Full Access" already exists from migration 006 - skip it.
+--
+-- max_tools is advisory: nothing truncates a tool list to it. The only value
+-- with behaviour attached is 0 which, combined with an empty operation list,
+-- is the sentinel for the Full Access profile (see filter_tools_for_user).
+-- The figures below are sized for the full 1,007-tool surface.
+-- "Full Access" already exists from migration 006 - the INSERT below is a
+-- no-op for it thanks to ON CONFLICT.
 -- ============================================================================
 
 INSERT INTO tool_profiles (name, description, max_tools, is_active, created_at, updated_at)
@@ -35,69 +41,48 @@ VALUES
     ),
     (
         'Read-Only Analyst',
-        'Read-only analysis tools for monitoring and reporting',
-        120,
+        'Every read (GET) operation across every registered ISE API',
+        500,
         TRUE, NOW(), NOW()
     ),
     (
         'Network Operator',
-        'Read and write tools for network operations',
-        400,
+        'Read and write access to ERS network access devices and authorization policy elements',
+        120,
         TRUE, NOW(), NOW()
     ),
     (
         'Infrastructure Viewer',
-        'Infrastructure and analysis read-only tools',
-        200,
+        'Read-only access to deployment nodes, certificates, and directory integration',
+        60,
         TRUE, NOW(), NOW()
     ),
     (
         'Troubleshooting Only',
-        'Troubleshooting workflow tools',
-        50,
+        'Operations referenced by the built-in workflows',
+        60,
         TRUE, NOW(), NOW()
     )
 ON CONFLICT (name) DO NOTHING;
 
 -- ============================================================================
--- POPULATE tool_profile_operations FOR EACH NEW PROFILE
--- Operation names follow the convention: api_name || '_' || operation_id
--- which matches the format used throughout role_operations and MCP tool names.
+-- POPULATE tool_profile_operations
+--
+-- tool_profile_operations stores MCP tool names. Those are synthesized from
+-- the spec by src/core/tool_naming.py (the ERS spec declares no operationId),
+-- so they cannot be built by string concatenation in SQL - and api_endpoints
+-- is still empty at migration time, because sync_api_endpoints() runs after
+-- migrations complete.
+--
+-- The api_endpoints-derived profiles are therefore populated in code by
+-- src/services/database_init.py:sync_tool_profile_operations(), which runs
+-- once the endpoint registry has been synced.
+--
+-- "Troubleshooting Only" is the exception: its operations come from the
+-- workflow steps that migration 009 has already seeded, so it can be
+-- populated here.
 -- ============================================================================
 
--- "Read-Only Analyst": GET operations from the analyze API only
-INSERT INTO tool_profile_operations (profile_id, operation_name, created_at)
-SELECT
-    (SELECT id FROM tool_profiles WHERE name = 'Read-Only Analyst'),
-    api_name || '_' || operation_id,
-    NOW()
-FROM api_endpoints
-WHERE api_name = 'analyze'
-  AND http_method = 'GET'
-ON CONFLICT DO NOTHING;
-
--- "Network Operator": All methods across analyze and manage APIs
-INSERT INTO tool_profile_operations (profile_id, operation_name, created_at)
-SELECT
-    (SELECT id FROM tool_profiles WHERE name = 'Network Operator'),
-    api_name || '_' || operation_id,
-    NOW()
-FROM api_endpoints
-WHERE api_name IN ('analyze', 'manage')
-ON CONFLICT DO NOTHING;
-
--- "Infrastructure Viewer": GET operations from infra and analyze APIs
-INSERT INTO tool_profile_operations (profile_id, operation_name, created_at)
-SELECT
-    (SELECT id FROM tool_profiles WHERE name = 'Infrastructure Viewer'),
-    api_name || '_' || operation_id,
-    NOW()
-FROM api_endpoints
-WHERE api_name IN ('infra', 'analyze')
-  AND http_method = 'GET'
-ON CONFLICT DO NOTHING;
-
--- "Troubleshooting Only": Distinct operation names referenced by active workflow steps
 INSERT INTO tool_profile_operations (profile_id, operation_name, created_at)
 SELECT DISTINCT
     (SELECT id FROM tool_profiles WHERE name = 'Troubleshooting Only'),

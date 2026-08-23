@@ -1,4 +1,4 @@
-# How the Nexus Dashboard MCP Server Works
+# How the Cisco ISE MCP Server Works
 
 ## Overview
 
@@ -8,7 +8,7 @@ You now have a **complete, working system** with some parts fully connected and 
 
 ```
 ┌─────────────────┐
-│  Claude Desktop │ ◄─── You type: "List all fabrics"
+│  Claude Desktop │ ◄─── You type: "List all network devices"
 └────────┬────────┘
          │ MCP Protocol (stdio)
          ▼
@@ -23,8 +23,8 @@ You now have a **complete, working system** with some parts fully connected and 
            │                           Logs every call
            ▼                                  ▼
 ┌─────────────────────┐           ┌───────────────────────┐
-│ Nexus Dashboard     │           │   PostgreSQL Database │
-│ nexus-dashboard.example.com      │           │  ┌─────────────────┐  │
+│ Cisco ISE     │           │   PostgreSQL Database │
+│ ise.example.com:9060      │           │  ┌─────────────────┐  │
 │                     │           │  │ clusters        │  │
 └─────────────────────┘           │  │ audit_log       │  │
                                   │  │ security_config │  │
@@ -53,22 +53,22 @@ You now have a **complete, working system** with some parts fully connected and 
 **Example Flow:**
 
 ```
-You in Claude: "List all fabrics"
+You in Claude: "List all network devices"
     ↓
-MCP Server executes: manage_listFabrics
+MCP Server executes: ise_networkdevice_getAll
     ↓
-Auth Middleware: Connects to Nexus Dashboard
+Auth Middleware: Connects to Cisco ISE
     ↓
-API Call: GET /api/v1/manage/fabrics
+API Call: GET /ers/config/networkdevice
     ↓
-Response: [{"fabricName": "Lab_Fabric", ...}]
+Response: {"SearchResult": {"total": 143, "resources": [...]}}
     ↓
 ✅ Audit Logger AUTOMATICALLY writes to database:
     INSERT INTO audit_log (
       cluster_id: 1,
-      operation_id: 'manage_listFabrics',
+      operation_id: 'networkdevice_getAll',
       http_method: 'GET',
-      path: '/api/v1/manage/fabrics',
+      path: '/ers/config/networkdevice',
       request_body: null,
       response_status: 200,
       response_body: {full response},
@@ -85,7 +85,7 @@ You'll see:
 ┌────┬──────────────────────┬────────┬───────────────────────┬────────┬──────────────────┐
 │ ID │ Operation            │ Method │ Path                  │ Status │ Timestamp        │
 ├────┼──────────────────────┼────────┼───────────────────────┼────────┼──────────────────┤
-│ 1  │ manage_listFabrics   │ GET    │ /api/v1/manage/fab... │  200   │ 2025-11-23 14:30 │
+│ 1  │ networkdevice_getAll │ GET    │ /ers/config/networ... │  200   │ 2025-11-23 14:30 │
 └────┴──────────────────────┴────────┴───────────────────────┴────────┴──────────────────┘
 
 ✅ This is REAL data from your actual MCP usage!
@@ -120,9 +120,9 @@ class SecurityMiddleware:
 **Example:**
 
 ```
-You: "Create a new VLAN with ID 100"
+You: "Add a new network device called branch-sw-01"
     ↓
-Tool called: manage_createVlan (POST method)
+Tool called: ise_networkdevice_create (POST method)
     ↓
 Security Middleware checks:
 - Method: POST ❌ (not GET)
@@ -133,7 +133,7 @@ Security Middleware checks:
 You see: "Error: Edit mode is disabled. Only read operations are allowed."
     ↓
 ✅ Audit log records the attempt:
-    operation_id: 'manage_createVlan'
+    operation_id: 'networkdevice_create'
     response_status: 403
     error_message: 'Operation requires edit mode'
 ```
@@ -166,7 +166,7 @@ SELECT name, password_encrypted FROM clusters;
 **You can verify:**
 ```bash
 # Check the database
-docker exec -it nd_mcp_postgres psql -U mcp_user -d nexus_mcp
+docker exec -it ise_mcp_postgres psql -U mcp_user -d ise_mcp
 SELECT name, LEFT(password_encrypted, 20) as encrypted_preview FROM clusters;
 
 # You'll see encrypted gibberish, not plain passwords ✓
@@ -215,7 +215,7 @@ cluster_name = os.getenv("CLUSTER_NAME", "default")
 1. Go to Web UI: http://localhost:7001/clusters
 2. Click "Add New Cluster"
 3. Use name: **"default"** ← Important!
-4. Fill in your Nexus Dashboard details
+4. Fill in your Cisco ISE details
 5. MCP server will now use this cluster ✓
 
 ### 🔄 2. Edit Mode Configuration
@@ -258,13 +258,13 @@ async def _load_config(self):
 
 Edit `.env` file manually:
 ```bash
-# In /Users/cbeye/AI/nexus_dashboard_mcp/.env
+# In the repository .env
 EDIT_MODE_ENABLED=true
 ```
 
 Then restart MCP server:
 ```bash
-docker-compose restart nd_mcp_mcp_server
+docker-compose restart ise_mcp_mcp_server
 ```
 
 ---
@@ -280,7 +280,7 @@ docker-compose restart nd_mcp_mcp_server
 2. Click "Add New Cluster"
 3. Fill form:
    Name: default  ← Use "default" for now
-   URL: https://nexus-dashboard.example.com
+   URL: https://ise.example.com:9060
    Username: admin
    Password: YourPassword
    SSL: ☐ Off
@@ -292,24 +292,24 @@ docker-compose restart nd_mcp_mcp_server
 **Step 2: Restart MCP server to pick up new credentials**
 
 ```bash
-docker-compose restart nd_mcp_mcp_server
+docker-compose restart ise_mcp_mcp_server
 ```
 
 **Step 3: Use Claude Desktop**
 
 ```
-You: "List all fabrics"
+You: "List all network devices"
 
 Claude uses MCP:
     ↓
 MCP Server:
   - Reads cluster "default" from database ✓
   - Decrypts password ✓
-  - Connects to nexus-dashboard.example.com ✓
+  - Connects to ise.example.com:9060 ✓
   - Makes API call ✓
   - Logs to audit_log ✓
     ↓
-You get response: "Here are the fabrics: ..."
+You get response: "Here are the network devices: ..."
 ```
 
 **Step 4: Check audit logs**
@@ -330,10 +330,10 @@ You get response: "Here are the fabrics: ..."
    EDIT_MODE_ENABLED=true
 
 2. Restart MCP server:
-   docker-compose restart nd_mcp_mcp_server
+   docker-compose restart ise_mcp_mcp_server
 
 3. Now in Claude:
-   You: "Create a VLAN with ID 100"
+   You: "Add a new network device called branch-sw-01"
    ✅ Works! (Previously blocked)
 
 4. Check audit log:
@@ -358,17 +358,17 @@ You get response: "Here are the fabrics: ..."
 1. Open Web UI audit page: http://localhost:7001/audit
 
 2. Use Claude Desktop normally:
-   - "List fabrics"
-   - "Show switches in Lab_Fabric"
-   - "Get interface details for switch spine-01"
+   - "List network devices"
+   - "Show the endpoint with MAC 00:11:22:33:44:55"
+   - "List the TrustSec security group tags"
 
 3. Refresh audit page:
    ┌────┬─────────────────────┬────────┬────────┬──────────────┐
    │ ID │ Operation           │ Method │ Status │ Timestamp    │
    ├────┼─────────────────────┼────────┼────────┼──────────────┤
-   │ 45 │ manage_getFabric... │ GET    │  200   │ 14:35:12     │
-   │ 44 │ manage_listFabric...│ GET    │  200   │ 14:35:08     │
-   │ 43 │ manage_listFabrics  │ GET    │  200   │ 14:35:01     │
+   │ 45 │ sgt_getAll          │ GET    │  200   │ 14:35:12     │
+   │ 44 │ endpoint_getByName  │ GET    │  200   │ 14:35:08     │
+   │ 43 │ networkdevice_getAll│ GET    │  200   │ 14:35:01     │
    └────┴─────────────────────┴────────┴────────┴──────────────┘
 
 4. Filter by status = 4XX or 5XX to see errors only
@@ -405,7 +405,7 @@ Expected:
 [{
   "id": 1,
   "name": "default",
-  "url": "https://nexus-dashboard.example.com",
+  "url": "https://ise.example.com:9060",
   "username": "admin",
   "verify_ssl": false,
   "is_active": true,
@@ -424,9 +424,9 @@ Expected:
 # Or if you've used it:
 [{
   "id": 1,
-  "operation_id": "manage_listFabrics",
+  "operation_id": "networkdevice_getAll",
   "http_method": "GET",
-  "path": "/api/v1/manage/fabrics",
+  "path": "/ers/config/networkdevice",
   "response_status": 200,
   "timestamp": "2025-11-23T14:30:15.123456"
 }]
@@ -506,7 +506,7 @@ GROUP BY user_id;
 3. **Read-Only Mode** - Write operations blocked by default
 4. **Web UI** - Full CRUD for clusters, view audit logs, see stats
 5. **FastAPI Backend** - All REST endpoints working
-6. **Multi-API Support** - 1,371 operations across 5 Nexus Dashboard APIs
+6. **Multi-API Support** - 1,007 operations across 33 Cisco ISE APIs (ERS, Open API, MnT, API Service)
 
 ### 🔄 What Needs Quick Integration (< 30 min of coding)
 

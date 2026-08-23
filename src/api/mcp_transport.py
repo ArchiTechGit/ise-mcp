@@ -33,7 +33,7 @@ from fastapi import APIRouter, HTTPException, Header, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from src.core.mcp_server import NexusDashboardMCP
+from src.core.mcp_server import ISEMCP
 from src.config.settings import get_settings
 from src.services.user_service import UserService
 from src.services.credential_manager import CredentialManager
@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/mcp", tags=["MCP Transport"])
 
 # Global MCP server instance (initialized on first request)
-_mcp_instance: Optional[NexusDashboardMCP] = None
+_mcp_instance: Optional[ISEMCP] = None
 _mcp_initialized = False
 
 # User service instance
@@ -83,12 +83,12 @@ class MCPResponse(BaseModel):
     error: Optional[Dict[str, Any]] = None
 
 
-async def get_mcp_instance() -> NexusDashboardMCP:
+async def get_mcp_instance() -> ISEMCP:
     """Get or create the MCP server instance."""
     global _mcp_instance, _mcp_initialized
 
     if _mcp_instance is None:
-        _mcp_instance = NexusDashboardMCP()  # No cluster binding; resolved per-request
+        _mcp_instance = ISEMCP()  # No deployment binding; resolved per-request
 
     if not _mcp_initialized:
         # Load all APIs
@@ -542,7 +542,7 @@ async def mcp_sse_post(
                     "tools": {"listChanged": True},
                 },
                 "serverInfo": {
-                    "name": "nexus-dashboard-mcp",
+                    "name": "ise-mcp",
                     "version": "1.0.0",
                 },
             }
@@ -563,12 +563,12 @@ async def mcp_sse_post(
                 })
             # Filter tools based on user permissions
             filtered_tools = filter_tools_for_user(tools, auth_result)
-            # Add nexus_list_clusters utility tool if user has multiple clusters
+            # Add ise_list_deployments utility tool if user has multiple ISE deployments
             if auth_result.user and auth_result.user.clusters and len(auth_result.user.clusters) > 1:
                 cluster_names = [c.name for c in auth_result.user.clusters]
                 filtered_tools.append({
-                    "name": "nexus_list_clusters",
-                    "description": f"List your assigned Nexus Dashboard clusters. You have access to: {', '.join(cluster_names)}",
+                    "name": "ise_list_deployments",
+                    "description": f"List your assigned ISE deployments. You have access to: {', '.join(cluster_names)}",
                     "inputSchema": {"type": "object", "properties": {}},
                 })
             result = {"tools": filtered_tools}
@@ -581,8 +581,8 @@ async def mcp_sse_post(
 
             if not tool_name:
                 error = {"code": -32602, "message": "Missing tool name"}
-            elif tool_name == "nexus_list_clusters":
-                # Built-in utility: list clusters assigned to this user
+            elif tool_name == "ise_list_deployments":
+                # Built-in utility: list ISE deployments assigned to this user
                 clusters_info = []
                 if auth_result.user and auth_result.user.clusters:
                     for c in auth_result.user.clusters:
@@ -612,7 +612,7 @@ async def mcp_sse_post(
                     if auth_result.user and auth_result.user.clusters:
                         target_cluster = auth_result.user.clusters[0].name
                     # Call the tool handler with cluster context
-                    contents = await mcp.handle_call_tool(tool_name, tool_arguments, cluster_name=target_cluster)
+                    contents = await mcp.handle_call_tool(tool_name, tool_arguments, deployment_name=target_cluster)
 
                     # Extract text from TextContent responses
                     result = {
@@ -697,7 +697,7 @@ async def mcp_message(
                     "tools": {"listChanged": True},
                 },
                 "serverInfo": {
-                    "name": "nexus-dashboard-mcp",
+                    "name": "ise-mcp",
                     "version": "1.0.0",
                 },
             }
@@ -718,12 +718,12 @@ async def mcp_message(
                 })
             # Filter tools based on user permissions
             filtered_tools = filter_tools_for_user(tools, auth_result)
-            # Add nexus_list_clusters utility tool if user has multiple clusters
+            # Add ise_list_deployments utility tool if user has multiple ISE deployments
             if auth_result.user and auth_result.user.clusters and len(auth_result.user.clusters) > 1:
                 cluster_names = [c.name for c in auth_result.user.clusters]
                 filtered_tools.append({
-                    "name": "nexus_list_clusters",
-                    "description": f"List your assigned Nexus Dashboard clusters. You have access to: {', '.join(cluster_names)}",
+                    "name": "ise_list_deployments",
+                    "description": f"List your assigned ISE deployments. You have access to: {', '.join(cluster_names)}",
                     "inputSchema": {"type": "object", "properties": {}},
                 })
             result = {"tools": filtered_tools}
@@ -736,8 +736,8 @@ async def mcp_message(
 
             if not tool_name:
                 error = {"code": -32602, "message": "Missing tool name"}
-            elif tool_name == "nexus_list_clusters":
-                # Built-in utility: list clusters assigned to this user
+            elif tool_name == "ise_list_deployments":
+                # Built-in utility: list ISE deployments assigned to this user
                 clusters_info = []
                 if auth_result.user and auth_result.user.clusters:
                     for c in auth_result.user.clusters:
@@ -767,7 +767,7 @@ async def mcp_message(
                     if auth_result.user and auth_result.user.clusters:
                         target_cluster = auth_result.user.clusters[0].name
                     # Call the tool handler with cluster context
-                    contents = await mcp.handle_call_tool(tool_name, tool_arguments, cluster_name=target_cluster)
+                    contents = await mcp.handle_call_tool(tool_name, tool_arguments, deployment_name=target_cluster)
 
                     # Extract text from TextContent responses
                     result = {

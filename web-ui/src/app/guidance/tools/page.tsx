@@ -288,7 +288,7 @@ export default function ToolOverridesPage() {
                   onChange={(e) => setFormData({ ...formData, operation_name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400"
                   disabled={!!editingOverride}
-                  placeholder="e.g., manage_createVlan"
+                  placeholder="e.g., ise_networkdevice_create"
                 />
               </div>
 

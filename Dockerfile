@@ -1,4 +1,4 @@
-# Multi-stage build for Nexus Dashboard MCP Server
+# Multi-stage build for the Cisco ISE MCP Server
 
 # Stage 1: Builder
 FROM python:3.11-slim AS builder

@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
 
   try {
     // Get the session cookie to forward
-    const sessionCookie = request.cookies.get('nexus_session');
+    const sessionCookie = request.cookies.get('ise_session');
 
     // Forward the request to the backend
     const backendResponse = await fetch(`${BACKEND_URL}/api/auth/logout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(sessionCookie && { Cookie: `nexus_session=${sessionCookie.value}` }),
+        ...(sessionCookie && { Cookie: `ise_session=${sessionCookie.value}` }),
       },
     });
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json(data, { status: backendResponse.status });
 
     // Delete the session cookie
-    response.cookies.delete('nexus_session');
+    response.cookies.delete('ise_session');
 
     return response;
   } catch (error) {

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // This ensures the cookie is set correctly for the browser's domain
     if (backendResponse.ok && data.token) {
       response.cookies.set({
-        name: 'nexus_session',
+        name: 'ise_session',
         value: data.token,
         httpOnly: true,
         secure: false, // Allow non-HTTPS for development

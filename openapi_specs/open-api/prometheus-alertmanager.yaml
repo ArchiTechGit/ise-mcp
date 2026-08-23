@@ -1,0 +1,1114 @@
+openapi: 3.0.3
+info:
+  title: Cisco ISE API - Prometheus AlertManager
+  version: 1.0.0
+servers:
+  - url: https://10.56.60.25:443
+    description: Inferred Url
+tags:
+  - name: prometheus-alertmanager-api-controller
+    description: the prometheus-alertmanager API
+paths:
+  /api/v1/prometheus-alertmanager/alertTrigger:
+    post:
+      tags:
+        - Prometheus Alertmanager
+      summary: Handles the incoming Cisco ISE resiliency rule triggered in Prometheus.
+      description: This is a webhook registered in Prometheus for handling the rules defined for ISE resiliency.
+      operationId: alertTrigger
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Successful response
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+  /api/v1/prometheus-alertmanager/receiver:
+    get:
+      tags:
+        - Prometheus Alertmanager
+      summary: Lists all the Prometheus Alertmanager receivers.
+      description: Lists all the Prometheus Alertmanager receivers.
+      operationId: getReceiverConfigurations
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Get all receivers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiversSummaryResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Prometheus Alertmanager
+      summary: Create a new Prometheus Alertmanager receiver configuration.
+      description: Creates a new Prometheus Alertmanager configuration with the template.
+      operationId: saveReceiverConfiguration
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceiverConfiguration'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiverConfigurationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Receiver configuration saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiverConfigurationResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/prometheus-alertmanager/receiver/{receiverId}:
+    get:
+      tags:
+        - Prometheus Alertmanager
+      summary: Get the Prometheus Alertmanager receiver configuration based on receiver ID.
+      description: Get a Prometheus Alertmanager receiver configuration based on receiver ID.
+      operationId: getReceiverConfigurationByID
+      parameters:
+        - name: receiverId
+          in: path
+          description: Unique name for receiver configuration. The name parameter in a receiver configuration would be its receiverId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Get recevier configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiverConfigurationResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Prometheus Alertmanager
+      summary: Updates a Prometheus Alertmanager receiver configuration.
+      description: Updates an existing Prometheus Alertmanager receiver configuration.
+      operationId: updateReceiverConfiguration
+      parameters:
+        - name: receiverId
+          in: path
+          description: Unique name for receiver configuration. The name parameter in a receiver configuration would be its receiverId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceiverConfiguration'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Receiver configuration updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiverConfigurationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Prometheus Alertmanager
+      summary: Delete the Prometheus Alertmanager receiver configuration based on receiver ID.
+      description: Deletes a Prometheus Alertmanager receiver configuration based on receiver ID.
+      operationId: deleteReceiverConfigurationByID
+      parameters:
+        - name: receiverId
+          in: path
+          description: Unique name for receiver configuration. The name parameter in a receiver configuration would be its receiverId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Receiver configuration deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiverConfigurationResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/prometheus-alertmanager/route:
+    get:
+      tags:
+        - Prometheus Alertmanager
+      summary: Get all the Prometheus Alertmanager routes that are configured.
+      description: Lists all the Prometheus Alertmanager routes that are configured.
+      operationId: getRoutes
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Get all routes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutesSummaryResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Prometheus Alertmanager
+      summary: Create a new Prometheus Alertmanager route configuration.
+      description: Creates a new Prometheus Alertmanager route configuration with the template.
+      operationId: saveRouteConfiguration
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteConfiguration'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigurationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Route configuration created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigurationResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/prometheus-alertmanager/route/{routeId}:
+    get:
+      tags:
+        - Prometheus Alertmanager
+      summary: Get the Prometheus Alertmanager routes configured based on route ID.
+      description: Get the Prometheus Alertmanager route configuration information based on route ID.
+      operationId: getRouteConfigurationByID
+      parameters:
+        - name: routeId
+          in: path
+          description: Unique name for route configuration. The alertname of the matcher parameter in a route configuration would be its routeId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Get route configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigurationResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Prometheus Alertmanager
+      summary: Updates an existing Prometheus Alertmanager route configuration.
+      description: Updates the route configuration details of an existing Prometheus Alertmanager.
+      operationId: updateRouteConfiguration
+      parameters:
+        - name: routeId
+          in: path
+          description: Unique name for route configuration. The alertname of the matcher parameter in a route configuration would be its routeId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteConfiguration'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Rule configuration updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigurationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Prometheus Alertmanager
+      summary: Deletes Prometheus Alertmanager routes based on route ID.
+      description: Delete an existing Prometheus Alertmanager route configuration based on the route ID.
+      operationId: deleteRouteConfigurationByID
+      parameters:
+        - name: routeId
+          in: path
+          description: Unique name for route configuration. The alertname of the matcher parameter in a route configuration would be its routeId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Route configuration deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigurationResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/prometheus-alertmanager/rule:
+    get:
+      tags:
+        - Prometheus Alertmanager
+      summary: Get all Prometheus rule configurations.
+      description: List all the configured Prometheus rules.
+      operationId: getRulesConfigurations
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Get all rules.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesConfigurationSummaryResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    post:
+      tags:
+        - Prometheus Alertmanager
+      summary: Create a new Prometheus rule configuration.
+      description: Creates a new Prometheus rule configuration with the template.
+      operationId: saveRuleConfiguration
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleConfiguration'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleConfigurationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Rule configuration created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleConfigurationResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+  /api/v1/prometheus-alertmanager/rule/{ruleId}:
+    get:
+      tags:
+        - Prometheus Alertmanager
+      summary: Get the Prometheus rule configuration based on rule ID.
+      description: Get the Prometheus rule configuration based on rule ID.
+      operationId: getRuleConfigurationByID
+      parameters:
+        - name: ruleId
+          in: path
+          description: Unique name for rule configuration. The alert parameter in a rule configuration would be its ruleId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Get rule configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleConfigurationResponse'
+                exampleSetFlag: false
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    put:
+      tags:
+        - Prometheus Alertmanager
+      summary: Update the Prometheus rule configuration.
+      description: Updates an existing Prometheus rule configuration.
+      operationId: updateRuleConfiguration
+      parameters:
+        - name: ruleId
+          in: path
+          description: Unique name for rule configuration. The alert parameter in a rule configuration would be its ruleId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleConfiguration'
+              exampleSetFlag: false
+      responses:
+        '200':
+          description: Rule configuration updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleConfigurationResponse'
+                exampleSetFlag: false
+        '201':
+          description: Created
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+    delete:
+      tags:
+        - Prometheus Alertmanager
+      summary: Delete a Prometheus rule configuration based on rule ID.
+      description: Delete a Prometheus rule configuration based on rule ID.
+      operationId: deleteRuleConfigurationByID
+      parameters:
+        - name: ruleId
+          in: path
+          description: Unique name for rule configuration. The alert parameter in a rule configuration would be its ruleId.
+          required: true
+          style: simple
+          schema:
+            type: string
+            exampleSetFlag: true
+        - name: X-Request-ID
+          in: header
+          description: The request ID header consists of the request ID which is returned in the response headers and also appears in the API service logs.
+          required: false
+          schema:
+            type: string
+            exampleSetFlag: true
+      responses:
+        '200':
+          description: Rule configuration deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleConfigurationResponse'
+                exampleSetFlag: false
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request for this specified resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: The specified resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                exampleSetFlag: false
+      security:
+        - BasicAuth: []
+components:
+  schemas:
+    Error:
+      title: Error
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          exampleSetFlag: true
+        message:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    ReceiverConfiguration:
+      title: ReceiverConfiguration
+      required:
+        - name
+        - webhook_configs
+      type: object
+      properties:
+        name:
+          type: string
+          description: contains alertname
+          example: DummyAlert1
+          exampleSetFlag: true
+        webhook_configs:
+          type: string
+          description: contains webhook details like url, http_config
+          example: 'url: ''http://localhost:5001/alert'''
+          exampleSetFlag: true
+      description: Receiver Configurations Summary
+      exampleSetFlag: false
+    ReceiverConfigurationResponse:
+      title: ReceiverConfigurationResponse
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/ReceiverConfiguration'
+          exampleSetFlag: true
+        version:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    ReceiversSummaryResponse:
+      title: ReceiversSummaryResponse
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/ReceiverConfiguration'
+            exampleSetFlag: false
+        version:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    RouteConfiguration:
+      title: RouteConfiguration
+      required:
+        - matcher
+        - receiver
+      type: object
+      properties:
+        matcher:
+          type: string
+          description: contains alertname
+          example: DummyAlert1
+          exampleSetFlag: true
+        receiver:
+          type: string
+          description: contains receiver name
+          example: dummy-webhook-1
+          exampleSetFlag: true
+      description: Route Configuration Summary
+      exampleSetFlag: false
+    RouteConfigurationResponse:
+      title: RouteConfigurationResponse
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/RouteConfiguration'
+          exampleSetFlag: true
+        version:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    RoutesSummaryResponse:
+      title: RoutesSummaryResponse
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/RouteConfiguration'
+            exampleSetFlag: false
+        version:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    RuleConfiguration:
+      title: RuleConfiguration
+      required:
+        - alert
+        - expr
+        - group_evaluation_interval
+      type: object
+      properties:
+        alert:
+          type: string
+          description: rule name
+          example: CountGreaterThan5
+          exampleSetFlag: true
+        annotations:
+          type: array
+          description: additional informational labels to store more information
+          example: '["title: ''Instance {{ $labels.instance }} down''"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+        expr:
+          type: string
+          description: rule expression
+          example: ping_request_count > 5
+          exampleSetFlag: true
+        for:
+          type: string
+          description: time duration prometheus waits before firing the alert
+          example: 1s
+          exampleSetFlag: true
+        group_evaluation_interval:
+          type: string
+          description: time interval for all the rules of a group to be evaluated
+          example: 1h
+          exampleSetFlag: true
+        labels:
+          type: array
+          description: additional labels to be attached to the alert
+          example: '["severity: ''critical''"]'
+          exampleSetFlag: true
+          items:
+            type: string
+            exampleSetFlag: false
+      description: Alert Configuration Summary
+      exampleSetFlag: false
+    RuleConfigurationResponse:
+      title: RuleConfigurationResponse
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/RuleConfiguration'
+          exampleSetFlag: true
+        version:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+    RulesConfigurationSummaryResponse:
+      title: RulesConfigurationSummaryResponse
+      required:
+        - response
+        - version
+      type: object
+      properties:
+        response:
+          type: array
+          exampleSetFlag: true
+          items:
+            $ref: '#/components/schemas/RuleConfiguration'
+            exampleSetFlag: false
+        version:
+          type: string
+          exampleSetFlag: true
+      exampleSetFlag: false
+

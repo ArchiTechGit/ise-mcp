@@ -1,0 +1,934 @@
+openapi: 3.0.1
+info:
+  title: Cisco ISE 5G APIs
+  version: 1.0.0
+servers:
+  - url: 'https://{server}/v1/'
+    variables:
+      server:
+        default: localhost
+        description: The host where the API is rooted
+security:
+  - BasicAuth: []
+paths:
+
+  #User Equipment Related APIs
+
+  /fiveg/user-equipment:
+    get:
+      summary: Get user equipments
+      operationId: getUserEquipments
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: "./api.yaml#/components/parameters/pageNumber"
+        - $ref: "./api.yaml#/components/parameters/pageSize"
+        - $ref: "#/components/parameters/XRequestIdHeader"
+        - $ref: "./api.yaml#/components/parameters/filtering"
+        - $ref: "./api.yaml#/components/parameters/filtertype"
+        - $ref: "./api.yaml#/components/parameters/sortType"
+        - $ref: "./api.yaml#/components/parameters/sortBy"
+      responses:
+        200:
+          description: Fetched user equipments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEquipmentGetAllResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a user equipment
+      operationId: createUserEquipment
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserEquipmentCreateRequest"
+      responses:
+        201:
+          description: User Equipment Created Successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEquipmentResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+  /fiveg/user-equipment/{userEquipmentId}:
+    get:
+      summary: Get the user equipment for a given ID
+      operationId: getUserEquipmentById
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/UserEquipmentIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: Fetched user equipment for the given ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEquipmentResponsePayload'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+    put:
+      summary: Update the user equipment for a given ID and request payload
+      operationId: updateUserEquipment
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/UserEquipmentIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserEquipmentUpdateRequest"
+      responses:
+        200:
+          description: User equipment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEquipmentResponsePayload'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        409:
+          $ref: './api.yaml#/components/responses/Conflict'
+
+    delete:
+      summary: Delete the user equipment for a given ID
+      operationId: deleteUserEquipment
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/UserEquipmentIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: User Equipment Deleted Successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        204:
+          $ref: './api.yaml#/components/responses/NoContent'
+
+
+  /fiveg/user-equipment/subscriber/{subscriberId}:
+    get:
+      summary: Get user equipments associated with a subscriber GUID
+      operationId: getUserEquipmentsBySubscriberId
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/SubscriberIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: User equipments retrieved successfully for the given subscriber ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEquipmentsForSubscriberResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+
+
+
+
+  /fiveg/user-equipment/imei/{imei}:
+    get:
+      summary: Get a user equipment based on the IMEI
+      operationId: getUserEquipmentByIMEI
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/IMEI'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: User equipment retrieved successfully based on the IMEI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEquipmentResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+
+  #Post request to create User Equipments with details listed in the csv
+  /fiveg/user-equipment/csv:
+    post:
+      summary: Create user equipments from a CSV file
+      operationId: createUserEquipmentsFromCSV
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: Subscriber Created Successfully
+          $ref: '#/components/responses/TaskAccepted'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+
+  /fiveg/user-equipment/bulk:
+    post:
+      summary: Create, update and delete multiple user equipments
+      operationId: bulkUserEquipmentOperation
+      tags:
+        - User Equipment
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationsUE'
+
+      responses:
+        200:
+          description: Subscriber Created Successfully
+          $ref: '#/components/responses/TaskAccepted'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+
+  #Subscriber Related APIs
+
+  /fiveg/subscriber:
+    get:
+      summary: Get all subscribers
+      operationId: getAllSubscribers
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: "./api.yaml#/components/parameters/pageNumber"
+        - $ref: "./api.yaml#/components/parameters/pageSize"
+        - $ref: "#/components/parameters/XRequestIdHeader"
+        - $ref: "./api.yaml#/components/parameters/filtering"
+        - $ref: "./api.yaml#/components/parameters/filtertype"
+        - $ref: "./api.yaml#/components/parameters/sortType"
+        - $ref: "./api.yaml#/components/parameters/sortBy"
+      responses:
+        200:
+          description: Subscribers retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberGetAllResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+
+    post:
+      summary: Create subscriber holding the IMEI
+      operationId: createSubscriber
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriberCreateRequest"
+      responses:
+        201:
+          description: Subscriber created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+  /fiveg/subscriber/{subscriberId}:
+    get:
+      summary: Get the subscriber for a given ID
+      operationId: getSubscriberById
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: '#/components/parameters/SubscriberIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: Subscriber retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberResponsePayload'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+
+    put:
+      summary: Update a subscriber for a given ID and the request payload
+      operationId: updateSubscriber
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: '#/components/parameters/SubscriberIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriberUpdateRequest"
+      responses:
+        200:
+          description: Subscriber updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberResponsePayload'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        409:
+          $ref: './api.yaml#/components/responses/Conflict'
+
+    delete:
+      summary: Delete the subscriber for a given ID
+      operationId: deleteSubscriber
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: '#/components/parameters/SubscriberIdParam'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: Subscriber deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        204:
+          $ref: './api.yaml#/components/responses/NoContent'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+  /fiveg/subscriber/imsi/{imsi}:
+    get:
+      summary: Get a subscriber by IMSI
+      operationId: getSubscriberByIMSI
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: '#/components/parameters/IMSI'
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: Subscriber retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberResponsePayload'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+        404:
+          $ref: './api.yaml#/components/responses/NotFound'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+
+  #Post request to create Subscribers with details listed
+  /fiveg/subscriber/bulk:
+    post:
+      summary: Create, update and delete subscribers in bulk
+      operationId: bulkSubscriberOperation
+      tags:
+        - Subscriber
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Operations'
+
+      responses:
+        200:
+          description: Subscriber created successfully
+          $ref: '#/components/responses/TaskAccepted'
+        500:
+          $ref: './api.yaml#/components/responses/InternalServerError'
+        400:
+          $ref: './api.yaml#/components/responses/BadRequest'
+
+
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  responses:
+    TaskAccepted:
+      description: Task accepted ID can be used to track the task through the task API
+      content:
+        application/json:
+          schema:
+            $ref: "./api.yaml#/components/schemas/TaskResponse"
+
+  parameters:
+
+    XRequestIdHeader:
+      in: header
+      name: X-Request-ID
+      description: The Request ID is returned in the response headers and appear in logs
+      schema:
+        type: string
+      required: false
+
+    #User Equipment Related Parameters
+
+    UserEquipmentIdParam:
+      name: userEquipmentId
+      in: path
+      description: Unique ID for a user equipment object
+      required: true
+      schema:
+        $ref: '#/components/schemas/UserEquipmentId'
+      example: '7c9484cf-0ebc-47ad-a9ef-bc12729ed73b'
+
+    SubscriberIdParam:
+      name: subscriberId
+      in: path
+      description: Unique ID for a subscriber object
+      required: true
+      schema:
+        $ref: '#/components/schemas/SubscriberId'
+
+    IMEI:
+      name: imei
+      in: path
+      description: IMEI for the user equipment object
+      required: true
+      schema:
+        type: string
+        minLength: 14
+        maxLength: 15
+        pattern: "^[0-9]{14,15}$"
+      example:
+        '490154203237518'
+
+    SolutionType:
+      name: solutionType
+      in: path
+      description: Solution type can 'On Prem' or 'A Service'
+      required: true
+      schema:
+        type: string
+      example:
+        'OnPrem'
+    #Key Pair Related Parameters
+
+    KeyPairProfile:
+      name: profile
+      in: path
+      description: Profile for key pair
+      required: true
+      schema:
+        $ref: '#/components/schemas/KeyPairProfileSchema'
+      example:
+        'A'
+
+    NumOfPairs:
+      name: numOfPairs
+      in: path
+      description: Number of pairs to be generated
+      required: true
+      schema:
+        $ref: '#/components/schemas/NumOfPairsSchema'
+
+    KeyIndex:
+      name: keyIndex
+      in: path
+      description: KeyIndex for the key pair
+      required: true
+      schema:
+        $ref: '#/components/schemas/KeyIndexSchema'
+      example:
+        '1'
+
+    #Subscriber Related Parameters
+
+    IMSI:
+      name: imsi
+      in: path
+      description: IMSI parameter
+      required: true
+      schema:
+        type: string
+      example:
+        '490154203237518'
+
+  schemas:
+
+    #Common Schemas
+
+    Link:
+      type: object
+      properties:
+        rel:
+          enum:
+            - next
+            - previous
+            - self
+            - status
+          type: string
+          example: 'self'
+        href:
+          type: string
+          example: 'https://<ip>/api/v1/fiveg/<userEquipment/subscriber>/<ID>'
+        type:
+          type: string
+          example: "application/json"
+
+
+
+    Version:
+      type: string
+      pattern: "^[0-9]+(\\.[0-9]+){2}$"
+      example: '1.0.0'
+
+
+    GetAllResponseAttrs:
+      type: object
+      properties:
+        nextPage:
+          $ref: "#/components/schemas/Link"
+        previousPage:
+          $ref: "#/components/schemas/Link"
+        version:
+          $ref: '#/components/schemas/Version'
+
+
+    #User Equipment Related Schemas
+
+    UserEquipmentResponsePayload:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/UserEquipmentResponse'
+        version:
+          $ref: '#/components/schemas/Version'
+
+    UserEquipmentResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserEquipment'
+        - type: object
+          properties:
+            link:
+              $ref: '#/components/schemas/Link'
+
+    UserEquipmentId:
+      type: string
+      format: uuid
+      example: '7c9484cf-0ebc-47ad-a9ef-bc12729ed73b'
+
+    SubscriberId:
+      type: string
+      format: uuid
+      example: '7c9484cf-0ebc-47ad-a9ef-bc12729ed73d'
+
+    UserEquipmentUpdateRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          description: 'Description for User Equipment'
+          example: 'User Equipment'
+        deviceGroup:
+          type: string
+          description: 'Device or Endpoint Group'
+          example: '7a9484cf-0ebc-47ad-a9ef-bc12729ed73f'
+
+    Timestamp:
+          type: object
+          properties:
+            createTime:
+              type: string
+            updateTime:
+              type: string
+
+    UserEquipmentCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/UserEquipmentUpdateRequest'
+        - type: object
+          required:
+            - imei
+          properties:
+            imei:
+              type: string
+              description: 'IMEI for User Equipment'
+              example:
+                '490154203237518'
+              minLength: 14
+              maxLength: 15
+              pattern: "^[0-9]{14,15}$"
+
+    UserEquipment:
+      allOf:
+        - $ref: '#/components/schemas/UserEquipmentCreateRequest'
+        - $ref: '#/components/schemas/Timestamp'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/UserEquipmentId'
+
+
+    UserEquipmentsForSubscriberResponsePayload:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserEquipmentResponse'
+        version:
+          $ref: '#/components/schemas/Version'
+
+    UserEquipmentGetAllResponsePayload:
+      allOf:
+        - type: object
+          properties:
+            response:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserEquipmentResponse'
+        - $ref: "#/components/schemas/GetAllResponseAttrs"
+
+    #Key Pair Related Schemas
+    Message:
+      type: object
+      properties:
+        response:
+          type: string
+
+    KeyPairProfileSchema:
+      type: string
+      description: Allowed values for profile are A or B
+
+
+    KeyPairStatusSchema:
+      type: string
+      enum:
+        - active
+        - revoked
+      default: active
+
+    NumOfPairsSchema:
+      type: integer
+      default: 1
+
+    KeyPairResponsePayload:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/KeyPairResponse'
+        version:
+          $ref: '#/components/schemas/Version'
+
+    KeyPairGenerateResponsePayload:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyPairResponse'
+        NumOfSuccessfulObjects:
+          type: integer
+        NumOfFailedObjects:
+          type: integer
+        version:
+          $ref: '#/components/schemas/Version'
+
+    KeyPair:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/KeyPairId'
+        publickey:
+          type: string
+        keyindex:
+          $ref: '#/components/schemas/KeyIndexSchema'
+        profile:
+          $ref: '#/components/schemas/KeyPairProfileSchema'
+        status:
+          $ref: '#/components/schemas/KeyPairStatusSchema'
+
+    KeyIndexSchema:
+      type: integer
+      minimum: 1
+      maximum: 255
+      example: '2'
+
+    KeyPairResponse:
+      allOf:
+        - $ref: '#/components/schemas/KeyPair'
+        - $ref: '#/components/schemas/Timestamp'
+        - type: object
+          properties:
+            link:
+              $ref: '#/components/schemas/Link'
+
+    KeyPairGetAllResponsePayload:
+      allOf:
+        - type: object
+          properties:
+            response:
+              type: array
+              items:
+                $ref: '#/components/schemas/KeyPairResponse'
+        - $ref: "#/components/schemas/GetAllResponseAttrs"
+
+    KeyPairId:
+      type: string
+      format: uuid
+      example: '7c9484cf-0ebc-47ad-a9ef-bc12729ed73f'
+
+    #Subscriber Related Schemas
+
+    SubscriberUpdateRequest:
+      type: object
+      required:
+        - opc
+        - ki
+      properties:
+        enabled:
+          type: boolean
+          description: 'Subscriber is enabled or not'
+          default: true
+          example: true
+        friendlyName:
+          type: string
+          description: 'Friendly name for the subscriber'
+          example: 'FriendlyName'
+        identityGroups:
+          type: string
+          description: 'Identity Groups. If you add more than one identity group, they need to be comma separated.'
+          example: '7a9484cf-0ebc-47ad-a9ef-bc12729ed73f,7b9484cf-0ebc-47ad-a9ef-bc12729ed73f'
+        imeis:
+          type: string
+          description: 'IMEI to be attached to the subscriber'
+          example: '490154203237518'
+        opc:
+          type: string
+          description: 'OPC'
+          pattern: '^([A-Fa-f0-9]){32}$'
+          example: "12345678901234567890123456789012"
+        ki:
+          type: string
+          description: 'KI'
+          pattern: '^([A-Fa-f0-9]){32}$'
+          example: "12345678901234567890123456789012"
+
+    SubscriberCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/SubscriberUpdateRequest'
+        - type: object
+          required:
+            - imsi
+          properties:
+            imsi:
+              type: string
+              description: 'IMSI for subscriber'
+              example:
+                '490154203237518'
+              pattern: "^([0-9]){15,16}$"
+
+    SolutionType:
+      type: string
+      enum:
+        - OnPrem
+        - Service
+      default: OnPrem
+
+    Subscriber:
+      allOf:
+        - $ref: '#/components/schemas/SubscriberCreateRequest'
+        - $ref: '#/components/schemas/Timestamp'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/SubscriberId'
+
+    SubscriberResponsePayload:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/SubscriberResponse'
+        version:
+          $ref: '#/components/schemas/Version'
+
+    SubscriberResponse:
+      allOf:
+        - $ref: '#/components/schemas/Subscriber'
+        - type: object
+          properties:
+            link:
+              $ref: '#/components/schemas/Link'
+
+    SubscriberGetAllResponsePayload:
+      allOf:
+        - type: object
+          properties:
+            response:
+              type: array
+              items:
+                $ref: '#/components/schemas/SubscriberResponse'
+        - $ref: "#/components/schemas/GetAllResponseAttrs"
+
+    SubscriberBulkRequest:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/SubscriberId"
+        imsi:
+          type: string
+          description: 'IMSI for Subscriber'
+          example:
+            '490154203237518'
+          pattern: "^([0-9]){15,16}$"
+        enabled:
+          type: boolean
+          description: 'Subscriber is enabled or not'
+          default: true
+          example: true
+        friendlyName:
+          type: string
+          description: 'Friendly name for the subscriber'
+          example: 'FriendlyName'
+        identityGroups:
+          type: string
+          description: 'Identity Groups. If you add more than one identity group, they need to be comma separated'
+          example: '7a9484cf-0ebc-47ad-a9ef-bc12729ed73f,7b9484cf-0ebc-47ad-a9ef-bc12729ed73f'
+        imeis:
+          type: string
+          description: 'Comma separated IMEIs to be attached to the subscriber'
+          example: '490154203237518,490154203237515'
+        opc:
+          type: string
+          description: 'OPC'
+          example: "12345678901234567890123456789012"
+
+        ki:
+          type: string
+          description: 'KI'
+          example: "12345678901234567890123456789012"
+
+          #sqn:
+          #type: integer
+          #description: 'SQN'
+
+
+    SubscriberArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/SubscriberBulkRequest"
+
+    Operations:
+      type: object
+      properties:
+        operation:
+          enum:
+            - Create
+            - Update
+            - Delete
+
+        ItemList:
+          $ref: "#/components/schemas/SubscriberArray"
+
+    UserEquipmentBulkRequest:
+      type: object
+      properties:
+        imei:
+          type: string
+          example:
+            '490154203237518'
+        description:
+          type: string
+          example: 'Sample Description'
+        id:
+          $ref: '#/components/schemas/UserEquipmentId'
+        deviceGroup:
+          type: string
+          description: 'Device or Endpoint Group'
+          example: '7a9484cf-0ebc-47ad-a9ef-bc12729ed73f'
+
+
+    UserEquipmentArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/UserEquipmentBulkRequest"
+
+    OperationsUE:
+      type: object
+      properties:
+        operation:
+          enum:
+            - Create
+            - Update
+            - Delete
+        ItemList:
+          $ref: "#/components/schemas/UserEquipmentArray"
+
+    DeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Resource with ID 8d32371d-ee1a-47ce-995f-5966dec3c5dc was deleted successfully'

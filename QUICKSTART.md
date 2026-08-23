@@ -1,11 +1,11 @@
-# Nexus Dashboard MCP Server - Quick Start Guide
+# Cisco ISE MCP Server - Quick Start Guide
 
 Get up and running in 5 minutes!
 
 ## What You Get
 
-A complete Nexus Dashboard management system with:
-- **MCP Server**: 1,371 operations across 5 APIs (Manage, Analyze, Infra, OneManage, Orchestrator)
+A complete Cisco ISE management system with:
+- **MCP Server**: 1,007 operations across 33 ISE APIs — ERS, the 30 Open API specs (policy sets, TrustSec, certificates, deployment, …), Monitoring/MnT, and the API Service
 - **Web API**: FastAPI REST backend with HTTPS
 - **Web UI**: Next.js/React dashboard with authentication
 - **PostgreSQL**: Database with encrypted credentials and audit logging
@@ -16,8 +16,8 @@ A complete Nexus Dashboard management system with:
 ### Step 1: Clone and Configure
 
 ```bash
-git clone https://github.com/beye91/nexus-dashboard-mcp.git
-cd nexus-dashboard-mcp
+git clone https://github.com/ArchiTechGit/ise-mcp.git
+cd ise-mcp
 
 # Configure your server's IP address
 echo "CERT_SERVER_IP=YOUR_SERVER_IP" > .env
@@ -48,21 +48,25 @@ Wait for all services to start (about 1-2 minutes on first run).
 
 ### Step 3: Access Web UI
 
-1. Open browser: `https://YOUR_SERVER_IP:7443`
+1. Open browser: `https://YOUR_SERVER_IP:7447`
 2. Accept the self-signed certificate warning
 3. Create admin account:
    - Username: `admin`
    - Email: `admin@example.com`
    - Password: `Admin123!`
 
-### Step 4: Add Your Cluster
+### Step 4: Add Your ISE Deployment
 
-1. Navigate to **Clusters** page
+First, make sure ERS is enabled on the Primary PAN:
+**Administration > System > Settings > API Settings > ERS Settings** -> enable **ERS (Read/Write)**,
+and confirm your admin account is in the **ERS Admin** group.
+
+1. Navigate to **ISE Deployments** page
 2. Click **Add New Cluster**
 3. Enter details:
-   - Name: `my-nexus-cluster`
-   - URL: `https://nexus-dashboard.example.com`
-   - Username: `admin`
+   - Name: `my-ise-deployment`
+   - URL: `https://ise.example.com:9060` (the ERS port is required - ERS does not answer on 443)
+   - Username: `ersadmin`
    - Password: Your password
    - SSL Verification: Off (for self-signed certs)
 4. Click **Test Connection** to verify
@@ -77,11 +81,11 @@ Add to your Claude Desktop config:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://YOUR_SERVER_IP:8444/mcp/sse",
+        "https://YOUR_SERVER_IP:8448/mcp/sse",
         "--transport",
         "sse-only"
       ]
@@ -90,16 +94,16 @@ Add to your Claude Desktop config:
 }
 ```
 
-Restart Claude Desktop and try: "List all fabrics in my Nexus Dashboard"
+Restart Claude Desktop and try: "List all network devices in my ISE deployment"
 
 ## Access Points
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Web UI | `https://YOUR_SERVER_IP:7443` | Management dashboard |
-| Web API | `https://YOUR_SERVER_IP:8444` | REST API |
-| API Docs | `https://YOUR_SERVER_IP:8444/docs` | Swagger documentation |
-| MCP SSE | `https://YOUR_SERVER_IP:8444/mcp/sse` | Claude Desktop endpoint |
+| Web UI | `https://YOUR_SERVER_IP:7447` | Management dashboard |
+| Web API | `https://YOUR_SERVER_IP:8448` | REST API |
+| API Docs | `https://YOUR_SERVER_IP:8448/docs` | Swagger documentation |
+| MCP SSE | `https://YOUR_SERVER_IP:8448/mcp/sse` | Claude Desktop endpoint |
 
 ## Common Commands
 
@@ -121,7 +125,7 @@ docker compose down && docker compose up -d
 
 # Full reset (WARNING: deletes all data!)
 docker compose down -v
-docker volume rm nexus-mcp-certs
+docker volume rm ise-mcp-certs
 docker compose up -d --build
 ```
 
@@ -133,21 +137,21 @@ docker compose up -d --build
 docker compose ps
 
 # Check for errors
-docker compose logs nd_mcp_web_ui
-docker compose logs nd_mcp_web_api
+docker compose logs ise_mcp_web_ui
+docker compose logs ise_mcp_web_api
 ```
 
 ### Certificate issues
 ```bash
 # Regenerate certificates
-docker volume rm nexus-mcp-certs
+docker volume rm ise-mcp-certs
 docker compose up -d
 ```
 
 ### Database issues
 ```bash
 # Connect to database
-docker compose exec nd_mcp_postgres psql -U mcp_user -d nexus_mcp
+docker compose exec ise_mcp_postgres psql -U mcp_user -d ise_mcp
 
 # Check tables
 \dt
@@ -155,7 +159,7 @@ docker compose exec nd_mcp_postgres psql -U mcp_user -d nexus_mcp
 
 ## Next Steps
 
-1. **Add more clusters**: Configure additional Nexus Dashboard instances
+1. **Add more deployments**: Configure additional ISE deployments
 2. **Set up users**: Add team members with role-based access
 3. **Enable edit mode**: Allow write operations when needed
 4. **Review audit logs**: Monitor all API operations

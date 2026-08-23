@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Nexus Dashboard MCP Server is built with a modular, layered architecture designed for security, maintainability, and extensibility.
+The Cisco ISE MCP Server is built with a modular, layered architecture designed for security, maintainability, and extensibility.
 
 ## Core Components
 
@@ -25,7 +25,7 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
 **Purpose**: Cross-cutting concerns for all API operations
 
 #### Authentication Middleware (`auth.py`)
-- Manages Nexus Dashboard authentication
+- Manages Cisco ISE authentication
 - Handles session/cookie management
 - Executes authenticated API requests
 - Automatic token refresh on expiration
@@ -51,8 +51,8 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
 - CRUD operations for cluster credentials
 - Credential retrieval and decryption
 
-#### Nexus API Client (`nexus_api.py`)
-- HTTP client for Nexus Dashboard
+#### ISE API Client (`ise_api.py`)
+- HTTP client for Cisco ISE
 - Authentication handling
 - Retry logic and error handling
 - Connection pooling
@@ -62,7 +62,7 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
 **Purpose**: Database models using SQLAlchemy ORM
 
 **Models**:
-- `Cluster`: Nexus Dashboard cluster credentials
+- `Cluster`: ISE deployment credentials
 - `SecurityConfig`: Global security settings
 - `APIEndpoint`: Registry of available API operations
 - `AuditLog`: Audit trail of all operations
@@ -85,8 +85,8 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
 2. Claude Desktop → MCP Server (tool call)
 3. MCP Server → Security Middleware (check: always allowed)
 4. MCP Server → Auth Middleware (authenticate if needed)
-5. Auth Middleware → Nexus Dashboard API
-6. Nexus Dashboard → Response
+5. Auth Middleware → Cisco ISE API
+6. Cisco ISE → Response
 7. MCP Server → Audit Logger (log success)
 8. MCP Server → Claude Desktop (return data)
 ```
@@ -100,8 +100,8 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
    ├─ If disabled → PermissionError → User
    └─ If enabled → Continue
 4. MCP Server → Auth Middleware
-5. Auth Middleware → Nexus Dashboard API
-6. Nexus Dashboard → Response
+5. Auth Middleware → Cisco ISE API
+6. Cisco ISE → Response
 7. MCP Server → Audit Logger (log with request body)
 8. MCP Server → Claude Desktop (return result)
 ```
@@ -135,14 +135,14 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
        │
        ▼
 ┌──────────────────────┐
-│ Nexus API Client     │
+│ ISE API Client       │
 │ POST /login          │
 │ (Basic Auth)         │
 └──────┬───────────────┘
        │
        ▼
 ┌──────────────────────┐
-│ Nexus Dashboard      │
+│ Cisco ISE      │
 │ Returns cookies      │
 └──────┬───────────────┘
        │
@@ -161,7 +161,7 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
 - Scope: Passwords in `clusters` table
 
 **In Transit**:
-- HTTPS for Nexus Dashboard communication
+- HTTPS for Cisco ISE communication
 - Option to disable SSL verification for dev/test
 
 ## Database Schema
@@ -224,58 +224,89 @@ The Nexus Dashboard MCP Server is built with a modular, layered architecture des
 ### From OpenAPI to MCP Tool
 
 ```python
-# OpenAPI Operation
-{
+# OpenAPI Operation, as written in ERS_APIs.yaml.
+# Note there is no operationId - the ERS spec declares none anywhere.
+"/networkdevice/": {
   "get": {
-    "operationId": "getFabrics",
-    "summary": "Get list of fabrics",
+    "tags": ["networkdevice"],
+    "summary": "Get-All",
     "parameters": [
-      {"name": "limit", "in": "query", "schema": {"type": "integer"}}
-    ],
-    "responses": {
-      "200": {"description": "Success"}
-    }
+      {"name": "filter", "in": "query", "schema": {"type": "string"}},
+      {"$ref": "#/components/parameters/ppage"},
+      {"$ref": "#/components/parameters/psize"}
+    ]
   }
 }
 
 # Generated MCP Tool
 Tool(
-  name="manage_getFabrics",
-  description="GET /api/v1/fabrics - Get list of fabrics",
+  name="ise_networkdevice_getAll",
+  description=(
+    "List all networkdevice resources\n"
+    "Endpoint: GET /networkdevice/\n"
+    "Resource: networkdevice\n"
+    "API: ise"
+  ),
   inputSchema={
     "type": "object",
     "properties": {
-      "limit": {"type": "integer", "description": "Query parameter"}
+      "filter": {"type": "string", "description": "Filter Supported Fields:[name, ...]"},
+      "page":   {"type": "integer", "description": "Page Number (0...N)"},
+      "size":   {"type": "integer", "description": "Items by Page"}
     }
   },
   fn=async_execute_function
 )
 ```
 
+Three things happen between those two blocks:
+
+1. **`$ref` resolution.** `APILoader` dereferences the spec once at load time,
+   so the shared `ppage`/`psize` pagination parameters arrive as real parameter
+   objects rather than pointers.
+2. **Name synthesis.** `tool_naming.build_operation_ids()` derives
+   `networkdevice_getAll` from the tag and summary, because there is no
+   `operationId` to use. See [API_PATHS.md](API_PATHS.md).
+3. **Description expansion.** `Get-All` never names the resource it acts on, so
+   `describe_operation()` expands it against the tag before the tool is built.
+
 ## Extension Points
 
-The server loads all five APIs (Manage, Analyze, Infrastructure, OneManage,
-Orchestrator) from `openapi_specs/` — 1,371 operations in total. Adding another
-API is registry-driven:
+The server loads 33 specs for 1,007 tools: ERS (395), the 30 Open API specs
+(590), Monitoring/MnT (20), and the API Service (2). The 30 Open API entries are
+declared as a table in the registry rather than written out one by one. Adding a
+further API takes three steps:
 
-1. Place the OpenAPI spec in `openapi_specs/` (e.g. `new_api.json`)
+1. Place the OpenAPI spec in `openapi_specs/` (e.g. `new_api.yaml`)
 2. Register it in `src/core/api_registry.py` by adding an `APIDefinition`:
    ```python
    "newapi": APIDefinition(
        name="newapi",
        display_name="New API",
-       spec_file="new_api.json",
-       base_path="/api/v1/newApi",  # base path requests are routed to
+       spec_file="new_api.yaml",
+       base_path="/api/v1",  # base path requests are routed to
        description="...",
        enabled=True,
    ),
    ```
-3. That's it — `NexusDashboardMCP` iterates `APIRegistry.get_enabled_apis()`,
-   loads each spec, and generates MCP tools named `{api_name}_{operationId}`.
-   `AuthMiddleware` resolves the base path from the registry at request time.
-4. (Optional) Add the spec to `scripts/generate_tool_descriptions.py` and the
-   sync map in `src/services/database_init.py` so RBAC selection and tool
-   descriptions include the new operations.
+3. That's it — `ISEMCP` iterates `APIRegistry.get_enabled_apis()`, loads each
+   spec, and generates MCP tools. `AuthMiddleware` resolves the base path from
+   the registry at request time, and `scripts/generate_tool_descriptions.py`
+   and `src/services/database_init.py` both read the same registry, so tool
+   descriptions and RBAC selection pick the new operations up automatically.
+
+A spec that declares `operationId`s has them used verbatim; only a spec without
+them (ERS) gets synthesized names. Each API also carries its own `tool_prefix`,
+so registering a new API never renames an existing API's tools — which matters,
+because those names are already seeded into `api_endpoints.tool_name`.
+
+Two things to get right for a new API:
+
+- **Base path.** `""` means "paths are already absolute from the server root"
+  and is distinct from an unknown API. `AuthMiddleware` checks for `None`, not
+  falsiness, precisely so an empty base path is honoured.
+- **Port.** If ISE serves the family on its own port, add a rule to
+  `ISEAPIClient._port_for_path()` rather than expecting the base URL to cover it.
 
 ### Custom Middleware
 
@@ -349,7 +380,7 @@ Claude Desktop (user-friendly message)
 1. **Authentication Errors**: 401, credential issues
 2. **Permission Errors**: Edit mode required
 3. **Validation Errors**: Invalid parameters
-4. **API Errors**: Nexus Dashboard errors (4xx, 5xx)
+4. **API Errors**: Cisco ISE errors (4xx, 5xx)
 5. **System Errors**: Database, network failures
 
 Each category has specific handling and user messaging.
@@ -382,10 +413,10 @@ Each category has specific handling and user messaging.
 
 - Multi-component workflows
 - Real database (test DB)
-- Mocked Nexus Dashboard API
+- Mocked Cisco ISE API
 
 ### E2E Tests (Future)
 
 - Full stack testing
-- Real Nexus Dashboard (sandbox/dev)
+- Real Cisco ISE (sandbox/dev)
 - User workflow validation

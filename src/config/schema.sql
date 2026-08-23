@@ -1,4 +1,4 @@
--- Nexus Dashboard MCP Server Database Schema
+-- Cisco ISE MCP Server Database Schema
 
 -- Schema migrations tracking (keeps track of which migration files have been applied)
 CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
     applied_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
--- Clusters table for storing Nexus Dashboard cluster credentials
+-- Clusters table for storing Cisco ISE deployment credentials (one row per deployment)
 CREATE TABLE IF NOT EXISTS clusters (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -33,8 +33,9 @@ CREATE TABLE IF NOT EXISTS security_config (
 -- API endpoints mapping table
 CREATE TABLE IF NOT EXISTS api_endpoints (
     id SERIAL PRIMARY KEY,
-    api_name VARCHAR(50) NOT NULL, -- 'manage', 'analyze', 'infra', etc.
-    operation_id VARCHAR(255) NOT NULL,
+    api_name VARCHAR(50) NOT NULL, -- 'ise'
+    operation_id VARCHAR(255) NOT NULL, -- synthesized ID, e.g. 'networkdevice_getAll'
+    tool_name VARCHAR(64), -- derived MCP tool name (see src/core/tool_naming.py)
     http_method VARCHAR(10) NOT NULL,
     path VARCHAR(512) NOT NULL,
     enabled BOOLEAN DEFAULT TRUE,
@@ -226,6 +227,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_client_ip ON audit_log(client_ip);
 -- API endpoints indexes
 CREATE INDEX IF NOT EXISTS idx_api_endpoints_api_name ON api_endpoints(api_name);
 CREATE INDEX IF NOT EXISTS idx_api_endpoints_enabled ON api_endpoints(enabled);
+CREATE INDEX IF NOT EXISTS idx_api_endpoints_tool_name ON api_endpoints(tool_name);
 
 -- User indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -291,15 +293,15 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Insert default tool profiles (max_tools=0 means no filtering for Full Access)
 INSERT INTO tool_profiles (name, description, max_tools) VALUES
-    ('Fabric Operations', 'Common fabric management operations for VLAN, VRF, BD, and EPG', 30),
-    ('Monitoring & Health', 'Read-only monitoring and health check operations', 25),
-    ('Troubleshooting', 'Network analysis and troubleshooting tools', 25),
+    ('Device Onboarding', 'Network access device and device group management', 30),
+    ('Monitoring & Health', 'Read-only deployment, node, and health check operations', 25),
+    ('Identity & Endpoints', 'Internal user, identity group, and endpoint lookup', 25),
     ('Full Access', 'All available operations (no filtering)', 0)
 ON CONFLICT (name) DO NOTHING;
 
 -- ==================== Comments ====================
 
-COMMENT ON TABLE clusters IS 'Stores Nexus Dashboard cluster connection information with encrypted credentials';
+COMMENT ON TABLE clusters IS 'Stores Cisco ISE deployment connection information with encrypted credentials';
 COMMENT ON TABLE security_config IS 'Global security configuration for the MCP server';
 COMMENT ON TABLE api_endpoints IS 'Registry of all available API endpoints from OpenAPI specs';
 COMMENT ON TABLE audit_log IS 'Audit trail of all operations performed through the MCP server';
@@ -410,18 +412,18 @@ CREATE INDEX IF NOT EXISTS idx_system_prompt_sections_section_name ON system_pro
 -- Default API guidance
 INSERT INTO api_guidance (api_name, display_name, description, when_to_use, when_not_to_use, priority)
 VALUES
-    ('manage', 'Manage API', 'Core management operations for VLAN, VRF, BD, EPG, and policy configuration', 'Use for creating, updating, or deleting network configurations.', 'Avoid for read-only operations or analysis tasks.', 10),
-    ('analyze', 'Analyze API', 'Network analysis and troubleshooting operations', 'Use for troubleshooting connectivity issues and analyzing network behavior.', 'Avoid for configuration changes.', 20),
-    ('infra', 'Infrastructure API', 'Infrastructure operations for fabric nodes and interfaces', 'Use for infrastructure queries and node status.', 'Avoid for policy configuration.', 30),
-    ('one_manage', 'OneManage API', 'Centralized management across multiple network domains', 'Use for cross-domain operations.', 'Avoid for single-fabric operations.', 40)
+    ('ise', 'Cisco ISE External RESTful Services (ERS) API', 'Full ISE ERS API covering network access devices, internal users and identity groups, endpoints and profiling, authorization policy elements, TrustSec SGTs and matrices, guest and sponsor portals, certificates, Active Directory join points, and deployment nodes', 'Use for all ISE configuration and inventory work.', 'Not for live session or posture data, which comes from the ISE Monitoring (MnT) API, nor for policy sets and authorization rules, which live in the /api/v1 Open API. Neither is exposed by this server yet.', 10),
+    ('apiservice', 'Cisco ISE API Service (Open API enablement)', 'Reads and sets whether the ISE Open API is enabled, separately for the Policy Administration node and the Policy Service nodes', 'Use to check or change whether the Open API is enabled.', 'Provides no policy, certificate, or deployment operations - it only toggles the Open API.', 20)
 ON CONFLICT (api_name) DO NOTHING;
 
 -- Default system prompt sections
 INSERT INTO system_prompt_sections (section_name, section_order, title, content)
 VALUES
-    ('overview', 10, 'API Overview', 'You are working with Cisco Nexus Dashboard APIs. Select the appropriate API based on the task.'),
-    ('api_selection', 20, 'API Selection Guidelines', 'Identify if the task is configuration (manage), troubleshooting (analyze), infrastructure query (infra), or cross-domain (one_manage).'),
-    ('best_practices', 30, 'Best Practices', 'Always verify prerequisites before configuration changes. Use read operations to validate state.')
+    ('overview', 10, 'API Overview', 'You are working with the Cisco Identity Services Engine (ISE) External RESTful Services (ERS) API. Operations are grouped by resource family: network, identity, policy, trustsec, guest, threat, and deployment.'),
+    ('api_selection', 20, 'API Selection Guidelines', 'Identify the resource family for the task, then prefer getByName when the user gives you a name; otherwise list with a filter and read the resource UUID before calling an operation that takes an {id} path parameter.'),
+    ('identifiers', 25, 'Working with ISE Identifiers', 'ERS resources are addressed by UUID, not display name. Endpoints are the exception - they are keyed by MAC address, and ANC actions take the MAC directly. Never guess a UUID.'),
+    ('pagination', 27, 'Pagination & Filtering', 'Get-All returns an ERS SearchResult with a total, a resources array of name/id/link summaries, and a nextPage link. The default page size is 20 and the maximum is 100. Narrow results with filter=field.OPERATOR.value.'),
+    ('best_practices', 30, 'Best Practices', 'Always verify prerequisites before configuration changes. Use read operations to validate state. Treat shared secrets and passwords as sensitive and never echo them back.')
 ON CONFLICT (section_name) DO NOTHING;
 
 COMMENT ON TABLE api_guidance IS 'API-level guidance for tool selection';

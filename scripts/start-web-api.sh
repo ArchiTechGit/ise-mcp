@@ -9,7 +9,7 @@ echo "Starting FastAPI Web API..."
 SSL_ENABLED="${SSL_ENABLED:-true}"
 SSL_CERTFILE="${SSL_CERTFILE:-/app/certs/server.crt}"
 SSL_KEYFILE="${SSL_KEYFILE:-/app/certs/server.key}"
-WEB_API_PORT="${WEB_API_PORT:-8444}"
+WEB_API_PORT="${WEB_API_PORT:-8448}"
 INTERNAL_HTTP_PORT="${INTERNAL_HTTP_PORT:-8000}"
 
 if [ "$SSL_ENABLED" = "true" ]; then

@@ -5,7 +5,7 @@
 ### Required
 
 - Docker 20.10+ and Docker Compose 2.0+
-- Access to a Nexus Dashboard cluster
+- Access to a ISE deployment
 - 2GB RAM minimum (4GB recommended)
 - 10GB disk space
 
@@ -25,7 +25,7 @@
                     |                    |
                [HTTPS]              [HTTPS]
                     |                    |
-            Port 7443            Port 8444
+            Port 7447            Port 8448
                     |                    |
 +------------------+    +--------------------------+
 |    Web UI        |    |        Web API           |
@@ -43,8 +43,8 @@
     +--------------+---------------+
     |              |               |
 +--------+  +------------+  +--------------+
-|Postgres|  | MCP Server |  |Nexus Dashboard|
-| 15432  |  |  (stdio)   |  |   Clusters    |
+|Postgres|  | MCP Server |  |Cisco ISE|
+| 15436  |  |  (stdio)   |  |   Clusters    |
 +--------+  +------------+  +--------------+
 ```
 
@@ -53,8 +53,8 @@
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/beye91/nexus-dashboard-mcp.git
-cd nexus-dashboard-mcp
+git clone https://github.com/ArchiTechGit/ise-mcp.git
+cd ise-mcp
 ```
 
 ### Step 2: Configure Environment
@@ -78,7 +78,7 @@ SESSION_SECRET_KEY=your-session-secret
 
 # Optional: Certificate configuration
 CERT_DAYS=365
-CERT_CN=nexus-dashboard
+CERT_CN=ise-mcp
 
 # Optional: Logging
 LOG_LEVEL=INFO
@@ -111,28 +111,28 @@ docker compose ps
 docker compose logs -f
 
 # Test API health
-curl -k https://localhost:8444/api/health
+curl -k https://localhost:8448/api/health
 ```
 
 ### Step 5: Initial Setup
 
-1. Open browser to `https://YOUR_SERVER_IP:7443`
+1. Open browser to `https://YOUR_SERVER_IP:7447`
 2. Accept the self-signed certificate warning
 3. Create the initial admin user:
    - Username: `admin`
    - Email: `admin@example.com`
    - Password: `Admin123!` (or your preferred password)
-4. Add your first Nexus Dashboard cluster
+4. Add your first ISE deployment
 
 ## Port Reference
 
 | Service | Port | Protocol | Description | Configurable |
 |---------|------|----------|-------------|--------------|
-| Web UI | 7443 | HTTPS | Management interface | `WEB_UI_PORT` |
-| Web UI Internal | 7100 | HTTP | Internal Next.js server (localhost only) | `WEB_UI_INTERNAL_PORT` |
-| Web API | 8444 | HTTPS | REST API and MCP SSE | `WEB_API_PORT` |
+| Web UI | 7447 | HTTPS | Management interface | `WEB_UI_PORT` |
+| Web UI Internal | 7104 | HTTP | Internal Next.js server (localhost only) | `WEB_UI_INTERNAL_PORT` |
+| Web API | 8448 | HTTPS | REST API and MCP SSE | `WEB_API_PORT` |
 | Internal HTTP | 8001 | HTTP | Web UI to API proxy | `INTERNAL_HTTP_PORT` |
-| PostgreSQL | 15432 | TCP | Database | via docker-compose |
+| PostgreSQL | 15436 | TCP | Database | via docker-compose |
 
 > **Note:** Services attach to an existing external Docker bridge network (default: `openshell-cluster-nemoclaw`).
 
@@ -150,15 +150,15 @@ DOCKER_EXTERNAL_NETWORK=your-existing-bridge-network
 
 ### Port Configuration
 
-The internal Next.js port (default: 7100) can be configured to avoid conflicts with other services (e.g., Grafana which commonly uses port 3000). Set the following environment variables in your `.env` file:
+The internal Next.js port (default: 7104) can be configured to avoid conflicts with other services (e.g., Grafana which commonly uses port 3000). Set the following environment variables in your `.env` file:
 
 ```env
-# External HTTPS port for Web UI (default: 7443)
-WEB_UI_PORT=7443
+# External HTTPS port for Web UI (default: 7447)
+WEB_UI_PORT=7447
 
-# Internal Next.js port - localhost only (default: 7100)
+# Internal Next.js port - localhost only (default: 7104)
 # Change this if you have conflicts with other services
-WEB_UI_INTERNAL_PORT=7100
+WEB_UI_INTERNAL_PORT=7104
 ```
 
 ## SSL/TLS Configuration
@@ -167,7 +167,7 @@ WEB_UI_INTERNAL_PORT=7100
 
 Certificates are automatically generated on first startup:
 
-- **Location:** Docker volume `nexus-mcp-certs`
+- **Location:** Docker volume `ise-mcp-certs`
 - **Validity:** 365 days (configurable via `CERT_DAYS`)
 - **SANs Included:**
   - `localhost`
@@ -178,7 +178,7 @@ Certificates are automatically generated on first startup:
 
 ```bash
 # Remove existing certificates
-docker volume rm nexus-mcp-certs
+docker volume rm ise-mcp-certs
 
 # Restart services (new certificates will be generated)
 docker compose up -d
@@ -210,7 +210,7 @@ To use your own certificates:
 |----------|---------|-------------|
 | `CERT_SERVER_IP` | (none) | Your server's IP address for SSL SAN |
 | `CERT_DAYS` | `365` | Certificate validity in days |
-| `CERT_CN` | `nexus-dashboard` | Certificate common name |
+| `CERT_CN` | `ise-mcp` | Certificate common name |
 | `ENCRYPTION_KEY` | (auto) | Fernet key for credential encryption |
 | `SESSION_SECRET_KEY` | (auto) | Session signing key |
 | `BACKEND_API_URL` | (required) | Web UI runtime target for proxied API requests |
@@ -219,10 +219,10 @@ To use your own certificates:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WEB_UI_PORT` | `7443` | External HTTPS port for Web UI |
-| `WEB_UI_INTERNAL_PORT` | `7100` | Internal Next.js port (localhost only) |
-| `WEB_API_PORT` | `8444` | External HTTPS port for Web API |
-| `INTERNAL_HTTP_PORT` | `7100` | Internal HTTP port for API proxy |
+| `WEB_UI_PORT` | `7447` | External HTTPS port for Web UI |
+| `WEB_UI_INTERNAL_PORT` | `7104` | Internal Next.js port (localhost only) |
+| `WEB_API_PORT` | `8448` | External HTTPS port for Web API |
+| `INTERNAL_HTTP_PORT` | `7104` | Internal HTTP port for API proxy |
 
 ### Security
 
@@ -230,15 +230,15 @@ To use your own certificates:
 |----------|---------|-------------|
 | `EDIT_MODE_ENABLED` | `false` | Enable write operations |
 | `MCP_API_TOKEN` | (none) | Optional token for MCP access |
-| `NEXUS_VERIFY_SSL` | `false` | Verify Nexus Dashboard SSL |
+| `ISE_VERIFY_SSL` | `false` | Verify Cisco ISE SSL |
 
-### Nexus Dashboard (Optional)
+### Cisco ISE (Optional)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NEXUS_CLUSTER_URL` | (none) | Default cluster URL |
-| `NEXUS_USERNAME` | `admin` | Default username |
-| `NEXUS_PASSWORD` | (none) | Default password |
+| `ISE_HOST_URL` | (none) | Default cluster URL |
+| `ISE_USERNAME` | `admin` | Default username |
+| `ISE_PASSWORD` | (none) | Default password |
 
 ### Logging
 
@@ -255,11 +255,11 @@ For connecting to the MCP server running on a different host:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "npx",
       "args": [
         "mcp-remote@latest",
-        "https://YOUR_SERVER_IP:8444/mcp/sse",
+        "https://YOUR_SERVER_IP:8448/mcp/sse",
         "--transport",
         "sse-only"
       ]
@@ -279,12 +279,12 @@ For Claude Desktop running on the same machine:
 ```json
 {
   "mcpServers": {
-    "nexus-dashboard": {
+    "ise": {
       "command": "docker",
       "args": [
         "exec",
         "-i",
-        "nd_mcp_mcp_server",
+        "ise_mcp_mcp_server",
         "python",
         "src/main.py"
       ]
@@ -310,13 +310,13 @@ For Claude Desktop running on the same machine:
 docker compose ps
 
 # View detailed health status
-docker inspect nd_mcp_web_api --format='{{.State.Health.Status}}'
+docker inspect ise_mcp_web_api --format='{{.State.Health.Status}}'
 ```
 
 ### API Health Endpoint
 
 ```bash
-curl -k https://localhost:8444/api/health
+curl -k https://localhost:8448/api/health
 ```
 
 Response:
@@ -335,14 +335,14 @@ Response:
 
 ### Web UI Health Page
 
-Access `https://YOUR_SERVER_IP:7443/health` for a visual health dashboard.
+Access `https://YOUR_SERVER_IP:7447/health` for a visual health dashboard.
 
 ## Database Management
 
 ### Connect to Database
 
 ```bash
-docker compose exec nd_mcp_postgres psql -U mcp_user -d nexus_mcp
+docker compose exec ise_mcp_postgres psql -U mcp_user -d ise_mcp
 ```
 
 ### Common Queries
@@ -368,10 +368,10 @@ SELECT id, username, email, is_active FROM users;
 
 ```bash
 # Create backup
-docker compose exec nd_mcp_postgres pg_dump -U mcp_user nexus_mcp > backup-$(date +%Y%m%d).sql
+docker compose exec ise_mcp_postgres pg_dump -U mcp_user ise_mcp > backup-$(date +%Y%m%d).sql
 
 # Restore from backup
-docker compose exec -T postgres psql -U mcp_user nexus_mcp < backup-20250101.sql
+docker compose exec -T postgres psql -U mcp_user ise_mcp < backup-20250101.sql
 ```
 
 ## Troubleshooting
@@ -380,28 +380,28 @@ docker compose exec -T postgres psql -U mcp_user nexus_mcp < backup-20250101.sql
 
 ```bash
 # Check logs for errors
-docker compose logs nd_mcp_web_api
-docker compose logs nd_mcp_web_ui
+docker compose logs ise_mcp_web_api
+docker compose logs ise_mcp_web_ui
 
 # Verify port availability
-netstat -tlnp | grep -E '7443|8444|15432'
+netstat -tlnp | grep -E '7447|8448|15436'
 ```
 
 ### Certificate Errors
 
 ```bash
 # View certificate details
-docker compose exec nd_mcp_web_api openssl x509 -in /app/certs/server.crt -text -noout
+docker compose exec ise_mcp_web_api openssl x509 -in /app/certs/server.crt -text -noout
 
 # Check certificate expiration
-docker compose exec nd_mcp_web_api openssl x509 -in /app/certs/server.crt -noout -dates
+docker compose exec ise_mcp_web_api openssl x509 -in /app/certs/server.crt -noout -dates
 ```
 
 ### Database Connection Issues
 
 ```bash
 # Test database connectivity
-docker compose exec nd_mcp_postgres pg_isready -U mcp_user
+docker compose exec ise_mcp_postgres pg_isready -U mcp_user
 
 # Check database logs
 docker compose logs postgres
@@ -452,7 +452,7 @@ docker compose up -d
 - [ ] Set `CERT_SERVER_IP` to your production server IP
 - [ ] Generate and configure unique `ENCRYPTION_KEY`
 - [ ] Generate and configure unique `SESSION_SECRET_KEY`
-- [ ] Configure firewall to allow ports 7443, 8444, 15432
+- [ ] Configure firewall to allow ports 7447, 8448, 15436
 - [ ] Change default admin password after first login
 - [ ] Keep `EDIT_MODE_ENABLED=false` unless needed
 - [ ] Set up regular database backups

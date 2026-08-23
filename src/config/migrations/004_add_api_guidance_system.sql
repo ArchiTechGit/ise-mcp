@@ -112,64 +112,108 @@ CREATE INDEX IF NOT EXISTS idx_system_prompt_sections_section_order ON system_pr
 CREATE INDEX IF NOT EXISTS idx_system_prompt_sections_is_active ON system_prompt_sections(is_active);
 
 -- Insert default API guidance
-INSERT INTO api_guidance (api_name, display_name, description, when_to_use, when_not_to_use, priority, created_at, updated_at)
+INSERT INTO api_guidance (api_name, display_name, description, when_to_use, when_not_to_use, priority, is_active, created_at, updated_at)
 VALUES
     (
-        'manage',
-        'Manage API',
-        'Core management operations for VLAN, VRF, BD, EPG, and policy configuration',
-        'Use for creating, updating, or deleting network configurations. Best for direct policy changes and object creation.',
-        'Avoid for read-only operations or analysis tasks. Use analyze API instead for troubleshooting.',
-        10, NOW(), NOW()
-    ),
-    (
-        'analyze',
-        'Analyze API',
-        'Network analysis and troubleshooting operations including connectivity, path tracing, and diagnostics',
-        'Use for troubleshooting connectivity issues, validating configurations, and analyzing network behavior.',
-        'Avoid for configuration changes or infrastructure management.',
-        20, NOW(), NOW()
-    ),
-    (
-        'infra',
-        'Infrastructure API',
-        'Infrastructure operations for fabric nodes, interfaces, and physical topology',
-        'Use for infrastructure queries, node status, interface configurations, and physical topology.',
-        'Avoid for policy or logical network configuration. Use manage API for policy changes.',
-        30, NOW(), NOW()
-    ),
-    (
-        'one_manage',
-        'OneManage API',
-        'Centralized network management operations across multiple network domains',
-        'Use for cross-domain operations and centralized management tasks when multiple fabrics are involved.',
-        'Avoid for single-fabric operations where direct manage API is more appropriate.',
-        40, NOW(), NOW()
+        'ise',
+        'Cisco ISE External RESTful Services (ERS) API',
+        'Full ISE ERS API covering network access devices, internal users and identity groups, endpoints and profiling, authorization policy elements, TrustSec SGTs and matrices, guest and sponsor portals, certificates, Active Directory join points, and deployment nodes',
+        'Use for all ISE configuration and inventory work: onboarding network devices, managing identities and endpoints, editing policy elements, running TrustSec queries, and administering guest access.',
+        'Not applicable — this is the only API available for ISE operations. Note that ERS covers configuration only; live session and posture data comes from the ISE Monitoring (MnT) API, which is not part of this server.',
+        10, TRUE, NOW(), NOW()
     )
 ON CONFLICT (api_name) DO NOTHING;
 
+-- Insert resource-family guidance for the ERS resource groups
+INSERT INTO category_guidance (api_name, category_name, display_name, description, when_to_use, related_categories, priority, is_active, created_at, updated_at)
+VALUES
+    (
+        'ise', 'network', 'Network Access Devices',
+        'Network device (NAD) inventory and grouping: network devices with their RADIUS and TACACS+ shared secrets, network device groups, external RADIUS servers, and RADIUS/TACACS server sequences.',
+        'Use for onboarding switches, WLCs and firewalls as RADIUS or TACACS+ clients, organising them into device groups, and reviewing shared-secret and CoA configuration.',
+        '["policy", "trustsec"]', 10, TRUE, NOW(), NOW()
+    ),
+    (
+        'ise', 'identity', 'Identities & Endpoints',
+        'Internal users, identity groups, identity store sequences, endpoints and endpoint groups, endpoint certificates, profiler profiles, and REST ID stores.',
+        'Use for creating or auditing internal accounts, managing endpoint MAC identities and their group assignment, and reviewing profiling results.',
+        '["policy", "guest"]', 20, TRUE, NOW(), NOW()
+    ),
+    (
+        'ise', 'policy', 'Authorization Policy Elements',
+        'Policy building blocks referenced by authorization rules: authorization profiles, downloadable ACLs, allowed protocol services, certificate profiles and templates, and filter policies.',
+        'Use for reviewing or editing what ISE returns on a successful authorization — VLAN, dACL, SGT and reauthentication settings — and which EAP methods are permitted.',
+        '["identity", "network", "trustsec"]', 30, TRUE, NOW(), NOW()
+    ),
+    (
+        'ise', 'trustsec', 'TrustSec (SGT, SGACL & SXP)',
+        'Security Group Tags, SGACLs, the egress policy matrix and its cells, SG mappings and mapping groups, SXP connections, local bindings and VPNs, and the CTS query endpoints.',
+        'Use for reading or changing segmentation policy: tag definitions, matrix cells, IP-to-SGT mappings, and SXP peering. CTS query operations are served on TCP 9063 rather than the ERS port.',
+        '["policy", "network"]', 40, TRUE, NOW(), NOW()
+    ),
+    (
+        'ise', 'guest', 'Guest & Sponsor Access',
+        'Guest users and guest types, sponsor groups and sponsor group members, guest locations and SSIDs, SMTP and SMS notification settings, and the guest, sponsor, hotspot, BYOD and self-registration portals.',
+        'Use for creating and managing guest accounts through their lifecycle (create, suspend, reinstate, notify), and for reviewing portal and sponsor configuration.',
+        '["identity"]', 50, TRUE, NOW(), NOW()
+    ),
+    (
+        'ise', 'threat', 'Adaptive Network Control & Threat',
+        'ANC policies and ANC endpoint actions (quarantine, port bounce, shutdown, reauthenticate), and threat and vulnerability clearing.',
+        'Use to contain a compromised endpoint by applying an ANC policy to its MAC address, and to clear the containment once remediation is complete.',
+        '["identity", "policy"]', 60, TRUE, NOW(), NOW()
+    ),
+    (
+        'ise', 'deployment', 'Deployment, Certificates & Directories',
+        'ISE deployment nodes and node services, deployment and telemetry info, system certificates, Active Directory join points and domain operations, LDAP identity sources, pxGrid nodes and settings, and support bundles.',
+        'Use for checking deployment topology and node personas, reviewing certificate and directory integration, and collecting support bundles.',
+        '["identity"]', 70, TRUE, NOW(), NOW()
+    )
+ON CONFLICT (api_name, category_name) DO NOTHING;
+
 -- Insert default system prompt sections
-INSERT INTO system_prompt_sections (section_name, section_order, title, content, created_at, updated_at)
+INSERT INTO system_prompt_sections (section_name, section_order, title, content, is_active, created_at, updated_at)
 VALUES
     (
         'overview',
         10,
         'API Overview',
-        'You are working with Cisco Nexus Dashboard APIs. The system provides four main API categories: Manage (configuration), Analyze (troubleshooting), Infrastructure (physical topology), and OneManage (cross-domain). Always select the most appropriate API based on the user task.',
-        NOW(), NOW()
+        'You are working with the Cisco Identity Services Engine (ISE) External RESTful Services (ERS) API. Operations are grouped by resource family: network (network access devices and device groups), identity (internal users, identity groups, endpoints, profiling), policy (authorization profiles, dACLs, allowed protocols), trustsec (SGTs, SGACLs, egress matrix, SXP), guest (guest users, sponsor groups, portals), threat (ANC quarantine actions), and deployment (nodes, certificates, Active Directory). ERS covers configuration only — live session, posture and authentication logs come from the ISE Monitoring (MnT) API, which this server does not expose.',
+        TRUE, NOW(), NOW()
     ),
     (
         'api_selection',
         20,
         'API Selection Guidelines',
-        'When selecting operations: 1) Identify if the task is configuration (manage), troubleshooting (analyze), infrastructure query (infra), or cross-domain (one_manage). 2) Check category guidance for specific operation types. 3) Consider workflows for common multi-step tasks. 4) Validate required parameters are available before attempting operations.',
-        NOW(), NOW()
+        'When selecting operations: 1) Identify the resource family for the task. 2) Prefer the getByName operation when the user gives you a name — most ERS resources expose one, and it saves a list-and-filter round trip. 3) Otherwise list with a filter and read the resource UUID from the result before calling an operation that takes an {id} path parameter. 4) Check category guidance for the resource family, and consider workflows for common multi-step tasks. 5) Validate required path, query and body parameters before calling.',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'identifiers',
+        25,
+        'Working with ISE Identifiers',
+        'Almost every ERS resource is addressed by a UUID in its {id} path parameter, not by its display name. Resolve a name first: call the resource getByName operation where one exists, or list with filter=name.EQUALS.<value> and read the id from the SearchResult. Endpoints are the exception — they are keyed by MAC address, and ANC actions take the MAC directly. Never guess a UUID.',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'pagination',
+        27,
+        'Pagination & Filtering',
+        'Get-All operations return an ERS SearchResult: a total count, a resources array of name/id/link summaries, and a nextPage link. The default page size is 20 and the maximum is 100, so set size and page explicitly when enumerating. Narrow results with filter using the documented syntax field.OPERATOR.value (for example name.CONTAINS.branch or macAddress.EQUALS.00:11:22:33:44:55); each operation description lists the fields it supports. The summary entries carry only name, id and link — call getById to see the full object.',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'write_operations',
+        28,
+        'Create, Update & Delete',
+        'ERS request bodies wrap the object in a single resource key, for example {"NetworkDevice": {...}}; send the body exactly in that shape. A successful create returns 201 with an empty body and the new UUID in the Location header. PUT replaces the whole object, so read the current resource with getById first and send it back with your changes applied, otherwise unset fields are cleared; use PATCH where the resource supports it to change fields in isolation.',
+        TRUE, NOW(), NOW()
     ),
     (
         'best_practices',
         30,
         'Best Practices',
-        'Follow these practices: 1) Always verify prerequisites before configuration changes. 2) Use read operations to validate state before and after changes. 3) For complex tasks, break them into logical steps. 4) Handle errors gracefully and provide clear feedback. 5) Log all configuration changes for audit purposes.',
-        NOW(), NOW()
+        'Follow these practices: 1) Verify prerequisites before configuration changes — a network device needs its group hierarchy and shared secret ready, and an authorization profile needs its dACL to exist first. 2) Use read operations to validate state before and after changes. 3) For destructive operations (deleting a network device, an identity group, or a matrix cell), confirm the target name and UUID with the user first. 4) Treat RADIUS and TACACS+ shared secrets, and any password field, as sensitive — never echo them back. 5) Break complex tasks into logical steps. 6) Surface the ISE ERSResponse error message verbatim; it names the field that failed validation. 7) Log all configuration changes for audit purposes.',
+        TRUE, NOW(), NOW()
     )
 ON CONFLICT (section_name) DO NOTHING;

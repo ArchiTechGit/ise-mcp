@@ -1,0 +1,1322 @@
+openapi: 3.0.1
+info:
+  title: Cisco ISE Split Upgrade and Full Upgrade APIs
+  version: 1.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: 'https://{server}/v1/'
+    variables:
+      server:
+        default: localhost
+        description: The host where the API is rooted
+security:
+  - BasicAuth: []
+
+x-rbac: "administration_system_upgrade"
+
+#api paths and schemas needs to be changed for upgrade
+
+paths:
+  /upgrade/prepare/pre-checks:
+    post:
+      summary: APIs to initiate pre-checks execution on Primary PAN for complete deployment.
+      description: |
+        API's purpose is to initiate pre-checks execution on Primary PAN for complete deployment.
+      operationId: runPreChecksInPPAN
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrecheckRequest'
+      responses:
+        202:
+          description: Prechecks initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeTaskResponse'
+        400:
+          description: Invalid input. Please provide valid inputs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/prepare/get-status:
+    get:
+      summary:  gets status of pre-checks
+      description: |
+        get the latest precheck report
+      operationId: getPrecheckStatus
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+        - $ref: '#/components/parameters/PreCheckID'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradePrecheckResponse'
+        400:
+          description: Invalid reportId. Please provide valid reportId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/proceed/initiate-upgrade:
+    post:
+      summary: API's purpose would be to orchestrate upgrade execution on PPAN
+      description: |
+        API's purpose would be to orchestrate upgrade execution on PPAN
+      operationId: initiateUpgradeOnPPAN
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpgradeProceedRequest'
+      responses:
+        202:
+          description: Upgrade initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeTaskResponse'
+        400:
+          description: Unable to trigger upgrade , check error response for more details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/stage/start-stage:
+    post:
+      summary: API to initiate staging orcheastration from PPAN
+      description: |
+        API to initiate staging orcheastration from PPAN
+      operationId: initiateStagingOnPPAN
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StageRequest'
+      responses:
+        202:
+          description: Staging initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeTaskResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/stage/cancel-stage:
+    post:
+      summary: API to cancel staging process from PPAN
+      description: |
+        API to cancel staging process of specified nodes from PPAN
+      operationId: cancelStagingOnPPAN
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelStageRequest'
+      responses:
+        202:
+          description: Staging termination task initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeTaskResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/stage/get-status:
+    get:
+      summary: get the status a particular upgrade stage process
+      description: |
+        get the status of upgrade stage process for the requested nodes
+      operationId: stageStatus
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeListStage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/proceed/get-status:
+    get:
+      summary: get the status of upgrade proceed process
+      description: |
+        get the status of upgrade process for the requested nodes
+      operationId: proceedStatus
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeProceed'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade/summary/get-status:
+    get:
+      summary: get the summary of upgrade process
+      description: |
+        get the summary of upgrade process
+      operationId: upgradeSummary
+      tags:
+        - Upgrade
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeProceed'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /upgrade-patch/patch-install/pre-checks:
+    post:
+      summary: Initiate prechecks execution on PPAN for complete deployment.
+      description: |
+        Initiates prechecks execution on PPAN for complete deployment. It returns a precheck report id, which can be used to trigger patch installation later.
+        Patch installation can happen in three modes :
+        <ol>
+        <li>Full Patch Installation -> Hostname needs to be an empty array. First patch will get installed on PPAN and then it will get installed on all other nodes parallelly.</li>
+        <li>Sequential Patch Installation -> Hostname needs to be an empty array. First patch will get installed on PPAN and then it will get installed on all other nodes sequentially.</li>
+        <li>Split -> This will happen in batches / iterations. Host name is mandatory. In first iteration only PPAN should be sent as part of hostname. Once the PPAN installation is successfull then remaining nodes can be sent in batches.</li>
+        </ol>
+         upgradeType param can be specified as FULL_PATCH for full patch installation, SPLIT_PATCH for split patch installation and SEQUENTIAL_PATCH for sequential patch installation.
+        upgrade type, patch bundle name, repository name are mandatory parameters.
+      operationId: runPatchPreChecks
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchPrecheckRequest'
+      responses:
+        202:
+          description: Prechecks initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeTaskResponse'
+        400:
+          description: Invalid input. Please provide valid inputs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidErrorMessage'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /upgrade-patch/patch-install/pre-checks-status:
+    get:
+      summary: Gets status of prechecks for the given precheck report id.
+      description: |
+        Get the latest precheck report. User can get status of an individual check by passing check's name.
+      operationId: getPatchPrecheckStatus
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+        - $ref: '#/components/parameters/PrecheckName'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradePrecheckResponse'
+        400:
+          description: Invalid precheck reportId. Please provide valid precheck reportId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidErrorMessage'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /upgrade-patch/patch-install:
+    post:
+      summary: Trigger patch installation on the Cisco ISE nodes.
+      description: |
+        Trigger patch installation on the Cisco ISE nodes.
+        <ul>
+        <li>In Full patch installation, patch will be installed on PPAN first, and then on following nodes.</li>
+        <li> In Split patch installation, patch will be installed on PPAN first, and then on the nodes in batches of the remaining iterations.</li>
+        </ul>
+         A task ID is returned which can be used to monitor the progress of the patch installation process. As the patch
+        installation triggers the Cisco ISE to restart, the task API becomes unavailable for
+        a certain period of time. When installation is going on PPAN, then monitor the progress on SPAN GUI.
+
+      operationId: installPatch
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      responses:
+        202:
+          description: Patch installation triggered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchTaskResponse'
+        400:
+          description: Invalid input. A valid precheck report's id and and hostnames should be provided as query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidErrorMessage'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /upgrade-patch/patch-install/get-status:
+    get:
+      summary: get the status of patch installation.
+      description: |
+        Get the status of patch installation for the requested nodes.
+         Precheck report Id obtained by running the precheck API can be passed to get the status.
+      operationId: patchInstallStatus
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeProceed'
+        204:
+          description: No content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoContentMessage'
+
+        400:
+          description: Invalid input. A valid precheck report's id should be provided as query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /upgrade-patch/patch-install/list-patch:
+    get:
+      summary: List installed patches.
+      description: |
+        List all the installed patches in the system with the date of installation.
+      operationId: getInstalledPatches
+      tags:
+        - Patch
+      parameters:
+        - $ref: "#/components/parameters/XRequestIdHeader"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchListResponse'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /rollback/patch-rollback:
+    get:
+      tags:
+        - Patch
+      description: Get current and previous patch installed information
+      operationId: patchRollbackInfo
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchRollbackVersionResponse'
+
+
+    post:
+      summary: Trigger patch rollback on the Cisco ISE nodes.
+      description: |
+        Trigger patch rollback on the Cisco ISE nodes.
+        Patch will be rolled back in other nodes first followed by P-PAN.
+        Precheck report Id is mandatory which has been obtained by running patch rollback pre-checks API.
+        Patch rollback progress can be monitored using patch rollback get status API. 
+        When rollback is going on PPAN, then monitor the progress on SPAN GUI.
+
+      operationId: rollbackPatch
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+      responses:
+        202:
+          description: Patch rollback triggered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchTaskResponse'
+        400:
+          description: Invalid input. A valid precheck report's id and and hostnames should be provided as query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /rollback/patch-rollback/pre-checks:
+    post:
+      summary: Initiate prechecks execution on PPAN for complete deployment.
+      description: |
+        Initiates prechecks execution on PPAN for complete deployment. It returns a precheck report id, which can be used to trigger patch rollback later.
+        Patch rollback can happen in two modes :
+        <ol>
+        <li>Full Patch Rollback -> Hostname needs to be an empty array. First patch will get installed on PPAN and then it will get installed on all other nodes parallelly.</li>
+        <li>Sequential Patch Rollback -> Hostname needs to be an empty array. First patch will get installed on PPAN and then it will get installed on all other nodes sequentially.</li>
+        </ol>
+        upgradeType param can be specified as PATCH_ROLLBACK for full patch rollback, PATCH_ROLLBACK_SEQUENTIAL for sequential patch rollback. upgrade type is mandatory parameter.
+      operationId: runRollbackPreChecks
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RollbackPrecheckRequest'
+      responses:
+        202:
+          description: Prechecks for rollback initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeTaskResponse'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /rollback/patch-rollback/pre-checks-status:
+    get:
+      summary: Gets status of prechecks for the given precheck report id.
+      description: |
+        Get the latest precheck report.
+      operationId: getRollbackPrecheckStatus
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+        - $ref: '#/components/parameters/PreCheckID'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradePrecheckResponse'
+        400:
+          description: Invalid precheck reportId. Please provide valid precheck reportId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidErrorMessage'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+  /rollback/patch-rollback/summary:
+    get:
+      summary: get the summary of patch rollback
+      description: |
+        get the summary of patch rollback
+      operationId: patchRollbackSummary
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpgradeSummaryResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /rollback/patch-rollback/get-status:
+    get:
+      summary: Gets the status of patch rollback.
+      description: |
+        Get the status of patch rollback for the requested nodes.
+         Precheck report Id obtained by running the precheck API is mandatory to get the status.
+      operationId: patchRollbackProceedStatus
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+        - $ref: '#/components/parameters/PrecheckReportID'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeProceed'
+        400:
+          description: Invalid input. A valid precheck report's id should be provided as query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidErrorMessage'
+
+        403:
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorMessage'
+
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorMessage'
+
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorMessage'
+
+
+
+  /upgrade-patch/patch-install/get-summary:
+    get:
+      summary: get the summary of patch install process
+      description: |
+        get the summary of patch install process
+      operationId: patchSummary
+      tags:
+        - Patch
+      parameters:
+        - $ref: '#/components/parameters/XRequestIdHeader'
+
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpgradeSummaryResponse'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+
+    XRequestIdHeader:
+      in: header
+      name: X-Request-ID
+      description: request Id, will return in the response headers, and appear in logs
+      schema:
+        type: string
+      required: false
+
+    PrecheckReportID:
+      in: query
+      name: preCheckReportID
+      description: Precheck report's id.
+      example: c4aa1432-be06-bf27-11eb-c208a1714b90
+      schema:
+        type: string
+
+    Hostnames:
+      in: query
+      name: hostnames
+      schema:
+        type: array
+        items:
+          type: string
+
+    PreCheckID:
+      in: query
+      name: preCheckID
+      schema:
+        type: string
+
+    PrecheckName:
+      in: query
+      name: precheckName
+      description: Precheck name.
+      example: "DEPLOYMENT_CHECK"
+      schema:
+        type: string
+
+  schemas:
+
+    RollbackPrecheckRequest:
+      type: object
+      properties:
+        upgradeType:
+          type: string
+          example: PATCH_ROLLBACK or PATCH_ROLLBACK_SEQUENTIAL
+        preChecks:
+          type: array
+          description: Array of prechecks that needs to be executed.
+          example: ["DEPLOYMENT_CHECK" , "SYSTEM_CERT_CHECK" , "ADMIN_CERT_CHECK" , "SERVICES_CHECK" , "PAN_FAILOVER_CHECK" , "DNS_CHECK"]
+          items:
+            type: string
+        preCheckReportID:
+          type: string
+          example: 50bc7f99-057a-4d9f-aec4-20b7d4b89846
+        reTrigger:
+          type: boolean
+          example: false
+      required:
+        - upgradeType
+
+    PatchRollbackVersionResponse:
+      type: object
+      properties:
+        currentReleaseVersion:
+          type: string
+          example: 3.2
+        currentPatchVersion:
+          type: string
+          example: P2
+        previousInstalledPatchVersion:
+          type: string
+          example: P1
+
+    TaskIdResponse:
+      type: object
+      properties:
+        preCheckReportID:
+          description: ID which can be used to track the status of task.
+          example: c4aa1432-be06-bf27-11eb-c208a1714b90
+          type: string
+        message:
+          type: string
+          example: Upgrade task has been initiated.
+
+    UpgradeTaskResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/TaskIdResponse'
+        version:
+          type: string
+          example: 1.0.0
+
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Repository (repo_name) does not exist. Please configure the repository from ISE UI to proceed
+
+    ServerErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Internal server Error.
+
+    InvalidErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid Inputs. Check request parameters and retry.
+
+    ForbiddenErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Forbidden.
+
+    NotFoundErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Not Found.
+
+    NoContentMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: No Content.
+
+    ErrorResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/Message'
+        version:
+          type: string
+          example: 1.0.0
+
+    PrecheckRequest:
+      type: object
+      properties:
+        preChecks:
+          type: array
+          items:
+            type: string
+        hostnames:
+          type: array
+          items:
+            type: string
+            example: "hostnames should be empty[] for FULL_UPGRADE"
+        upgradeType:
+          type: string
+          example: FULL_UPGRADE or SPLIT_UPGRADE
+        repoName:
+          type: string
+          example: repo_name
+        bundleName:
+          type: string
+          example: ise-upgradebundle-2.6.x-3.0.x-to-3.1.0.486.NOT_FOR_RELEASE.x86_64.tar.gz
+        patchBundleName:
+          type: string
+          example: ise-patchbundle-2.6.0.156-Patch1-20061206.SPA.x86_64.tar.gz
+        preCheckReportID:
+          type: string
+          example: 50bc7f99-057a-4d9f-aec4-20b7d4b89846
+        reTrigger:
+          type: boolean
+          example: false
+
+    PatchPrecheckRequest:
+      type: object
+      properties:
+        preChecks:
+          type: array
+          description: Array of prechecks that needs to be executed.
+          example: ["DEPLOYMENT_CHECK" , "TRUST_CERT_CHECK" , "SYSTEM_CERT_CHECK" , "REPOSITORY_CHECK" , "SERVICES_CHECK" , "LICENSE_CHECK"]
+          items:
+            type: string
+        hostnames:
+          type: array
+          items:
+            type: string
+            description: Array of hostnames. Hostnames should be empty[] for FULL_PATCH and SEQUENTIAL_PATCH install
+            example: ["ise1.cisco.com","ise2.cisco.com"]
+        upgradeType:
+          type: string
+          example: FULL_PATCH or SPLIT_PATCH or SEQUENTIAL_PATCH
+        repoName:
+          type: string
+          example: repo_name
+        patchBundleName:
+          type: string
+          example: ise-patchbundle-2.6.0.156-Patch1-20061206.SPA.x86_64.tar.gz
+        preCheckReportID:
+          type: string
+          example: 50bc7f99-057a-4d9f-aec4-20b7d4b89846
+        reTrigger:
+          type: boolean
+          example: false
+      required:
+        - upgradeType
+        - patchBundleName
+        - repoName
+
+    UpgradeProceedRequest:
+      type: object
+      properties:
+        hostnames:
+          type: array
+          items:
+            type: string
+        upgradeType:
+          type: string
+          example: FULL_UPGRADE or SPLIT_UPGRADE
+        preCheckReportID:
+          type: string
+          example: f2b7ba4b-6692-48f4-aec8-8681ce651a57
+      required:
+        - upgradeType
+        - preCheckReportID
+        - continueOnFailure
+
+    StageRequest:
+      type: object
+      properties:
+        hostnames:
+          type: array
+          items:
+            type: string
+        upgradeType:
+          type: string
+          example: FULL_UPGRADE or SPLIT_UPGRADE
+
+        preCheckReportID:
+          type: string
+          example: f2b7ba4b-6692-48f4-aec8-8681ce651a57
+        reTrigger:
+          type: boolean
+          example: false
+
+    CancelStageRequest:
+      type: object
+      properties:
+        hostnames:
+          type: array
+          items:
+            type: string
+        upgradeType:
+          type: string
+          example: FULL_UPGRADE or SPLIT_UPGRADE
+        preCheckReportID:
+          type: string
+          example: f2b7ba4b-6692-48f4-aec8-8681ce651a57
+
+    UpgradeListStage:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpgradeStage'
+
+    UpgradeStage:
+      type: object
+      properties:
+        node:
+          type: string
+          example: ise1.sn.test
+        progressMsg:
+          type: string
+          example: Config files backed up successfully
+        percentage:
+          type: integer
+          example: 100
+        dbStatus:
+          type: string
+          example: UPGRADE_STAGING_COMPLETED
+        message:
+          type: string
+          example: Config Files Backup $ Copy Upgrade DB dump
+        status:
+          type: string
+          example: passed
+
+    UpgradePrecheckResponse:
+      type: object
+      properties:
+        preChecks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrecheckType'
+        preCheckReportID:
+          type: string
+          example: f2b7ba4b-6692-48f4-aec8-8681ce651a57
+        nodecount:
+          type: integer
+          example: 1
+        isValid:
+          type: boolean
+          example: false
+        status:
+          type: string
+          example: valid
+        iseVersion:
+          type: string
+          example: 3.4.0.451
+        patchNo:
+          type: integer
+          example: 99
+
+    PrecheckType:
+      type: object
+      properties:
+        onFailure:
+          type: string
+          example: fail
+        remediationMsg:
+          type: string
+          example: Repository validation failed. Check if repository configuration is correct and manually validate from UI in Repository page or in CLI using, show repository
+        updateTime:
+          type: long
+          example: 1631513275877
+        message:
+          type: string
+          example:
+        executionTime:
+          type: long
+          example:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListNode'
+        checkType:
+          type: string
+          example: local
+        displayname:
+          type: string
+          example: Repository Validation
+        percentage:
+          type: integer
+          example: 100
+        name:
+          type: string
+          example: REPOSITORY_CHECK
+        successMsg:
+          type: string
+          example: Repository for bundle is validated successfully
+        successNodes:
+          type: integer
+          example: 1
+        status:
+          type: string
+          example: Success
+
+    ListNode:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: repository precheck passed
+        name:
+          type: string
+          example: ise1.sn.test
+        status:
+          type: string
+          example: Success
+
+    UpgradeProceed:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListNodeProceed'
+        remainingUpgradeTime:
+          type: integer
+          example: 0
+        percentage:
+          type: integer
+          example: 100
+        status:
+          type: string
+          example: success
+
+    RollbackSummary:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListRollbackSummary'
+        status:
+          type: string
+          example: success
+
+    ListRollbackSummary:
+      type: object
+      properties:
+        dbStatus:
+          type: string
+          example: PATCH_ROLLBACK_COMPLETED
+        message:
+          type: string
+          example: Patch rollback completed successfully
+        node:
+          type: string
+          example: ise1.sn.test
+        percentage:
+          type: integer
+          example: 100
+        progressMsg:
+          type: string
+          example: Patch rollback completed successfully
+        status:
+          type: string
+          example: passed
+
+    PpanIntiateIdResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example:
+
+    ListNodeProceed:
+      type: object
+      properties:
+        dbStatus:
+          type: string
+          example: UPGRADE_EXEC_COMPLETED
+        message:
+          type: string
+          example: Upgrade completed successfully
+        node:
+          type: string
+          example: ise1.sn.test
+        percentage:
+          type: integer
+          example: 100
+        progressMsg:
+          type: string
+          example: Upgrade completed successfully
+        status:
+          type: string
+          example: passed
+        upgradeTime:
+          type: integer
+          example: 127
+
+    PatchTaskResponse:
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/TaskIdResponse'
+        version:
+          type: string
+          example: 1.0.0
+
+    Patch:
+      type: object
+      properties:
+        patchNumber:
+          type: integer
+          description: Patch version number.
+          example: 3
+        installDate:
+          type: string
+          description: Date of patch installation.
+          example: "Tue Jan 30 04:48:13 2024"
+
+    NodePatchList:
+      type: object
+      properties:
+        node:
+          type: string
+          description: ISE node name.
+          example: "ise90.sn.test"
+        patchVersions:
+          type: array
+          description: Array of objects, each object containing patch version and installed date.
+          items:
+            $ref: '#/components/schemas/Patch'
+
+    PatchListResponse:
+      type: object
+      properties:
+        iseVersion:
+          type: string
+          description: ISE node version.
+          example: 3.4.0.345
+        patchList:
+          type: array
+          description: Array of objects, each object containing  hostname and patch version numbers and installed dates.
+          items:
+            $ref: '#/components/schemas/NodePatchList'
+
+    NodeReportItem:
+      type: object
+      properties:
+        Old Personas:
+          type: string
+        Role:
+          type: string
+        New Personas:
+          type: string
+        Hostname:
+          type: string
+      required:
+        - Old Personas
+        - Role
+        - New Personas
+        - Hostname
+
+    NodesReport:
+      type: object
+      properties:
+        nodes-report:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReportItem'
+
+
+    UpgradeSummaryResponse:
+      type: object
+      properties:
+        PrechecksSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpgradePrecheckResponse'
+        NodesReportSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodesReport'
+        UpgradeSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpgradeProceed'

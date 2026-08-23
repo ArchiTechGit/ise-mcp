@@ -1,7 +1,12 @@
--- Migration 009: Seed built-in troubleshooting workflows and use cases
+-- Migration 009: Seed built-in Cisco ISE workflows and use cases
 -- Version: 009
--- Date: 2026-03-18
--- Description: Seeds 10 practical workflows with steps and 8 use cases for guided troubleshooting
+-- Date: 2026-08-19
+-- Description: Seeds 8 practical ISE workflows with steps and 6 use cases
+--              covering device onboarding, identity and endpoint management,
+--              guest access, TrustSec, threat containment, and deployment health.
+--
+-- Every operation_name below is a real MCP tool name produced by
+-- src/core/tool_naming.py from the ERS_APIs.yaml specification.
 
 -- ============================================================================
 -- WORKFLOWS
@@ -10,84 +15,68 @@
 INSERT INTO workflows (name, display_name, description, problem_statement, use_case_tags, is_active, priority, created_at, updated_at)
 VALUES
     (
-        'endpoint_unreachable',
-        'Endpoint Unreachable',
-        'Diagnose why a VM or host cannot be reached from the network. Walks through endpoint lookup, history, anomaly detection, interface checks, and path tracing.',
-        'A VM or endpoint is not reachable from the network.',
-        '["troubleshooting", "connectivity", "endpoint"]',
+        'network_device_onboarding',
+        'Network Access Device Onboarding',
+        'Review the existing device group hierarchy and profiles, check the device is not already present, create the network device with its RADIUS or TACACS+ settings, then read it back to confirm.',
+        'Onboard a switch, wireless controller, or firewall as a RADIUS/TACACS+ client of ISE.',
+        '["onboarding", "network-device", "radius", "tacacs"]',
         TRUE, 100, NOW(), NOW()
     ),
     (
-        'duplicate_ip_detection',
-        'Duplicate IP Address Detection',
-        'Identify and resolve duplicate IP address conflicts causing connectivity issues. Locates conflicting endpoints and provides resolution guidance.',
-        'Two or more hosts share the same IP address causing connectivity issues.',
-        '["troubleshooting", "ip", "duplicate", "endpoint"]',
+        'endpoint_investigation',
+        'Endpoint Investigation',
+        'Look up an endpoint by MAC address, review its identity group and profiling result, and check whether it is currently rejected or under an ANC action.',
+        'Find out what ISE knows about a specific endpoint and why it is being treated the way it is.',
+        '["endpoint", "troubleshooting", "profiling"]',
         TRUE, 95, NOW(), NOW()
     ),
     (
-        'fabric_health_assessment',
-        'Fabric Health Assessment',
-        'Proactive health check across the entire fabric. Reviews health scores, anomalies, advisories, and switch status for early issue detection.',
-        'General fabric health check, proactive monitoring.',
-        '["monitoring", "health", "proactive"]',
+        'anc_threat_containment',
+        'ANC Threat Containment',
+        'Confirm the ANC policy to apply, quarantine the offending endpoint by MAC address, verify the action took effect, and clear it once remediation is complete.',
+        'Contain a compromised or misbehaving endpoint and release it afterwards.',
+        '["security", "anc", "quarantine", "incident-response"]',
         TRUE, 90, NOW(), NOW()
     ),
     (
-        'interface_troubleshooting',
-        'Interface Troubleshooting',
-        'Diagnose interface issues including link down, flapping, errors, and congestion. Checks counters, statistics, and related anomalies.',
-        'Interface is down, flapping, or showing errors.',
-        '["troubleshooting", "interface", "errors"]',
+        'guest_account_lifecycle',
+        'Guest Account Lifecycle',
+        'Review guest types and sponsor groups, create a guest account, notify the guest, and suspend or reinstate it as required.',
+        'Create and manage a guest account through its full lifecycle.',
+        '["guest", "sponsor", "onboarding"]',
         TRUE, 85, NOW(), NOW()
     ),
     (
-        'bgp_routing_investigation',
-        'BGP/Routing Problem Investigation',
-        'Investigate routing problems including missing routes, BGP neighbor failures, and unexpected routing behavior. Checks neighbors, tables, and route churn.',
-        'Routes missing, BGP neighbor down, unexpected routing behavior.',
-        '["troubleshooting", "routing", "bgp", "l3"]',
+        'authorization_policy_audit',
+        'Authorization Policy Element Audit',
+        'Enumerate the policy building blocks — authorization profiles, downloadable ACLs, and allowed protocol services — and inspect the definitions behind them.',
+        'Understand what ISE returns on a successful authorization and which EAP methods are permitted.',
+        '["policy", "audit", "authorization"]',
         TRUE, 80, NOW(), NOW()
     ),
     (
-        'flow_path_analysis',
-        'Flow Path Analysis',
-        'Trace and analyze the traffic path between two endpoints. Creates troubleshoot jobs, visualizes topology, and checks flow statistics.',
-        'Traffic between two endpoints is broken or taking wrong path.',
-        '["troubleshooting", "flow", "path", "connectivity"]',
+        'trustsec_policy_review',
+        'TrustSec Segmentation Review',
+        'Walk the TrustSec configuration: security group tags, SGACLs, and the egress matrix cells that bind them into a segmentation policy.',
+        'Review or document the current TrustSec segmentation policy.',
+        '["trustsec", "segmentation", "sgt", "audit"]',
         TRUE, 75, NOW(), NOW()
     ),
     (
-        'configuration_compliance_check',
-        'Configuration Compliance Check',
-        'Verify fabric configuration matches intended state. Reviews compliance summaries, violations, pending changes, and config drift.',
-        'Verify fabric configuration matches intended state.',
-        '["compliance", "configuration", "drift"]',
+        'identity_source_review',
+        'Identity Source Review',
+        'Review internal users and identity groups, then inspect the external identity sources — Active Directory join points and LDAP stores — and the sequences that order them.',
+        'Determine which identity stores ISE will consult for an authentication and in what order.',
+        '["identity", "active-directory", "ldap", "audit"]',
         TRUE, 70, NOW(), NOW()
     ),
     (
-        'advisory_alert_triage',
-        'Advisory & Alert Triage',
-        'Prioritize and resolve multiple advisories and alerts. Reviews severity, trends, recommendations, and software upgrade options.',
-        'Multiple advisories/alerts to prioritize and resolve.',
-        '["operations", "advisories", "alerts"]',
+        'deployment_health_check',
+        'ISE Deployment Health Check',
+        'Review the deployment topology, each node and its personas, session service nodes, and pxGrid registration to confirm the deployment is intact.',
+        'Verify the ISE deployment is healthy and every node is playing its expected role.',
+        '["health", "deployment", "monitoring", "nodes"]',
         TRUE, 65, NOW(), NOW()
-    ),
-    (
-        'node_switch_health',
-        'Node/Switch Health Investigation',
-        'Investigate an unhealthy or unresponsive switch. Checks health overview, configuration, anomalies, infrastructure status, and cluster health.',
-        'A switch or node appears unhealthy or unresponsive.',
-        '["troubleshooting", "switch", "node", "health"]',
-        TRUE, 60, NOW(), NOW()
-    ),
-    (
-        'multicast_troubleshooting',
-        'Multicast Troubleshooting',
-        'Diagnose multicast delivery issues including IGMP and PIM problems. Checks routes, sources, receivers, group membership, and neighbor adjacency.',
-        'Multicast traffic not reaching receivers, IGMP issues.',
-        '["troubleshooting", "multicast", "igmp", "pim"]',
-        TRUE, 55, NOW(), NOW()
     )
 ON CONFLICT (name) DO NOTHING;
 
@@ -95,177 +84,135 @@ ON CONFLICT (name) DO NOTHING;
 -- WORKFLOW STEPS
 -- ============================================================================
 
--- Helper: get workflow IDs by name for FK references
--- We use subqueries to keep this idempotent
-
--- 1. Endpoint Unreachable
+-- 1. Network Access Device Onboarding
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_listEndpointsDetails', 'Find the endpoint by IP or MAC address and confirm it exists in the fabric', 'Endpoint details including leaf, EPG, and interface attachment', FALSE),
-    (2, 'analyze_listEndpointsHistory', 'Check if the endpoint recently moved, flapped, or disappeared', 'History of endpoint events with timestamps', FALSE),
-    (3, 'analyze_listEndpointsAnomalies', 'Check for active anomalies affecting this endpoint', 'List of anomalies related to the endpoint', FALSE),
-    (4, 'analyze_getAnomalyRecommendations', 'Get fix recommendations if an anomaly was found in the previous step', 'Recommended remediation actions', TRUE),
-    (5, 'analyze_listFabricInterfaces', 'Check the status of the interface where the endpoint is attached', 'Interface operational status, speed, and errors', FALSE),
-    (6, 'analyze_getFlowTopology', 'Trace the connectivity path to the endpoint through the fabric', 'Topology visualization of the path', FALSE),
-    (7, 'analyze_getHealthSummary', 'Check overall fabric health for broader issues that may affect connectivity', 'Fabric health score and top-level status', TRUE)
+    (1, 'ise_networkdevicegroup_getAll', 'List the network device group hierarchy so the new device lands in the right Location and Device Type groups', 'Device groups with their names, ids, and root hierarchy', FALSE),
+    (2, 'ise_networkdevice_getByName', 'Confirm the device is not already onboarded under this name', 'The existing device, or a 404 confirming the name is free', FALSE),
+    (3, 'ise_networkdevice_create', 'Create the network device with its IP list, device groups, and RADIUS or TACACS+ shared secret', '201 Created with the new device UUID in the Location header', FALSE),
+    (4, 'ise_networkdevice_getByName', 'Read the device back to confirm the settings ISE actually stored', 'Full NetworkDevice object including authentication settings and group membership', FALSE),
+    (5, 'ise_networkdevice_getAll', 'Optionally confirm the device appears in the overall inventory', 'SearchResult containing the newly created device', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'endpoint_unreachable'
+WHERE w.name = 'network_device_onboarding'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 2. Duplicate IP Address Detection
+-- 2. Endpoint Investigation
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_listEndpointsDuplicateIps', 'List all duplicate IP addresses detected in the fabric', 'List of IPs with multiple MAC/endpoint bindings', FALSE),
-    (2, 'analyze_listEndpointsDetails', 'Get details of the conflicting endpoints (MAC, leaf, EPG)', 'Full endpoint details for each conflicting entry', FALSE),
-    (3, 'analyze_listEndpointsHistory', 'Track when the duplicate entries first appeared', 'Timeline of endpoint learn/move events', FALSE),
-    (4, 'analyze_getAnomaliesSummary', 'Check for IP-related anomalies in the system', 'Anomaly counts by category and severity', FALSE),
-    (5, 'analyze_getAnomalyRecommendations', 'Get resolution guidance for the duplicate IP anomaly', 'Recommended steps to resolve the conflict', FALSE)
+    (1, 'ise_endpoint_getByName', 'Look up the endpoint by its MAC address (endpoints are keyed by MAC, not by UUID)', 'Endpoint object with its group assignment and profiling attributes', FALSE),
+    (2, 'ise_endpointgroup_getById', 'Resolve the endpoint identity group the endpoint belongs to', 'Endpoint group name and description', FALSE),
+    (3, 'ise_profilerprofile_getAll', 'Review the profiler policies that could match this endpoint', 'Profiler profile list with names and ids', TRUE),
+    (4, 'ise_endpoint_getRejectedEndpoints', 'Check whether the endpoint has been rejected during registration', 'List of rejected endpoints', TRUE),
+    (5, 'ise_ancendpoint_getAll', 'Check whether an ANC action is currently applied to the endpoint', 'ANC endpoint assignments with MAC address and policy name', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'duplicate_ip_detection'
+WHERE w.name = 'endpoint_investigation'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 3. Fabric Health Assessment
+-- 3. ANC Threat Containment
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_getHealthSummary', 'Get overall fabric health score and status', 'Health score breakdown by category', FALSE),
-    (2, 'analyze_getAnomaliesSummary', 'Review active anomalies broken down by severity', 'Anomaly counts: critical, major, minor, warning', FALSE),
-    (3, 'analyze_getAnomaliesTopNodes', 'Identify nodes with the most anomalies', 'Ranked list of nodes by anomaly count', FALSE),
-    (4, 'analyze_getAdvisoriesSummary', 'Review outstanding advisories (PSIRTs, field notices, EOL)', 'Advisory counts by type and severity', FALSE),
-    (5, 'analyze_listSwitchesSummary', 'Check switch health overview across the fabric', 'Switch status summary with health indicators', FALSE),
-    (6, 'analyze_listFabricsSummary', 'Get per-fabric status for multi-fabric environments', 'Fabric-level health and connectivity status', TRUE)
+    (1, 'ise_ancpolicy_getAll', 'List the ANC policies available and pick the action to apply (QUARANTINE, PORTBOUNCE, SHUTDOWN, REAUTHENTICATE)', 'ANC policies with their names and actions', FALSE),
+    (2, 'ise_endpoint_getByName', 'Confirm the endpoint exists and note its current group before containing it', 'Endpoint object for the MAC address in question', FALSE),
+    (3, 'ise_ancendpoint_apply', 'Apply the ANC policy to the endpoint MAC address to contain it', 'Success response confirming the policy was applied', FALSE),
+    (4, 'ise_ancendpoint_getAll', 'Verify the ANC assignment is now in place', 'ANC endpoint entry showing the MAC address and policy name', FALSE),
+    (5, 'ise_ancendpoint_clear', 'Clear the ANC action once the endpoint has been remediated', 'Success response confirming the policy was removed', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'fabric_health_assessment'
+WHERE w.name = 'anc_threat_containment'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 4. Interface Troubleshooting
+-- 4. Guest Account Lifecycle
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_listFabricInterfaces', 'Find the interface and check its operational status', 'Interface admin/oper state, speed, type', FALSE),
-    (2, 'analyze_listInterfacesDetails', 'Get detailed configuration and error counters for the interface', 'Detailed counters: CRC, input/output errors, resets', FALSE),
-    (3, 'analyze_listFabricInterfacesStatistics', 'Check error rates, discard rates, and utilization over time', 'Time-series statistics for errors and throughput', FALSE),
-    (4, 'analyze_listCongestionDetails', 'Check for congestion events on the interface or related links', 'Congestion events with timestamps and severity', TRUE),
-    (5, 'analyze_getAnomaliesSummary', 'Check for interface-related anomalies in the system', 'Anomalies filtered by interface category', FALSE),
-    (6, 'analyze_getAnomalyRecommendations', 'Get fix recommendations for any detected interface anomalies', 'Recommended actions to resolve interface issues', TRUE)
+    (1, 'ise_guesttype_getAll', 'List guest types to choose the access duration and portal behaviour for the account', 'Guest types with their names and ids', FALSE),
+    (2, 'ise_sponsorgroup_getAll', 'Confirm which sponsor group is permitted to create this kind of account', 'Sponsor groups with their permissions', TRUE),
+    (3, 'ise_guestuser_create', 'Create the guest account with its guest type, person details, and access window', '201 Created with the new guest user UUID in the Location header', FALSE),
+    (4, 'ise_guestuser_email', 'Send the account credentials to the guest by email (use ise_guestuser_sms for SMS)', 'Success response confirming the notification was sent', TRUE),
+    (5, 'ise_guestuser_suspendByName', 'Suspend the account if access must be revoked early', 'Success response confirming suspension', TRUE),
+    (6, 'ise_guestuser_reinstateByName', 'Reinstate a suspended account once access should resume', 'Success response confirming reinstatement', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'interface_troubleshooting'
+WHERE w.name = 'guest_account_lifecycle'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 5. BGP/Routing Problem Investigation
+-- 5. Authorization Policy Element Audit
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_listL3NeighborsSummary', 'Check BGP/OSPF neighbor status across the fabric', 'Neighbor state summary: established, idle, active', FALSE),
-    (2, 'analyze_listL3NeighborsDetails', 'Get detailed neighbor information including timers and prefixes', 'Per-neighbor details: uptime, prefixes received/sent, state', FALSE),
-    (3, 'analyze_listProtocolsDetails', 'Review protocol configuration for BGP/OSPF instances', 'Protocol config: AS numbers, router IDs, address families', FALSE),
-    (4, 'analyze_listUrib', 'Check routing table entries for specific prefixes', 'Routing table entries with next-hops and metrics', FALSE),
-    (5, 'analyze_getUribChangesCount', 'Check for recent route churn or instability', 'Route change counts over time', FALSE),
-    (6, 'analyze_getUribNodeGraph', 'Visualize the routing path for a given prefix', 'Graph representation of route propagation', TRUE),
-    (7, 'analyze_getAnomaliesSummary', 'Check for routing-related anomalies', 'Anomalies in routing category', FALSE)
+    (1, 'ise_authorizationprofile_getAll', 'List every authorization profile defined in the deployment', 'Authorization profiles with names and ids', FALSE),
+    (2, 'ise_authorizationprofile_getById', 'Inspect a profile to see the VLAN, dACL, SGT, and reauthentication settings it returns', 'Full authorization profile definition', FALSE),
+    (3, 'ise_downloadableacl_getAll', 'List the downloadable ACLs that authorization profiles can reference', 'dACL names and ids', FALSE),
+    (4, 'ise_downloadableacl_getById', 'Read the ACE content of a specific downloadable ACL', 'dACL definition with its ACE lines', FALSE),
+    (5, 'ise_allowedprotocols_getAll', 'List the allowed protocol services that control which EAP methods are permitted', 'Allowed protocol service names and ids', TRUE),
+    (6, 'ise_allowedprotocols_getById', 'Inspect an allowed protocol service to see the enabled EAP methods and settings', 'Allowed protocols definition', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'bgp_routing_investigation'
+WHERE w.name = 'authorization_policy_audit'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 6. Flow Path Analysis
+-- 6. TrustSec Segmentation Review
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_listEndpointsDetails', 'Verify that both source and destination endpoints exist in the fabric', 'Endpoint details for source and destination', FALSE),
-    (2, 'analyze_createTroubleshootJob', 'Create a flow troubleshoot job for the source/destination pair', 'Job ID for the troubleshoot session', FALSE),
-    (3, 'analyze_getFlowTroubleshootJob', 'Retrieve the troubleshoot job results and analysis', 'Troubleshoot findings: drops, misconfigurations, contract issues', FALSE),
-    (4, 'analyze_getFlowTopology', 'Visualize the actual flow path through the fabric', 'Topology map showing hops, interfaces, and policies', FALSE),
-    (5, 'analyze_listFlowDetails', 'Get detailed per-flow statistics and metadata', 'Flow details: protocol, ports, bytes, packets', FALSE),
-    (6, 'analyze_listFlowsStatistics', 'Check flow rate, drops, and utilization trends', 'Time-series flow statistics', TRUE)
+    (1, 'ise_sgt_getAll', 'List the security group tags defined in the deployment', 'SGTs with their names, values, and ids', FALSE),
+    (2, 'ise_sgacl_getAll', 'List the SGACLs available to the egress matrix', 'SGACL names and ids', FALSE),
+    (3, 'ise_sgacl_getById', 'Read the ACE content of a specific SGACL', 'SGACL definition with its permit/deny rules', TRUE),
+    (4, 'ise_egressmatrixcell_getAll', 'Enumerate the egress matrix cells that bind source SGT, destination SGT, and SGACL', 'Matrix cells with their source, destination, and policy', FALSE),
+    (5, 'ise_egressmatrixcell_getById', 'Inspect a specific matrix cell to see its default rule and assigned SGACLs', 'Full egress matrix cell definition', TRUE),
+    (6, 'ise_sxplocalbindings_getAll', 'Review static IP-to-SGT bindings propagated over SXP', 'SXP local bindings with IP, SGT, and VPN', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'flow_path_analysis'
+WHERE w.name = 'trustsec_policy_review'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 7. Configuration Compliance Check
+-- 7. Identity Source Review
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_listConformanceSummaries', 'Get overall configuration compliance summary', 'Compliance score and violation counts by category', FALSE),
-    (2, 'analyze_listConformanceDetails', 'List specific compliance violations and deviations', 'Detailed violations: object, expected vs actual config', FALSE),
-    (3, 'manage_getFabricConfigurationPreview', 'Preview any pending configuration changes', 'Pending changes that have not been deployed yet', TRUE),
-    (4, 'manage_getSwitchConfigurationDiff', 'Check per-switch config drift between intended and running', 'Config diff per switch showing drift', FALSE),
-    (5, 'analyze_getAnomaliesSummary', 'Check for configuration-related anomalies', 'Config anomalies: misconfigurations, policy violations', FALSE)
+    (1, 'ise_identitygroup_getAll', 'List the internal identity groups users can belong to', 'Identity groups with names and ids', FALSE),
+    (2, 'ise_internaluser_getAll', 'List internal users, filtering by name or group as needed', 'SearchResult of internal users', FALSE),
+    (3, 'ise_activedirectory_getAllJoinPoints', 'List the Active Directory join points configured on the deployment', 'AD join points with their domain names and ids', FALSE),
+    (4, 'ise_activedirectory_getJoinPointDetails', 'Inspect a join point to see its domain, groups, and attribute configuration', 'Full AD join point definition', TRUE),
+    (5, 'ise_ldap_getAll', 'List LDAP identity sources configured alongside Active Directory', 'LDAP store names and ids', TRUE),
+    (6, 'ise_idstoresequence_getAll', 'Review identity store sequences to see the order in which stores are consulted', 'Identity store sequences with their ordered store lists', FALSE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'configuration_compliance_check'
+WHERE w.name = 'identity_source_review'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
 
--- 8. Advisory & Alert Triage
+-- 8. ISE Deployment Health Check
 INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
 SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
 FROM workflows w
 CROSS JOIN (VALUES
-    (1, 'analyze_getAdvisoriesSummary', 'Get overview of all advisories by severity and type', 'Advisory counts: PSIRT, field notice, EOL by severity', FALSE),
-    (2, 'analyze_getAdvisoriesDetails', 'List individual advisories with full details', 'Advisory details: ID, title, affected versions, severity', FALSE),
-    (3, 'analyze_getAdvisoryRecommendations', 'Get fix recommendations for the highest-priority advisory', 'Recommended actions: patches, upgrades, workarounds', FALSE),
-    (4, 'analyze_getAlertsTrend', 'Check if alerts are increasing or decreasing over time', 'Alert trend data showing direction and velocity', FALSE),
-    (5, 'analyze_getSoftwareRecommendations', 'Check if software upgrades would resolve outstanding issues', 'Recommended software versions and resolved defects', TRUE),
-    (6, 'analyze_updateAlertsStatus', 'Acknowledge or dismiss resolved alerts to clean up the queue', 'Updated alert status confirmation', TRUE)
+    (1, 'ise_deploymentinfo_getAllInfo', 'Read the overall deployment information for the ISE cluster', 'Deployment summary across all nodes', FALSE),
+    (2, 'ise_node_getAll', 'List every node in the deployment', 'Node names and ids', FALSE),
+    (3, 'ise_node_getByName', 'Inspect a node to confirm its personas and services', 'Node detail including persona and service roles', FALSE),
+    (4, 'ise_sessionservicenode_getAll', 'Confirm which nodes are providing session services', 'Session service nodes with their group assignment', TRUE),
+    (5, 'ise_pxgridnode_getAll', 'Review pxGrid client registration state', 'pxGrid nodes with their registration status', TRUE),
+    (6, 'ise_telemetryinfo_getAll', 'Check telemetry configuration and reporting status', 'Telemetry info records', TRUE)
 ) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'advisory_alert_triage'
-AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
-);
-
--- 9. Node/Switch Health Investigation
-INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
-SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
-FROM workflows w
-CROSS JOIN (VALUES
-    (1, 'analyze_listSwitchesSummary', 'Get switch health overview and identify the unhealthy node', 'Switch list with health scores and status', FALSE),
-    (2, 'analyze_listSwitchesConfig', 'Check the switch configuration for misconfigurations', 'Switch configuration details and settings', FALSE),
-    (3, 'analyze_getAnomaliesTopNodes', 'See how many anomalies are attributed to this node', 'Anomaly count and ranking for the node', FALSE),
-    (4, 'analyze_getAnomalyDetails', 'Get specifics on the anomalies affecting the node', 'Individual anomaly details: type, severity, description', FALSE),
-    (5, 'infra_listNodes', 'Check infrastructure-level node status and properties', 'Node properties: model, serial, firmware, uptime', FALSE),
-    (6, 'infra_getClusterHealtStatus', 'Check overall cluster health to assess systemic impact', 'Cluster health status and service availability', TRUE),
-    (7, 'analyze_getAnomalyRecommendations', 'Get fix recommendations for the node anomalies', 'Recommended remediation steps for the node', FALSE)
-) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'node_switch_health'
-AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
-);
-
--- 10. Multicast Troubleshooting
-INSERT INTO workflow_steps (workflow_id, step_order, operation_name, description, expected_output, optional, created_at)
-SELECT w.id, v.step_order, v.operation_name, v.description, v.expected_output, v.optional, NOW()
-FROM workflows w
-CROSS JOIN (VALUES
-    (1, 'analyze_listMulticastRoutes', 'List multicast routes to verify group registration', 'Multicast route table: groups, sources, RPF interfaces', FALSE),
-    (2, 'analyze_listMulticastRouteSources', 'Check multicast source registration and active sources', 'Registered sources per group with status', FALSE),
-    (3, 'analyze_listMulticastRouteReceivers', 'Verify receiver paths and downstream interfaces', 'Receiver list with OIF and join state', FALSE),
-    (4, 'analyze_listIgmpMulticastGroups', 'Check IGMP group membership on relevant interfaces', 'IGMP groups: members, last-reporter, expiry timers', FALSE),
-    (5, 'analyze_listIgmpInterfaces', 'Verify IGMP interface status and configuration', 'IGMP interface config: version, querier status, timers', FALSE),
-    (6, 'analyze_listPimNeighbors', 'Check PIM neighbor adjacency for multicast routing', 'PIM neighbors: address, uptime, expiry, DR priority', FALSE),
-    (7, 'analyze_listPimInterfaces', 'Verify PIM interface status and mode configuration', 'PIM interface config: mode (sparse/dense), DR, hello interval', FALSE)
-) AS v(step_order, operation_name, description, expected_output, optional)
-WHERE w.name = 'multicast_troubleshooting'
+WHERE w.name = 'deployment_health_check'
 AND NOT EXISTS (
     SELECT 1 FROM workflow_steps ws WHERE ws.workflow_id = w.id AND ws.step_order = v.step_order
 );
@@ -277,59 +224,45 @@ AND NOT EXISTS (
 INSERT INTO use_cases (name, display_name, description, category, is_active, created_at, updated_at)
 VALUES
     (
-        'connectivity_troubleshooting',
-        'Connectivity Troubleshooting',
-        'Diagnose and resolve endpoint connectivity issues including unreachable hosts, broken paths, and flow problems.',
-        'troubleshooting',
-        TRUE, NOW(), NOW()
-    ),
-    (
-        'ip_address_conflict',
-        'IP Address Conflict',
-        'Detect and resolve duplicate IP address situations where multiple endpoints share the same IP, causing intermittent connectivity.',
-        'troubleshooting',
-        TRUE, NOW(), NOW()
-    ),
-    (
-        'proactive_monitoring',
-        'Proactive Monitoring',
-        'Regular health checks across fabric and nodes to catch issues before they impact production traffic.',
-        'monitoring',
-        TRUE, NOW(), NOW()
-    ),
-    (
-        'interface_problems',
-        'Interface Problems',
-        'Troubleshoot interface-level issues including link failures, error counters, flapping, and congestion.',
-        'troubleshooting',
-        TRUE, NOW(), NOW()
-    ),
-    (
-        'routing_issues',
-        'Routing Issues',
-        'Investigate routing protocol problems including BGP neighbor failures, missing routes, and route instability.',
-        'troubleshooting',
-        TRUE, NOW(), NOW()
-    ),
-    (
-        'compliance_and_drift',
-        'Compliance & Drift',
-        'Verify that fabric configuration matches the intended state and detect any configuration drift.',
-        'compliance',
-        TRUE, NOW(), NOW()
-    ),
-    (
-        'alert_management',
-        'Alert Management',
-        'Triage, prioritize, and resolve advisories and alerts across the fabric.',
+        'device_onboarding',
+        'Device Onboarding',
+        'Bring network access devices under ISE control with the correct device groups, shared secrets, and protocol settings.',
         'operations',
         TRUE, NOW(), NOW()
     ),
     (
-        'multicast_issues',
-        'Multicast Issues',
-        'Diagnose multicast delivery failures including IGMP membership, PIM adjacency, and source/receiver path issues.',
+        'access_troubleshooting',
+        'Access Troubleshooting',
+        'Work out why an endpoint or user is being denied, quarantined, or given the wrong level of access.',
         'troubleshooting',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'incident_response',
+        'Incident Response',
+        'Contain a compromised endpoint quickly and release it once the threat has been remediated.',
+        'security',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'guest_management',
+        'Guest Management',
+        'Create, notify, suspend, and reinstate guest accounts, and review the sponsor and portal configuration behind them.',
+        'operations',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'policy_audit',
+        'Policy Audit',
+        'Document what the deployment actually enforces: authorization profiles, ACLs, protocol services, and TrustSec segmentation.',
+        'compliance',
+        TRUE, NOW(), NOW()
+    ),
+    (
+        'deployment_monitoring',
+        'Deployment Monitoring',
+        'Regular checks on node personas, services, and identity source integration to catch deployment problems early.',
+        'monitoring',
         TRUE, NOW(), NOW()
     )
 ON CONFLICT (name) DO NOTHING;
@@ -342,15 +275,14 @@ INSERT INTO use_case_workflows (use_case_id, workflow_id, created_at)
 SELECT uc.id, w.id, NOW()
 FROM use_cases uc, workflows w
 WHERE (uc.name, w.name) IN (
-    ('connectivity_troubleshooting', 'endpoint_unreachable'),
-    ('connectivity_troubleshooting', 'flow_path_analysis'),
-    ('ip_address_conflict', 'duplicate_ip_detection'),
-    ('proactive_monitoring', 'fabric_health_assessment'),
-    ('proactive_monitoring', 'node_switch_health'),
-    ('interface_problems', 'interface_troubleshooting'),
-    ('routing_issues', 'bgp_routing_investigation'),
-    ('compliance_and_drift', 'configuration_compliance_check'),
-    ('alert_management', 'advisory_alert_triage'),
-    ('multicast_issues', 'multicast_troubleshooting')
+    ('device_onboarding', 'network_device_onboarding'),
+    ('access_troubleshooting', 'endpoint_investigation'),
+    ('access_troubleshooting', 'authorization_policy_audit'),
+    ('incident_response', 'anc_threat_containment'),
+    ('guest_management', 'guest_account_lifecycle'),
+    ('policy_audit', 'authorization_policy_audit'),
+    ('policy_audit', 'trustsec_policy_review'),
+    ('deployment_monitoring', 'deployment_health_check'),
+    ('deployment_monitoring', 'identity_source_review')
 )
 ON CONFLICT (use_case_id, workflow_id) DO NOTHING;

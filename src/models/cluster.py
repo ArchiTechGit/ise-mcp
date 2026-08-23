@@ -1,4 +1,4 @@
-"""Cluster model for storing Nexus Dashboard connection information."""
+"""Cluster model for storing Cisco ISE deployment connection information."""
 
 from datetime import datetime
 from typing import Optional, List, TYPE_CHECKING
@@ -14,7 +14,13 @@ if TYPE_CHECKING:
 
 
 class Cluster(Base):
-    """Model for Nexus Dashboard cluster credentials."""
+    """Model for Cisco ISE deployment credentials.
+
+    The table is named ``clusters`` for continuity with the shared
+    multi-tenant plumbing; each row is one ISE deployment, addressed by the
+    URL of its Primary Policy Administration Node.
+    """
+
 
     __tablename__ = "clusters"
     __allow_unmapped__ = True

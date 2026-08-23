@@ -1,0 +1,103 @@
+openapi: 3.0.1
+info:
+  title: API Service
+  version: 1.0.0
+  description: >
+    This API is used to enable or disable the Open API on Cisco ISE. It can also be used to retrieve the status of the Open API on Cisco ISE. 
+tags:
+  - name: apiService
+    description: the API Service API
+paths:
+  /admin/API/apiService/get:
+    get:
+      summary: Retrieve the status of Open API on Cisco ISE
+      description: |
+        This API is used to retrieve the status of the Open API from Cisco ISE.
+      operationId: retrieveOpenAPIStatus
+      tags:
+        - apiService
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetOpenAPIResponse'
+                
+  /admin/API/apiService/update:
+    post:
+      summary: Updates the Open API status on Cisco ISE.
+      description: >
+        This API is used to update the status of the Open API on Cisco ISE.
+      operationId: updateOpenAPIStatus
+      tags:
+        - apiService
+      parameters:
+        - $ref: '#/components/parameters/Content-Type-Header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOpenAPIRequest'
+      responses:
+        '200':
+          description: Success
+          parameters:
+            - $ref: '#/components/parameters/id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOpenAPIResponse'     
+components:
+  parameters:
+    Content-Type-Header:
+      in: header
+      name: Content-Type
+      description: >-
+        The Content-Type header is used to indicate the media type of the request body payload.
+      schema:
+        type: string
+      required: true
+    id:
+      in: body
+      name: ID
+      description: Unique idenitfier for the Open API status
+      schema:
+        type: string
+      required: true
+     
+  schemas:
+    GetOpenAPIResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "66fa85ef-0e81-4760-bcf0-7dd3c0450f9f"
+        papIsEnabled:
+          type: boolean
+          example: false
+        psnsIsEnabled:
+          type: boolean
+          example: true
+    UpdateOpenAPIResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "66fa85ef-0e81-4760-bcf0-7dd3c0450f9f"
+        papIsEnabled:
+          type: boolean
+          example: false
+        psnsIsEnabled:
+          type: boolean
+          example: false
+    UpdateOpenAPIRequest:
+      type: object
+      properties:
+        papIsEnabled:
+          type: boolean
+          example: false
+        psnsIsEnabled:
+          type: boolean
+          example: false
+                

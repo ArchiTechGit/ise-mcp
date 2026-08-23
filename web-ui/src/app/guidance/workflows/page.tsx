@@ -322,7 +322,7 @@ export default function WorkflowsPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="check_fabric_health"
+                    placeholder="network_device_onboarding"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Lowercase with underscores, used for API calls
@@ -339,7 +339,7 @@ export default function WorkflowsPage() {
                     value={formData.display_name}
                     onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    placeholder="Check Fabric Health"
+                    placeholder="Network Access Device Onboarding"
                   />
                 </div>
 
